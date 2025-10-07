@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/_projects/p21_testgame/testgame-connect/**)",
+      "Read(//c/_projects/p22_guess_a_word/guess-a-dish/src/**)",
+      "Read(//c/_projects/p22_guess_a_word/guess_a_word/server/**)",
+      "Read(//c/_projects/p22_guess_a_word/guess-a-dish/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
