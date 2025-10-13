@@ -6,6 +6,9 @@ import { app } from "./firebase";
 import Banner from "./banner";
 import Footer from "./footer";
 
+/**
+ * @route /home
+ */
 export default function Home() {
     const navigate = useNavigate();
     const [user, setUser] = useState(false);

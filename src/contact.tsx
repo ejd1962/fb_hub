@@ -4,6 +4,9 @@ import Banner from "./banner";
 import Footer from "./footer";
 import { app } from "./firebase";
 
+/**
+ * @route /contact
+ */
 export default function Contact() {
     const [user, setUser] = useState<any>(null);
 

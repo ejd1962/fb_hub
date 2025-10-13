@@ -4,6 +4,9 @@ import Banner from "./banner";
 import Footer from "./footer";
 import { app } from "./firebase";
 
+/**
+ * @route /privacy
+ */
 export default function Privacy() {
     const [user, setUser] = useState<any>(null);
 

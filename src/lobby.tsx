@@ -33,6 +33,9 @@ interface GameData extends GameInfo {
 
 type DeploymentMode = 'local' | 'alpha' | 'beta' | 'prod';
 
+/**
+ * @route /lobby
+ */
 export default function Lobby() {
     const [user, setUser] = useState<any>(null);
     const [alertMessage, setAlertMessage] = useState<string | null>(null);

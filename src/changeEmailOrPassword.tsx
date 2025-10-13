@@ -6,6 +6,9 @@ import { app } from "./firebase";
 import Banner from "./banner";
 import Footer from "./footer";
 
+/**
+ * @route /change_email_or_pw
+ */
 export default function ChangeEmailOrPassword() {
     const [user, setUser] = useState<any>(null);
     const [isEmailPasswordUser, setIsEmailPasswordUser] = useState(false);

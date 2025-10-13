@@ -4,6 +4,9 @@ import Banner from "./banner";
 import Footer from "./footer";
 import { app } from "./firebase";
 
+/**
+ * @route /jobs
+ */
 export default function Jobs() {
     const [user, setUser] = useState<any>(null);
 

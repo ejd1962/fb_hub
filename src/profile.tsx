@@ -10,6 +10,9 @@ import Footer from "./footer";
 import { isUsernameUnique } from "./usernameUtils";
 import { findForbiddenWords } from "./civilityEnforcementUtils";
 
+/**
+ * @route /profile
+ */
 export default function Profile() {
     const [user, setUser] = useState<any>(null);
     const [firstName, setFirstName] = useState("");
