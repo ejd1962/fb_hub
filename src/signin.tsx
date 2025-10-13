@@ -10,10 +10,11 @@ import {
     signInWithEmailAndPassword,
     sendEmailVerification
 } from "firebase/auth";
-import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { doc, getDoc, getFirestore, setDoc } from "firebase/firestore";
 import { app } from "./firebase";
 import { useNavigate } from "react-router-dom";
 import Banner from "./banner";
+import { generateUniqueTemporaryUsername } from "./usernameUtils";
 
 
 export default function Login() {
@@ -81,6 +82,26 @@ export default function Login() {
         try {
             const result = await signInWithPopup(auth, provider);
             console.log("Google sign-in successful!", result.user);
+
+            // Check if profile exists, if not create one with temporary username
+            const profileDoc = await getDoc(doc(db, "profile", result.user.uid));
+            if (!profileDoc.exists()) {
+                const tempUsername = await generateUniqueTemporaryUsername();
+                await setDoc(doc(db, "profile", result.user.uid), {
+                    username: tempUsername,
+                    username_date_chosen: "0000/00/00",
+                    email: result.user.email,
+                    firstName: "",
+                    lastName: "",
+                    language: "",
+                    country: "",
+                    birthDate: "",
+                    gender: "",
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                });
+                console.log("Profile created with temporary username:", tempUsername);
+            }
         } catch (error: any) {
             console.error("Google sign-in failed:", error);
             setError(error.message);
@@ -97,6 +118,23 @@ export default function Login() {
                 console.log("Creating account with email/password");
                 const result = await createUserWithEmailAndPassword(auth, email, password);
                 console.log("Account created successfully!", result.user);
+
+                // Create profile with temporary username
+                const tempUsername = await generateUniqueTemporaryUsername();
+                await setDoc(doc(db, "profile", result.user.uid), {
+                    username: tempUsername,
+                    username_date_chosen: "0000/00/00",
+                    email: result.user.email,
+                    firstName: "",
+                    lastName: "",
+                    language: "",
+                    country: "",
+                    birthDate: "",
+                    gender: "",
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                });
+                console.log("Profile created with temporary username:", tempUsername);
 
                 // Send verification email
                 await sendEmailVerification(result.user);
@@ -117,7 +155,7 @@ export default function Login() {
         <div>
             <Banner user={user} />
             <div style={{ maxWidth: "400px", margin: "0 auto", padding: "20px" }}>
-                <h1>Authentication Hub</h1>
+                <h1>Sign In</h1>
 
             {error && (
                 <div style={{ padding: "10px", backgroundColor: "#ffebee", color: "#c62828", marginBottom: "20px" }}>
