@@ -1,4 +1,5 @@
 import { getAuth } from "firebase/auth";
+import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { app } from "./firebase";
@@ -20,22 +21,46 @@ export default function Banner({ user }: BannerProps) {
     const [profile, setProfile] = useState<any>(null);
     const { DEBUG, setDEBUG } = useDebug();
     const { goBack, getLastPage } = useNavigationHistory();
+    const db = getFirestore(app);
 
     useEffect(() => {
-        if (user) {
-            // Load profile from localStorage
-            const storedProfile = localStorage.getItem("userProfile");
-            if (storedProfile) {
-                const parsedProfile = JSON.parse(storedProfile);
-                setProfile(parsedProfile);
+        const loadProfile = async () => {
+            if (user) {
+                // Load from localStorage first (instant display, no layout shift)
+                const cachedProfile = localStorage.getItem("userProfile");
+                if (cachedProfile) {
+                    setProfile(JSON.parse(cachedProfile));
+                }
+
+                // Then sync from Firestore in background to ensure fresh data
+                try {
+                    const profileDoc = await getDoc(doc(db, "profile", user.uid));
+                    if (profileDoc.exists()) {
+                        const profileData = profileDoc.data();
+                        setProfile(profileData);
+                        // Update cache
+                        localStorage.setItem("userProfile", JSON.stringify(profileData));
+                    } else {
+                        // Fallback: set username to email if no profile document exists
+                        const fallbackProfile = { username: user.email };
+                        setProfile(fallbackProfile);
+                        localStorage.setItem("userProfile", JSON.stringify(fallbackProfile));
+                    }
+                } catch (error) {
+                    console.error("Error loading profile in banner:", error);
+                    // Keep cached profile if Firestore fails
+                    if (!cachedProfile) {
+                        const fallbackProfile = { username: user.email };
+                        setProfile(fallbackProfile);
+                    }
+                }
             } else {
-                // Fallback: set username to email if no profile
-                setProfile({ username: user.email });
+                setProfile(null);
             }
-        } else {
-            setProfile(null);
-        }
-    }, [user]);
+        };
+
+        loadProfile();
+    }, [user, db]);
 
     const handleMenuAction = (action: string) => {
         switch (action) {
@@ -71,8 +96,8 @@ export default function Banner({ user }: BannerProps) {
                 color: "white",
                 paddingTop: "5px",
                 paddingBottom: "5px",
-                paddingLeft: "1px",
-                paddingRight: "5px",
+                paddingLeft: "20px",
+                paddingRight: "20px",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -87,7 +112,9 @@ export default function Banner({ user }: BannerProps) {
                     display: "flex",
                     alignItems: "center",
                     gap: "8px",
-                    cursor: "pointer"
+                    cursor: "pointer",
+                    padding: "0",
+                    margin: "0"
                 }}
                 onClick={() => navigate("/")}
             >
@@ -98,7 +125,11 @@ export default function Banner({ user }: BannerProps) {
                     style={{
                         height: "40px",
                         width: "200px",
-                        objectFit: "contain"
+                        objectFit: "contain",
+                        margin: "0",
+                        marginLeft: "-15px",
+                        padding: "0",
+                        display: "block"
                     }}
                 />
                 <span className="banner-page-name" style={{ fontSize: "16px", fontWeight: "bold" }}>

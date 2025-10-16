@@ -1,4 +1,5 @@
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged, sendEmailVerification } from "firebase/auth";
+import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import "./App.css";
@@ -12,14 +13,18 @@ import Footer from "./footer";
 export default function Home() {
     const navigate = useNavigate();
     const [user, setUser] = useState(false);
+    const [username, setUsername] = useState("");
+    const [sendingVerification, setSendingVerification] = useState(false);
+    const [verificationMessage, setVerificationMessage] = useState("");
+    const db = getFirestore(app);
 
     useEffect(() => {
         console.log("HOME PAGE - Setting up auth listener");
-        const unsubscribe = onAuthStateChanged(getAuth(app), (user) => {
-            console.log("HOME PAGE - Auth state changed:", user);
-            console.log("HOME PAGE - User email:", user?.email);
-            console.log("HOME PAGE - User UID:", user?.uid);
-            if (!user) {
+        const unsubscribe = onAuthStateChanged(getAuth(app), async (currentUser) => {
+            console.log("HOME PAGE - Auth state changed:", currentUser);
+            console.log("HOME PAGE - User email:", currentUser?.email);
+            console.log("HOME PAGE - User UID:", currentUser?.uid);
+            if (!currentUser) {
                 console.log("HOME PAGE - No user, redirecting to /login");
                 navigate("/signin");
                 setUser(false);
@@ -27,6 +32,25 @@ export default function Home() {
             } else {
                 console.log("HOME PAGE - User authenticated, setting user state to true");
                 setUser(true);
+
+                // Load username from localStorage first, then sync from Firestore
+                const cachedProfile = localStorage.getItem("userProfile");
+                if (cachedProfile) {
+                    setUsername(JSON.parse(cachedProfile).username || "");
+                }
+
+                // Sync from Firestore
+                try {
+                    const profileDoc = await getDoc(doc(db, "profile", currentUser.uid));
+                    if (profileDoc.exists()) {
+                        const profileData = profileDoc.data();
+                        setUsername(profileData.username || "");
+                        // Update cache
+                        localStorage.setItem("userProfile", JSON.stringify(profileData));
+                    }
+                } catch (error) {
+                    console.error("Error loading username:", error);
+                }
             }
         });
 
@@ -34,12 +58,32 @@ export default function Home() {
             console.log("HOME PAGE - Cleaning up auth listener");
             unsubscribe();
         };
-    }, [navigate]);
+    }, [navigate, db]);
 
     function handleClick() {
         const auth = getAuth(app);
         auth.signOut();
     }
+
+    const handleResendVerification = async () => {
+        const currentUser = getAuth(app).currentUser;
+        if (!currentUser) return;
+
+        setSendingVerification(true);
+        setVerificationMessage("");
+
+        try {
+            await sendEmailVerification(currentUser);
+            setVerificationMessage("Verification email sent! Please check your inbox.");
+            setTimeout(() => setVerificationMessage(""), 5000);
+        } catch (error: any) {
+            console.error("Error sending verification email:", error);
+            setVerificationMessage("Error: " + error.message);
+        } finally {
+            setSendingVerification(false);
+        }
+    };
+
     console.log(user);
 
     return (
@@ -80,8 +124,39 @@ export default function Home() {
                 {user ? (
                     <div>
                         <p><strong>User ID:</strong> {getAuth(app).currentUser?.uid}</p>
+                        <p><strong>Username:</strong> {username || "Loading..."}</p>
                         <p><strong>Email:</strong> {getAuth(app).currentUser?.email}</p>
-                        <p><strong>Email Verified:</strong> {getAuth(app).currentUser?.emailVerified ? "Yes" : "No"}</p>
+                        <p style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                            <span><strong>Email Verified:</strong> {getAuth(app).currentUser?.emailVerified ? "Yes" : "No"}</span>
+                            {!getAuth(app).currentUser?.emailVerified && (
+                                <button
+                                    onClick={handleResendVerification}
+                                    disabled={sendingVerification}
+                                    style={{
+                                        padding: "6px 12px",
+                                        fontSize: "12px",
+                                        backgroundColor: sendingVerification ? "#ccc" : "#e67e22",
+                                        color: "white",
+                                        border: "none",
+                                        borderRadius: "4px",
+                                        cursor: sendingVerification ? "not-allowed" : "pointer",
+                                        fontWeight: "bold"
+                                    }}
+                                >
+                                    {sendingVerification ? "SENDING..." : "RESEND VERIFICATION EMAIL"}
+                                </button>
+                            )}
+                        </p>
+                        {verificationMessage && (
+                            <p style={{
+                                color: verificationMessage.includes("Error") ? "#c62828" : "#2e7d32",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                marginTop: "5px"
+                            }}>
+                                {verificationMessage}
+                            </p>
+                        )}
                         <p style={{ marginTop: "15px" }}>
                             <span
                                 onClick={() => navigate("/profile")}

@@ -5,7 +5,11 @@
       "Read(//c/_projects/p22_guess_a_word/guess-a-dish/src/**)",
       "Read(//c/_projects/p22_guess_a_word/guess_a_word/server/**)",
       "Read(//c/_projects/p22_guess_a_word/guess-a-dish/**)",
-      "Read(//c/_projects/p23_fb_hub/**)"
+      "Read(//c/_projects/p23_fb_hub/**)",
+      "Read(//c/_projects/p22_guess_a_word/guess_a_word/**)",
+      "Read(//c/_projects/p22_guess_a_word/**)",
+      "Bash(cat:*)",
+      "Read(//c/_projects/p21_testgame/**)"
     ],
     "deny": [],
     "ask": []

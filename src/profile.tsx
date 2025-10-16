@@ -157,7 +157,7 @@ export default function Profile() {
                 setIsUsernameTemporary(false);
             }
 
-            await setDoc(doc(db, "profile", user.uid), {
+            const profileData = {
                 firstName,
                 lastName,
                 username,
@@ -168,7 +168,12 @@ export default function Profile() {
                 gender,
                 email: user.email,
                 updatedAt: new Date().toISOString()
-            });
+            };
+
+            await setDoc(doc(db, "profile", user.uid), profileData);
+
+            // Update localStorage with new profile data
+            localStorage.setItem("userProfile", JSON.stringify(profileData));
 
             setMessage("Profile saved successfully!");
             console.log("Profile saved for user:", user.uid);
@@ -234,7 +239,8 @@ export default function Profile() {
                                 padding: "10px",
                                 fontSize: "16px",
                                 border: "1px solid #ccc",
-                                borderRadius: "4px"
+                                borderRadius: "4px",
+                                boxSizing: "border-box"
                             }}
                         />
                     </div>
@@ -253,14 +259,15 @@ export default function Profile() {
                                 padding: "10px",
                                 fontSize: "16px",
                                 border: "1px solid #ccc",
-                                borderRadius: "4px"
+                                borderRadius: "4px",
+                                boxSizing: "border-box"
                             }}
                         />
                     </div>
 
                     <div style={{ marginBottom: "15px" }}>
                         <label style={{ display: "block", marginBottom: "5px", fontWeight: "500" }}>
-                            Username {!isUsernameTemporary && "(cannot be changed)"}
+                            Username {isUsernameTemporary ? "(temporary - can be changed once)" : "(cannot be changed)"}
                         </label>
                         <input
                             type="text"
@@ -275,14 +282,10 @@ export default function Profile() {
                                 border: "1px solid #ccc",
                                 borderRadius: "4px",
                                 backgroundColor: !isUsernameTemporary ? "#f5f5f5" : "white",
-                                cursor: !isUsernameTemporary ? "not-allowed" : "text"
+                                cursor: !isUsernameTemporary ? "not-allowed" : "text",
+                                boxSizing: "border-box"
                             }}
                         />
-                        {isUsernameTemporary && (
-                            <small style={{ color: "#666", display: "block", marginTop: "5px" }}>
-                                This is a temporary username. You can change it once to your preferred username.
-                            </small>
-                        )}
                     </div>
 
                     <div style={{ marginBottom: "15px" }}>
@@ -297,7 +300,8 @@ export default function Profile() {
                                 padding: "10px",
                                 fontSize: "16px",
                                 border: "1px solid #ccc",
-                                borderRadius: "4px"
+                                borderRadius: "4px",
+                                boxSizing: "border-box"
                             }}
                         >
                             <option value="">Select a language</option>
@@ -321,7 +325,8 @@ export default function Profile() {
                                 padding: "10px",
                                 fontSize: "16px",
                                 border: "1px solid #ccc",
-                                borderRadius: "4px"
+                                borderRadius: "4px",
+                                boxSizing: "border-box"
                             }}
                         >
                             <option value="">Select a country</option>
@@ -346,7 +351,8 @@ export default function Profile() {
                                 padding: "10px",
                                 fontSize: "16px",
                                 border: "1px solid #ccc",
-                                borderRadius: "4px"
+                                borderRadius: "4px",
+                                boxSizing: "border-box"
                             }}
                         />
                     </div>
@@ -363,7 +369,8 @@ export default function Profile() {
                                 padding: "10px",
                                 fontSize: "16px",
                                 border: "1px solid #ccc",
-                                borderRadius: "4px"
+                                borderRadius: "4px",
+                                boxSizing: "border-box"
                             }}
                         >
                             <option value="">Select gender</option>
@@ -381,12 +388,11 @@ export default function Profile() {
                             style={{
                                 padding: "12px 24px",
                                 fontSize: "16px",
-                                backgroundColor: (saving || !hasChanges()) ? "#ccc" : "#34a853",
+                                backgroundColor: (saving || !hasChanges()) ? "#888" : "#34a853",
                                 color: "white",
                                 border: "none",
                                 borderRadius: "4px",
-                                cursor: (saving || !hasChanges()) ? "not-allowed" : "pointer",
-                                opacity: (saving || !hasChanges()) ? 0.6 : 1
+                                cursor: (saving || !hasChanges()) ? "not-allowed" : "pointer"
                             }}
                         >
                             {saving ? "Saving..." : "Save Profile"}

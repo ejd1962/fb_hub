@@ -5,12 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "npm run sync-game-data && tsc && vite build",
     "preview": "vite preview",
-    "add-routes": "node add-route-markers.js",
-    "show-routes": "node show-routes.js",
-    "build-show-routes": "npm run add-routes && npm run show-routes",
-    "increment-build": "node increment-build.js"
+    "sync-game-data": "node sync-game-data.js",
+    "doc-flow": "node doc-flow.js",
+    "show-doc-flow": "node show-doc-flow.js",
+    "increment-build": "node increment-build.js",
+    "doc-flow-git-commit-build": "npm run doc-flow && npm run show-doc-flow && node generate-snapshot-info.cjs && npm run build",
+    "doc-flow-git-commit-no-build": "npm run doc-flow && npm run show-doc-flow && node generate-snapshot-info.cjs"
   },
   "devDependencies": {
     "@types/react": "^19.2.0",

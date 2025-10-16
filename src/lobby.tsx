@@ -10,6 +10,7 @@ import Footer from "./footer";
 // TypeScript interface for game_info.json
 interface GameInfo {
     game_name: string;
+    game_number: number;
     game_panel_image: string;
     min_players: number;
     max_players: number;
@@ -19,6 +20,7 @@ interface GameInfo {
     promotion: string;
     description: string;
     rules: string;
+    dev_server: string;
     local_server: string;
     alpha_server: string;
     beta_server: string;
@@ -56,8 +58,14 @@ export default function Lobby() {
         return mode || 'local';
     };
 
-    // Get server URL based on deployment mode
-    const getServerUrl = (gameInfo: GameInfo): string => {
+    // Get server URL based on deployment mode and server type
+    const getServerUrl = (gameInfo: GameInfo, serverType: 'prod' | 'dev' = 'prod'): string => {
+        // In debug mode, if serverType is 'dev', use dev_server
+        if (DEBUG && serverType === 'dev') {
+            return gameInfo.dev_server;
+        }
+
+        // Otherwise use deployment mode logic
         const mode = getDeploymentMode();
         switch (mode) {
             case 'local': return gameInfo.local_server;
@@ -131,7 +139,7 @@ export default function Lobby() {
         return () => unsubscribe();
     }, []);
 
-    const handleGameClick = async (gameData: GameData) => {
+    const handleGameClick = async (gameData: GameData, serverType: 'prod' | 'dev' = 'prod') => {
         if (!user) {
             showAlert("Please sign in to play games!");
             navigate("/signin");
@@ -140,7 +148,7 @@ export default function Lobby() {
             return;
         } else {
             try {
-                const gameUrl = getServerUrl(gameData);
+                const gameUrl = getServerUrl(gameData, serverType);
                 console.log(`Getting Firebase ID token for ${gameData.game_name}`);
                 const auth = getAuth(app);
                 const idToken = await auth.currentUser?.getIdToken();
@@ -172,7 +180,8 @@ export default function Lobby() {
                     console.log('Token verification response:', data);
 
                     if (data.success) {
-                        showAlert(`Authentication successful!\nURL: ${verifyUrl}\nUser: ${data.user.email}\nUsername: ${data.user.profile.username}`);
+                        // Authentication successful - no dialog needed
+                        console.log(`Authentication successful for ${data.user.email} (${data.user.profile.username})`);
 
                         // Create game session with token in body
                         const sessionUrl = `${gameUrl}/api/game-session`;
@@ -200,7 +209,8 @@ export default function Lobby() {
                         console.log('Game session response:', sessionData);
 
                         if (sessionData.success) {
-                            showAlert(`Session created successfully!\nURL: ${sessionUrl}\nSession ID: ${sessionData.sessionId}`);
+                            // Session created successfully - no dialog needed, just launch the game
+                            console.log(`Session created successfully. Session ID: ${sessionData.sessionId}`);
 
                             // Create a form to POST sessionId to entry page (from game_info.json)
                             const form = document.createElement('form');
@@ -280,7 +290,7 @@ export default function Lobby() {
                                     cursor: user ? "pointer" : "not-allowed",
                                     opacity: user ? 1 : 0.6
                                 }}
-                                onClick={() => user && handleGameClick(game)}
+                                onClick={() => user && handleGameClick(game, 'prod')}
                             >
                                 {!game.imageLoaded && (
                                     <div style={{ fontSize: "24px", color: "#999" }}>⟳ Loading...</div>
@@ -365,31 +375,88 @@ export default function Lobby() {
                                     )}
                                 </div>
 
-                                {/* Play Button */}
-                                <button
-                                    onClick={() => user && handleGameClick(game)}
-                                    disabled={!user}
-                                    style={{
-                                        width: "100%",
-                                        padding: "10px",
-                                        backgroundColor: user ? "#e67e22" : "#ccc",
-                                        color: "white",
-                                        border: "none",
-                                        borderRadius: "4px",
-                                        fontSize: "16px",
-                                        fontWeight: "bold",
-                                        cursor: user ? "pointer" : "not-allowed",
-                                        transition: "background-color 0.2s"
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        if (user) e.currentTarget.style.backgroundColor = "#c0611f";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        if (user) e.currentTarget.style.backgroundColor = "#e67e22";
-                                    }}
-                                >
-                                    {user ? "PLAY NOW" : "🔒 Sign in required"}
-                                </button>
+                                {/* Play Buttons - Production and Dev */}
+                                {DEBUG ? (
+                                    // Debug mode: Show both buttons
+                                    <div style={{ display: "flex", gap: "10px" }}>
+                                        <button
+                                            onClick={() => user && handleGameClick(game, 'prod')}
+                                            disabled={!user}
+                                            style={{
+                                                flex: 1,
+                                                padding: "10px",
+                                                backgroundColor: user ? "#e67e22" : "#ccc",
+                                                color: "white",
+                                                border: "none",
+                                                borderRadius: "4px",
+                                                fontSize: "12px",
+                                                fontWeight: "bold",
+                                                cursor: user ? "pointer" : "not-allowed",
+                                                transition: "background-color 0.2s",
+                                                whiteSpace: "pre-line"
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (user) e.currentTarget.style.backgroundColor = "#c0611f";
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (user) e.currentTarget.style.backgroundColor = "#e67e22";
+                                            }}
+                                        >
+                                            {user ? `PLAY NOW\nPROD\nlocalhost:${9000 + game.game_number}` : "🔒"}
+                                        </button>
+                                        <button
+                                            onClick={() => user && handleGameClick(game, 'dev')}
+                                            disabled={!user}
+                                            style={{
+                                                flex: 1,
+                                                padding: "10px",
+                                                backgroundColor: user ? "#3498db" : "#ccc",
+                                                color: "white",
+                                                border: "none",
+                                                borderRadius: "4px",
+                                                fontSize: "12px",
+                                                fontWeight: "bold",
+                                                cursor: user ? "pointer" : "not-allowed",
+                                                transition: "background-color 0.2s",
+                                                whiteSpace: "pre-line"
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (user) e.currentTarget.style.backgroundColor = "#2c7cb8";
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (user) e.currentTarget.style.backgroundColor = "#3498db";
+                                            }}
+                                        >
+                                            {user ? `PLAY NOW\nDEV\nlocalhost:${10000 + game.game_number}` : "🔒"}
+                                        </button>
+                                    </div>
+                                ) : (
+                                    // Non-debug mode: Show only production button
+                                    <button
+                                        onClick={() => user && handleGameClick(game, 'prod')}
+                                        disabled={!user}
+                                        style={{
+                                            width: "100%",
+                                            padding: "10px",
+                                            backgroundColor: user ? "#e67e22" : "#ccc",
+                                            color: "white",
+                                            border: "none",
+                                            borderRadius: "4px",
+                                            fontSize: "16px",
+                                            fontWeight: "bold",
+                                            cursor: user ? "pointer" : "not-allowed",
+                                            transition: "background-color 0.2s"
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (user) e.currentTarget.style.backgroundColor = "#c0611f";
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (user) e.currentTarget.style.backgroundColor = "#e67e22";
+                                        }}
+                                    >
+                                        {user ? "PLAY NOW" : "🔒 Sign in required"}
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))}

@@ -87,7 +87,7 @@ export default function Login() {
             const profileDoc = await getDoc(doc(db, "profile", result.user.uid));
             if (!profileDoc.exists()) {
                 const tempUsername = await generateUniqueTemporaryUsername();
-                await setDoc(doc(db, "profile", result.user.uid), {
+                const newProfile = {
                     username: tempUsername,
                     username_date_chosen: "0000/00/00",
                     email: result.user.email,
@@ -99,7 +99,11 @@ export default function Login() {
                     gender: "",
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString()
-                });
+                };
+                await setDoc(doc(db, "profile", result.user.uid), newProfile);
+
+                // Store in localStorage
+                localStorage.setItem("userProfile", JSON.stringify(newProfile));
                 console.log("Profile created with temporary username:", tempUsername);
             }
         } catch (error: any) {
@@ -121,7 +125,7 @@ export default function Login() {
 
                 // Create profile with temporary username
                 const tempUsername = await generateUniqueTemporaryUsername();
-                await setDoc(doc(db, "profile", result.user.uid), {
+                const newProfile = {
                     username: tempUsername,
                     username_date_chosen: "0000/00/00",
                     email: result.user.email,
@@ -133,7 +137,11 @@ export default function Login() {
                     gender: "",
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString()
-                });
+                };
+                await setDoc(doc(db, "profile", result.user.uid), newProfile);
+
+                // Store in localStorage
+                localStorage.setItem("userProfile", JSON.stringify(newProfile));
                 console.log("Profile created with temporary username:", tempUsername);
 
                 // Send verification email
