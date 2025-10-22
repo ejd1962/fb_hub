@@ -6,6 +6,7 @@ import Banner from "./banner";
 import CustomAlert from "./CustomAlert";
 import { useDebug } from "./DebugContext";
 import Footer from "./footer";
+import { getOrCreateGuestUUID } from "./guestUtils";
 
 // TypeScript interface for game_info.json
 interface GameInfo {
@@ -28,6 +29,12 @@ interface GameInfo {
     entry_page: string;
 }
 
+interface ServerStatus {
+    prod: boolean;      // 9xxx alive
+    devBackend: boolean; // 10xxx alive
+    devFrontend: boolean; // 11xxx alive
+}
+
 interface GameData extends GameInfo {
     folderName: string;
     imageLoaded: boolean;
@@ -44,6 +51,8 @@ export default function Lobby() {
     const [games, setGames] = useState<GameData[]>([]);
     const [expandedDescription, setExpandedDescription] = useState<string | null>(null);
     const [expandedRules, setExpandedRules] = useState<string | null>(null);
+    const [guestUUID, setGuestUUID] = useState<string | null>(null);
+    const [serverStatuses, setServerStatuses] = useState<Map<number, ServerStatus>>(new Map());
     const navigate = useNavigate();
     const { DEBUG } = useDebug();
 
@@ -76,11 +85,44 @@ export default function Lobby() {
         }
     };
 
+    // Health check function - pings a server URL
+    const checkServerHealth = async (url: string): Promise<boolean> => {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+
+            const response = await fetch(url, {
+                method: 'HEAD',
+                signal: controller.signal
+            });
+
+            clearTimeout(timeoutId);
+            return response.ok;
+        } catch (error) {
+            return false;
+        }
+    };
+
+    // Check all servers for a game
+    const checkGameServers = async (gameNumber: number): Promise<ServerStatus> => {
+        const prodUrl = `http://localhost:${9000 + gameNumber}`;
+        const devBackendUrl = `http://localhost:${10000 + gameNumber}`;
+        const devFrontendUrl = `http://localhost:${11000 + gameNumber}`;
+
+        const [prod, devBackend, devFrontend] = await Promise.all([
+            checkServerHealth(prodUrl),
+            checkServerHealth(devBackendUrl),
+            checkServerHealth(devFrontendUrl)
+        ]);
+
+        return { prod, devBackend, devFrontend };
+    };
+
     // Load game data on mount
     useEffect(() => {
         const loadGames = async () => {
             // Hardcoded list of game folder names (Option A)
-            const gameFolders = ['testgame', 'guess_a_word'];
+            const gameFolders = ['testgame', 'guess_a_word', 'trivia', 'chateasy'];
 
             const loadedGames: GameData[] = [];
 
@@ -134,10 +176,36 @@ export default function Lobby() {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(getAuth(app), (currentUser) => {
             setUser(currentUser);
+
+            // If user is not authenticated, assign a guest UUID (only if they don't already have one)
+            if (!currentUser) {
+                const uuid = getOrCreateGuestUUID();
+                setGuestUUID(uuid);
+            }
         });
 
         return () => unsubscribe();
     }, []);
+
+    // Health check every 10 seconds
+    useEffect(() => {
+        const runHealthChecks = async () => {
+            const statusMap = new Map<number, ServerStatus>();
+
+            for (const game of games) {
+                const status = await checkGameServers(game.game_number);
+                statusMap.set(game.game_number, status);
+            }
+
+            setServerStatuses(statusMap);
+        };
+
+        if (games.length > 0) {
+            runHealthChecks(); // Run immediately
+            const interval = setInterval(runHealthChecks, 2500); // Then every 2.5 seconds
+            return () => clearInterval(interval);
+        }
+    }, [games]);
 
     const handleGameClick = async (gameData: GameData, serverType: 'prod' | 'dev' = 'prod') => {
         if (!user) {
@@ -148,14 +216,34 @@ export default function Lobby() {
             return;
         } else {
             try {
-                const gameUrl = getServerUrl(gameData, serverType);
+                let frontendUrl: string; // Where we launch the game UI
+                let backendUrl: string;  // Where we make API calls
+
+                if (serverType === 'dev') {
+                    // For dev mode, use 11xxx for frontend if alive, otherwise 10xxx
+                    // But ALWAYS use 10xxx for API calls
+                    const viteUrl = `http://localhost:${11000 + gameData.game_number}`;
+                    const devBackendUrl = `http://localhost:${10000 + gameData.game_number}`;
+
+                    const viteAlive = await checkServerHealth(viteUrl);
+                    frontendUrl = viteAlive ? viteUrl : devBackendUrl;
+                    backendUrl = devBackendUrl; // Always use backend for API
+
+                    console.log(`Dev server selection: Vite (${viteUrl}) ${viteAlive ? 'ALIVE' : 'DOWN'}, using frontend=${frontendUrl}, backend=${backendUrl}`);
+                } else {
+                    // For prod, both frontend and backend are the same server
+                    const prodUrl = getServerUrl(gameData, serverType);
+                    frontendUrl = prodUrl;
+                    backendUrl = prodUrl;
+                }
+
                 console.log(`Getting Firebase ID token for ${gameData.game_name}`);
                 const auth = getAuth(app);
                 const idToken = await auth.currentUser?.getIdToken();
 
                 if (idToken) {
-                    // Verify token with game server
-                    const verifyUrl = `${gameUrl}/api/verify-token`;
+                    // Verify token with game server (use backend URL)
+                    const verifyUrl = `${backendUrl}/api/verify-token`;
                     console.log(`Verifying token for ${gameData.game_name} at ${verifyUrl}`);
 
                     let response;
@@ -183,8 +271,8 @@ export default function Lobby() {
                         // Authentication successful - no dialog needed
                         console.log(`Authentication successful for ${data.user.email} (${data.user.profile.username})`);
 
-                        // Create game session with token in body
-                        const sessionUrl = `${gameUrl}/api/game-session`;
+                        // Create game session with token in body (use backend URL)
+                        const sessionUrl = `${backendUrl}/api/game-session`;
                         console.log(`Creating game session at ${sessionUrl}`);
 
                         let sessionResponse;
@@ -212,21 +300,12 @@ export default function Lobby() {
                             // Session created successfully - no dialog needed, just launch the game
                             console.log(`Session created successfully. Session ID: ${sessionData.sessionId}`);
 
-                            // Create a form to POST sessionId to entry page (from game_info.json)
-                            const form = document.createElement('form');
-                            form.method = 'POST';
-                            form.action = `${gameUrl}/${gameData.entry_page}`;
-                            form.target = '_blank';
-
-                            const input = document.createElement('input');
-                            input.type = 'hidden';
-                            input.name = 'sessionId';
-                            input.value = sessionData.sessionId;
-
-                            form.appendChild(input);
-                            document.body.appendChild(form);
-                            form.submit();
-                            document.body.removeChild(form);
+                            // Always use backend URL with GET request (sessionId as query param)
+                            // Backend will detect if Vite is running and redirect if needed (dev-vite mode)
+                            // or serve the built app directly (dev/prod mode)
+                            const url = `${backendUrl}/${gameData.entry_page}?sessionId=${sessionData.sessionId}`;
+                            console.log(`Opening game URL: ${url}`);
+                            window.open(url, '_blank');
                         } else {
                             showAlert(`Session creation failed!\nURL: ${sessionUrl}\nMessage: ${sessionData.message}`);
                         }
@@ -287,10 +366,20 @@ export default function Lobby() {
                                     alignItems: "center",
                                     justifyContent: "center",
                                     position: "relative",
-                                    cursor: user ? "pointer" : "not-allowed",
-                                    opacity: user ? 1 : 0.6
+                                    cursor: user ? "pointer" : "not-allowed"
                                 }}
                                 onClick={() => user && handleGameClick(game, 'prod')}
+                                onMouseEnter={(e) => {
+                                    if (!user) {
+                                        e.currentTarget.style.outline = "3px solid #e74c3c";
+                                        e.currentTarget.style.outlineOffset = "-3px";
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!user) {
+                                        e.currentTarget.style.outline = "none";
+                                    }
+                                }}
                             >
                                 {!game.imageLoaded && (
                                     <div style={{ fontSize: "24px", color: "#999" }}>⟳ Loading...</div>
@@ -376,85 +465,103 @@ export default function Lobby() {
                                 </div>
 
                                 {/* Play Buttons - Production and Dev */}
-                                {DEBUG ? (
-                                    // Debug mode: Show both buttons
-                                    <div style={{ display: "flex", gap: "10px" }}>
-                                        <button
-                                            onClick={() => user && handleGameClick(game, 'prod')}
-                                            disabled={!user}
-                                            style={{
-                                                flex: 1,
-                                                padding: "10px",
-                                                backgroundColor: user ? "#e67e22" : "#ccc",
-                                                color: "white",
-                                                border: "none",
-                                                borderRadius: "4px",
-                                                fontSize: "12px",
-                                                fontWeight: "bold",
-                                                cursor: user ? "pointer" : "not-allowed",
-                                                transition: "background-color 0.2s",
-                                                whiteSpace: "pre-line"
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                if (user) e.currentTarget.style.backgroundColor = "#c0611f";
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                if (user) e.currentTarget.style.backgroundColor = "#e67e22";
-                                            }}
-                                        >
-                                            {user ? `PLAY NOW\nPROD\nlocalhost:${9000 + game.game_number}` : "🔒"}
-                                        </button>
-                                        <button
-                                            onClick={() => user && handleGameClick(game, 'dev')}
-                                            disabled={!user}
-                                            style={{
-                                                flex: 1,
-                                                padding: "10px",
-                                                backgroundColor: user ? "#3498db" : "#ccc",
-                                                color: "white",
-                                                border: "none",
-                                                borderRadius: "4px",
-                                                fontSize: "12px",
-                                                fontWeight: "bold",
-                                                cursor: user ? "pointer" : "not-allowed",
-                                                transition: "background-color 0.2s",
-                                                whiteSpace: "pre-line"
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                if (user) e.currentTarget.style.backgroundColor = "#2c7cb8";
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                if (user) e.currentTarget.style.backgroundColor = "#3498db";
-                                            }}
-                                        >
-                                            {user ? `PLAY NOW\nDEV\nlocalhost:${10000 + game.game_number}` : "🔒"}
-                                        </button>
-                                    </div>
-                                ) : (
-                                    // Non-debug mode: Show only production button
+                                {!user ? (
+                                    // User not authenticated: Show sign-in button
                                     <button
-                                        onClick={() => user && handleGameClick(game, 'prod')}
-                                        disabled={!user}
+                                        onClick={() => navigate("/signin")}
                                         style={{
                                             width: "100%",
                                             padding: "10px",
-                                            backgroundColor: user ? "#e67e22" : "#ccc",
+                                            backgroundColor: "#3498db",
                                             color: "white",
                                             border: "none",
                                             borderRadius: "4px",
                                             fontSize: "16px",
                                             fontWeight: "bold",
-                                            cursor: user ? "pointer" : "not-allowed",
+                                            cursor: "pointer",
                                             transition: "background-color 0.2s"
                                         }}
-                                        onMouseEnter={(e) => {
-                                            if (user) e.currentTarget.style.backgroundColor = "#c0611f";
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            if (user) e.currentTarget.style.backgroundColor = "#e67e22";
-                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#2980b9"}
+                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#3498db"}
                                     >
-                                        {user ? "PLAY NOW" : "🔒 Sign in required"}
+                                        Sign In to Play
+                                    </button>
+                                ) : DEBUG ? (
+                                    // Debug mode: Show both buttons with dimming
+                                    (() => {
+                                        const status = serverStatuses.get(game.game_number);
+                                        const prodAlive = status?.prod ?? false;
+                                        const devAlive = (status?.devFrontend || status?.devBackend) ?? false;
+
+                                        return (
+                                            <div style={{ display: "flex", gap: "10px" }}>
+                                                <button
+                                                    onClick={() => prodAlive && handleGameClick(game, 'prod')}
+                                                    style={{
+                                                        flex: 1,
+                                                        padding: "10px",
+                                                        backgroundColor: prodAlive ? "#e67e22" : "#999",
+                                                        color: "white",
+                                                        border: "none",
+                                                        borderRadius: "4px",
+                                                        fontSize: "12px",
+                                                        fontWeight: "bold",
+                                                        cursor: prodAlive ? "pointer" : "not-allowed",
+                                                        opacity: prodAlive ? 1 : 0.5,
+                                                        transition: "background-color 0.2s",
+                                                        whiteSpace: "pre-line"
+                                                    }}
+                                                    onMouseEnter={(e) => prodAlive && (e.currentTarget.style.backgroundColor = "#c0611f")}
+                                                    onMouseLeave={(e) => prodAlive && (e.currentTarget.style.backgroundColor = "#e67e22")}
+                                                    disabled={!prodAlive}
+                                                >
+                                                    {`PLAY NOW\nPROD\nlocalhost:${9000 + game.game_number}`}
+                                                </button>
+                                                <button
+                                                    onClick={() => devAlive && handleGameClick(game, 'dev')}
+                                                    style={{
+                                                        flex: 1,
+                                                        padding: "10px",
+                                                        backgroundColor: devAlive ? "#3498db" : "#999",
+                                                        color: "white",
+                                                        border: "none",
+                                                        borderRadius: "4px",
+                                                        fontSize: "12px",
+                                                        fontWeight: "bold",
+                                                        cursor: devAlive ? "pointer" : "not-allowed",
+                                                        opacity: devAlive ? 1 : 0.5,
+                                                        transition: "background-color 0.2s",
+                                                        whiteSpace: "pre-line"
+                                                    }}
+                                                    onMouseEnter={(e) => devAlive && (e.currentTarget.style.backgroundColor = "#2c7cb8")}
+                                                    onMouseLeave={(e) => devAlive && (e.currentTarget.style.backgroundColor = "#3498db")}
+                                                    disabled={!devAlive}
+                                                >
+                                                    {`PLAY NOW\nDEV${status?.devFrontend ? '-VITE' : ''}\n:${10000 + game.game_number}`}
+                                                </button>
+                                            </div>
+                                        );
+                                    })()
+                                ) : (
+                                    // Non-debug mode: Show only production button
+                                    <button
+                                        onClick={() => handleGameClick(game, 'prod')}
+                                        style={{
+                                            width: "100%",
+                                            padding: "10px",
+                                            backgroundColor: "#e67e22",
+                                            color: "white",
+                                            border: "none",
+                                            borderRadius: "4px",
+                                            fontSize: "16px",
+                                            fontWeight: "bold",
+                                            cursor: "pointer",
+                                            transition: "background-color 0.2s"
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#c0611f"}
+                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#e67e22"}
+                                    >
+                                        PLAY NOW
                                     </button>
                                 )}
                             </div>

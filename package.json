@@ -12,7 +12,9 @@
     "show-doc-flow": "node show-doc-flow.js",
     "increment-build": "node increment-build.js",
     "doc-flow-git-commit-build": "npm run doc-flow && npm run show-doc-flow && node generate-snapshot-info.cjs && npm run build",
-    "doc-flow-git-commit-no-build": "npm run doc-flow && npm run show-doc-flow && node generate-snapshot-info.cjs"
+    "doc-flow-git-commit-no-build": "npm run doc-flow && npm run show-doc-flow && node generate-snapshot-info.cjs",
+    "copy-hub-elements-to-game": "node copy-hub-elements-to-game.js",
+    "copy-game-info-to-hub": "node copy-game-info-to-hub.js"
   },
   "devDependencies": {
     "@types/react": "^19.2.0",

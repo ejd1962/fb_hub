@@ -1,0 +1,22 @@
+{ "game_name" : "Trivia"
+, "game_number" : 3
+, "game_panel_image" : "game_panel_image.png"
+, "min_players" : 1
+, "max_players" : 8
+, "languages_supported" : "English"
+, "suggested_age_range" : "0 to 99"
+, "minimum_age" : 0
+, "promotion" : "Play Trivia choosing from several catagories. May the most obscure genius win!"
+, "description" : "Supports multiple question catagories, catagory is selected at random.  Users can choose difficulty level.  One player on each team. 1 question per player per round.  10 rounds per game. Single player mode is supported."
+, "rules" : "Detailed rules to come later."
+, "dev_server"   : "http://localhost:10003"
+, "local_server" : "http://localhost:9003"
+, "alpha_server" : "http://localhost:9003"
+, "beta_server"  : "http://localhost:9003"
+, "prod_server"  : "http://localhost:9003"
+, "entry_page"   : "lobby"
+}
+
+
+
+

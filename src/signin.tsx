@@ -15,6 +15,7 @@ import { app } from "./firebase";
 import { useNavigate } from "react-router-dom";
 import Banner from "./banner";
 import { generateUniqueTemporaryUsername } from "./usernameUtils";
+import { getOrCreateGuestUUID } from "./guestUtils";
 
 
 export default function Login() {
@@ -23,6 +24,7 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [isSignUp, setIsSignUp] = useState(false);
     const [error, setError] = useState("");
+    const [guestUUID, setGuestUUID] = useState<string | null>(null);
     const navigate = useNavigate();
     const db = getFirestore(app);
 
@@ -33,6 +35,10 @@ export default function Login() {
             console.log("LOGIN PAGE - User is signed in, signing out immediately");
             auth.signOut();
         }
+
+        // Assign a guest UUID for unauthenticated users (only if they don't already have one)
+        const uuid = getOrCreateGuestUUID();
+        setGuestUUID(uuid);
 
         // Listen for auth state changes
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {

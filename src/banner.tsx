@@ -86,6 +86,9 @@ export default function Banner({ user }: BannerProps) {
             case "lobby":
                 navigate("/lobby");
                 break;
+            case "welcome":
+                navigate("/welcome");
+                break;
         }
     };
 
@@ -248,6 +251,7 @@ export default function Banner({ user }: BannerProps) {
                                     return <option value="back" disabled>Back</option>;
                                 }
                             })()}
+                            <option value="welcome" disabled={location.pathname === "/welcome"}>Welcome</option>
                             <option value="home" disabled={location.pathname === "/home"}>Home</option>
                             <option value="lobby" disabled={location.pathname === "/lobby"}>Lobby</option>
                             <option value="profile" disabled={location.pathname === "/profile"}>Profile</option>
@@ -255,7 +259,11 @@ export default function Banner({ user }: BannerProps) {
                         </>
                     ) : (
                         // Unauthenticated user menu
-                        <option value="signup" disabled={location.pathname === "/signin"}>SignUp</option>
+                        <>
+                            <option value="welcome" disabled={location.pathname === "/welcome"}>Welcome</option>
+                            <option value="lobby" disabled={location.pathname === "/lobby"}>Lobby</option>
+                            <option value="signup" disabled={location.pathname === "/signin"}>SignUp</option>
+                        </>
                     )}
                 </select>
             </div>

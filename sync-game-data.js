@@ -19,6 +19,7 @@ const __dirname = path.dirname(__filename);
 const colors = {
     reset: '\x1b[0m',
     bright: '\x1b[1m',
+    dim: '\x1b[2m',
     green: '\x1b[32m',
     yellow: '\x1b[33m',
     blue: '\x1b[34m',
