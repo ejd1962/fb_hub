@@ -1,7 +1,10 @@
-const http = require('http');
-const httpProxy = require('http-proxy');
-const net = require('net');
-const fs = require('fs').promises;
+import http from 'http';
+import httpProxy from 'http-proxy';
+import net from 'net';
+import { promises as fs } from 'fs';
+import { createInterface } from 'readline';
+import { fileURLToPath } from 'url';
+import { spawn } from 'child_process';
 
 const num_ports = 5;  // number of ports in each range that might need proxies
 
@@ -14,6 +17,67 @@ const PORT_RANGES = {
 };
 
 const PROXY_PORT = 8080; // The single port we'll expose via ngrok
+
+// Parse command-line arguments
+function parseArgs() {
+  const args = process.argv.slice(2);
+  const deployment = args.find(arg => arg.startsWith('--deployment='))?.split('=')[1] || 'local';
+
+  if (!['local', 'ngrok'].includes(deployment)) {
+    console.error('Error: --deployment must be "local" or "ngrok"');
+    console.error('Usage: node setup-reverse-proxy.js --deployment=local|ngrok');
+    process.exit(1);
+  }
+
+  return { deployment };
+}
+
+// Spawn ngrok and extract the public URL
+async function startNgrok(port) {
+  console.log(`\nStarting ngrok on port ${port}...`);
+
+  return new Promise((resolve, reject) => {
+    // Spawn ngrok process
+    const ngrok = spawn('ngrok', ['http', port.toString(), '--log=stdout']);
+
+    let ngrokUrl = null;
+    let timeout = setTimeout(() => {
+      if (!ngrokUrl) {
+        ngrok.kill();
+        reject(new Error('Timeout waiting for ngrok URL'));
+      }
+    }, 10000); // 10 second timeout
+
+    // Parse ngrok output to find the public URL
+    ngrok.stdout.on('data', (data) => {
+      const output = data.toString();
+      console.log('[NGROK]', output.trim());
+
+      // Look for the forwarding URL in ngrok output
+      // Example: "Forwarding https://abc123.ngrok.io -> http://localhost:8080"
+      const urlMatch = output.match(/https:\/\/[a-z0-9-]+\.ngrok\.io/);
+      if (urlMatch && !ngrokUrl) {
+        ngrokUrl = urlMatch[0];
+        clearTimeout(timeout);
+        console.log(`\n✓ ngrok URL obtained: ${ngrokUrl}\n`);
+        resolve({ url: ngrokUrl, process: ngrok });
+      }
+    });
+
+    ngrok.stderr.on('data', (data) => {
+      console.error('[NGROK ERROR]', data.toString());
+    });
+
+    ngrok.on('close', (code) => {
+      console.log(`ngrok process exited with code ${code}`);
+    });
+
+    ngrok.on('error', (err) => {
+      clearTimeout(timeout);
+      reject(err);
+    });
+  });
+}
 
 // Check if a port is active
 async function isPortActive(port) {
@@ -242,39 +306,46 @@ async function main() {
   console.log('=================================');
   console.log('Reverse Proxy Setup');
   console.log('=================================\n');
-  
+
+  // Parse command-line arguments
+  const { deployment } = parseArgs();
+  console.log(`Deployment mode: ${deployment}\n`);
+
   // Step 1: Scan ports
   const activeServices = await scanAllPorts();
-  
-  const totalActive = (activeServices.hub ? 1 : 0) + 
-                     activeServices.production.length + 
-                     activeServices.dev.length + 
+
+  const totalActive = (activeServices.hub ? 1 : 0) +
+                     activeServices.production.length +
+                     activeServices.dev.length +
                      activeServices.devVite.length;
-  
+
   console.log(`\nFound ${totalActive} active services`);
-  
+
   if (totalActive === 0) {
     console.log('No active services found. Start your servers first!');
     return;
   }
-  
-  // Step 2: Get ngrok URL (or use placeholder)
-  console.log('\nTo complete setup:');
-  console.log(`1. This script will start a reverse proxy on port ${PROXY_PORT}`);
-  console.log(`2. Run: ngrok http ${PROXY_PORT}`);
-  console.log('3. Enter your ngrok URL below (or press Enter to use localhost for testing)\n');
-  
-  const readline = require('readline').createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-  
-  const baseUrl = await new Promise(resolve => {
-    readline.question('Enter ngrok URL (e.g., https://abc123.ngrok.io) or press Enter for localhost: ', answer => {
-      readline.close();
-      resolve(answer.trim() || `http://localhost:${PROXY_PORT}`);
-    });
-  });
+
+  // Step 2: Get base URL based on deployment mode
+  let baseUrl;
+  let ngrokProcess = null;
+
+  if (deployment === 'ngrok') {
+    // Start ngrok and get the public URL
+    try {
+      const ngrokResult = await startNgrok(PROXY_PORT);
+      baseUrl = ngrokResult.url;
+      ngrokProcess = ngrokResult.process;
+    } catch (error) {
+      console.error('Failed to start ngrok:', error.message);
+      console.log('Falling back to localhost mode');
+      baseUrl = `http://localhost:${PROXY_PORT}`;
+    }
+  } else {
+    // Local mode - use localhost
+    baseUrl = `http://localhost:${PROXY_PORT}`;
+    console.log(`Using local mode: ${baseUrl}`);
+  }
   
   // Step 3: Generate mappings
   const mappings = generateMappings(activeServices, baseUrl);
@@ -296,6 +367,13 @@ async function main() {
   // Handle shutdown
   process.on('SIGINT', () => {
     console.log('\n\nShutting down reverse proxy...');
+
+    // Kill ngrok if it's running
+    if (ngrokProcess) {
+      console.log('Stopping ngrok...');
+      ngrokProcess.kill();
+    }
+
     server.close(() => {
       console.log('Reverse proxy stopped');
       process.exit(0);
@@ -304,8 +382,11 @@ async function main() {
 }
 
 // Run if executed directly
-if (require.main === module) {
+const __filename = fileURLToPath(import.meta.url);
+const isMainModule = process.argv[1] === __filename;
+
+if (isMainModule) {
   main().catch(console.error);
 }
 
-module.exports = { scanAllPorts, generateMappings };
+export { scanAllPorts, generateMappings };
