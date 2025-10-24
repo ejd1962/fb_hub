@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "npm run sync-game-data && tsc && vite build",
     "preview": "vite preview",
+    "start": "node server.js",
     "sync-game-data": "node sync-game-data.js",
     "doc-flow": "node doc-flow.js",
     "show-doc-flow": "node show-doc-flow.js",
@@ -29,6 +30,8 @@
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.4",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "firebase": "^10.14.1",
     "firebaseui": "^6.1.0",
     "react": "^19.2.0",

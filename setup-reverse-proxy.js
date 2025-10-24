@@ -101,27 +101,27 @@ function generateMappings(activeServices, baseUrl) {
   
   // Production games
   activeServices.production.forEach(port => {
-    const path = `/game/${port}`;
+    const path = `/localhost_${port}`;
     mappings.routes[path] = {
       local_port: port,
       public_url: `${baseUrl}${path}`,
       type: 'production'
     };
   });
-  
+
   // Dev games
   activeServices.dev.forEach(port => {
-    const path = `/dev/${port}`;
+    const path = `/localhost_${port}`;
     mappings.routes[path] = {
       local_port: port,
       public_url: `${baseUrl}${path}`,
       type: 'dev'
     };
   });
-  
+
   // Dev-Vite games
   activeServices.devVite.forEach(port => {
-    const path = `/dev-vite/${port}`;
+    const path = `/localhost_${port}`;
     mappings.routes[path] = {
       local_port: port,
       public_url: `${baseUrl}${path}`,
