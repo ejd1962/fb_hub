@@ -7,6 +7,7 @@ import CustomAlert from "./CustomAlert";
 import { useDebug } from "./DebugContext";
 import Footer from "./footer";
 import { getOrCreateGuestUUID } from "./guestUtils";
+import { getUrlForPort, isReverseProxyMode } from "@transverse/shared-components";
 
 // TypeScript interface for game_info.json
 interface GameInfo {
@@ -222,14 +223,19 @@ export default function Lobby() {
                 if (serverType === 'dev') {
                     // For dev mode, use 11xxx for frontend if alive, otherwise 10xxx
                     // But ALWAYS use 10xxx for API calls
-                    const viteUrl = `http://localhost:${11000 + gameData.game_number}`;
-                    const devBackendUrl = `http://localhost:${10000 + gameData.game_number}`;
+                    const vitePort = 11000 + gameData.game_number;
+                    const devBackendPort = 10000 + gameData.game_number;
+
+                    // Use proxy utils to get correct URLs
+                    const viteUrl = await getUrlForPort(vitePort);
+                    const devBackendUrl = await getUrlForPort(devBackendPort);
 
                     const viteAlive = await checkServerHealth(viteUrl);
                     frontendUrl = viteAlive ? viteUrl : devBackendUrl;
                     backendUrl = devBackendUrl; // Always use backend for API
 
                     console.log(`Dev server selection: Vite (${viteUrl}) ${viteAlive ? 'ALIVE' : 'DOWN'}, using frontend=${frontendUrl}, backend=${backendUrl}`);
+                    console.log(`Proxy mode: ${isReverseProxyMode() ? 'ENABLED' : 'DISABLED'}`);
                 } else {
                     // For prod, both frontend and backend are the same server
                     const prodUrl = getServerUrl(gameData, serverType);
