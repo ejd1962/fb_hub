@@ -289,7 +289,8 @@ async function launchProcessInNewTab(command, args, options, label, color) {
     // Create a temporary bash script to avoid escaping issues
     const scriptPath = path.join(__dirname, `launch_script_${gameName}_${serverType}.bash`);
     const trueUrlExport = envVars.TRUE_URL ? `export TRUE_URL="${envVars.TRUE_URL}"\n` : '';
-    const viteBasePathExport = envVars.VITE_BASE_PATH ? `export VITE_BASE_PATH="${envVars.VITE_BASE_PATH}"\n` : '';
+    // Use MSYS_NO_PATHCONV to prevent Git Bash from converting the path
+    const viteBasePathExport = envVars.VITE_BASE_PATH ? `export MSYS_NO_PATHCONV=1\nexport VITE_BASE_PATH="${envVars.VITE_BASE_PATH}"\n` : '';
     const scriptContent = `#!/bin/bash
 cd "${bashCwd}"
 export PORT=${envVars.PORT}
