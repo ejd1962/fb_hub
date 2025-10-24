@@ -154,11 +154,12 @@ function generateMappings(activeServices, baseUrl) {
     routes: {}
   };
   
-  // Hub always at root
+  // Hub follows same pattern as games: /localhost_PORT
   if (activeServices.hub) {
-    mappings.routes['/'] = {
+    const path = `/localhost_${activeServices.hub}`;
+    mappings.routes[path] = {
       local_port: activeServices.hub,
-      public_url: baseUrl,
+      public_url: `${baseUrl}${path}`,
       type: 'hub'
     };
   }
@@ -360,8 +361,15 @@ async function main() {
     console.log('\n=================================');
     console.log('Reverse Proxy is Running!');
     console.log('=================================');
-    console.log(`\nHub URL: ${mappings.routes['/'].public_url}`);
-    console.log('\nPress Ctrl+C to stop\n');
+
+    // Find and display hub URL
+    const hubRoute = Object.entries(mappings.routes).find(([_, config]) => config.type === 'hub');
+    if (hubRoute) {
+      console.log(`\nHub URL: ${hubRoute[1].public_url}`);
+    }
+
+    console.log('\nAll routes saved to reverse_proxy.json');
+    console.log('Press Ctrl+C to stop\n');
   });
   
   // Handle shutdown
