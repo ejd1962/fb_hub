@@ -423,25 +423,27 @@ async function main() {
         process.exit(1);
     }
 
+    // Always clean up all server ports before launching
+    console.log(`${colors.yellow}Cleaning up all server ports...${colors.reset}\n`);
+
+    // Kill all ports in the hub/game range
+    const allPorts = [
+        9000, 10000, 11000,  // Hub ports
+        ...Array.from({length: 5}, (_, i) => 9001 + i),   // Production game ports
+        ...Array.from({length: 5}, (_, i) => 10001 + i),  // Dev game ports
+        ...Array.from({length: 5}, (_, i) => 11001 + i),  // Dev-vite game ports
+        8999  // Reverse proxy port
+    ];
+
+    for (const port of allPorts) {
+        killProcessOnPort(port);
+    }
+
+    console.log(`${colors.green}Port cleanup complete${colors.reset}\n`);
+
     // Proxy mode setup
     if (options.proxy === 'yes') {
-        console.log(`${colors.bright}${colors.yellow}Proxy mode enabled${colors.reset}`);
-        console.log(`${colors.yellow}Cleaning up all server ports...${colors.reset}\n`);
-
-        // Kill all ports in the hub/game range
-        const allPorts = [
-            9000, 10000, 11000,  // Hub ports
-            ...Array.from({length: 5}, (_, i) => 9001 + i),   // Production game ports
-            ...Array.from({length: 5}, (_, i) => 10001 + i),  // Dev game ports
-            ...Array.from({length: 5}, (_, i) => 11001 + i),  // Dev-vite game ports
-            8999  // Reverse proxy port
-        ];
-
-        for (const port of allPorts) {
-            killProcessOnPort(port);
-        }
-
-        console.log(`${colors.green}Port cleanup complete${colors.reset}\n`);
+        console.log(`${colors.bright}${colors.yellow}Proxy mode enabled${colors.reset}\n`);
 
         // Ensure hub is in the list if not already
         if (!options.games.includes('hub')) {
