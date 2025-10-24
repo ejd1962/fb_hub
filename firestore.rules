@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Public profile collection - readable by all authenticated users
+    // Contains: firstName, lastInitial, username, language, country, birthDate, gender, userColor, etc.
+    // Does NOT contain: email, lastName (those are in profile_secure)
+    match /profile/{userId} {
+      // Any authenticated user can read any profile
+      allow read: if request.auth != null;
+      // Only the user themselves can write to their own profile
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Secure profile collection - only readable by the user themselves
+    // Contains: lastName, email
+    match /profile_secure/{userId} {
+      // Only the user themselves can read or write their secure profile
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Add other collection rules as needed
+    // Example:
+    // match /games/{gameId} {
+    //   allow read: if request.auth != null;
+    //   allow write: if request.auth != null;
+    // }
+  }
+}
