@@ -1,0 +1,10 @@
+REVERSE PROXY MAPPINGS
+=====================
+
+Proxy Port: 8080
+Base URL: http://localhost:8080
+
+Routes:
+-------
+http://localhost:8080/localhost_10001              → localhost:10001 (dev)
+http://localhost:8080/localhost_11001              → localhost:11001 (dev-vite)

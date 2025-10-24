@@ -1,0 +1,16 @@
+{
+  "proxy_port": 8080,
+  "base_url": "http://localhost:8080",
+  "routes": {
+    "/localhost_10001": {
+      "local_port": 10001,
+      "public_url": "http://localhost:8080/localhost_10001",
+      "type": "dev"
+    },
+    "/localhost_11001": {
+      "local_port": 11001,
+      "public_url": "http://localhost:8080/localhost_11001",
+      "type": "dev-vite"
+    }
+  }
+}

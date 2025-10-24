@@ -9,12 +9,13 @@ import { spawn } from 'child_process';
 const num_ports = 5;  // number of ports in each range that might need proxies
 
 // Define your port ranges
-// Hub uses game_number=0, so it's on 9000 (prod), 10000 (dev), or 11000 (dev-vite)
+// Hub uses game_number=0: 9000 (prod), 10000 (dev), 11000 (dev-vite)
+// Games use game_number=1-5: 9001-9005 (prod), 10001-10005 (dev), 11001-11005 (dev-vite)
 const PORT_RANGES = {
-  hub: [9000, 10000, 11000], // Check all three possible hub ports
-  production: Array.from({length: num_ports}, (_, i) => 9000 + i),
-  dev: Array.from({length: num_ports}, (_, i) => 10000 + i),
-  devVite: Array.from({length: num_ports}, (_, i) => 11000 + i)
+  hub: [9000, 10000, 11000], // Hub only on these three ports
+  production: Array.from({length: num_ports}, (_, i) => 9001 + i), // 9001-9005
+  dev: Array.from({length: num_ports}, (_, i) => 10001 + i),        // 10001-10005
+  devVite: Array.from({length: num_ports}, (_, i) => 11001 + i)     // 11001-11005
 };
 
 const PROXY_PORT = 8080; // The single port we'll expose via ngrok
