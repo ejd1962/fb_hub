@@ -60,10 +60,10 @@ export default function Home() {
         };
     }, [navigate, db]);
 
-    function handleClick() {
-        const auth = getAuth(app);
-        auth.signOut();
-    }
+    // function handleClick() {
+    //     const auth = getAuth(app);
+    //     auth.signOut();
+    // }
 
     const handleResendVerification = async () => {
         const currentUser = getAuth(app).currentUser;

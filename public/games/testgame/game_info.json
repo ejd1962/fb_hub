@@ -1,0 +1,22 @@
+{ "game_name" : "TestGame"
+, "game_number" : 1
+, "game_panel_image" : "game_panel_image.png"
+, "min_players" : 1
+, "max_players" : 8
+, "languages_supported" : "English"
+, "suggested_age_range" : "0 to 99"
+, "minimum_age" : 0
+, "promotion" : "Join a game lobby, enter a game room, and send messages to others in the room."
+, "description" : "This is a simple demonstration game, that permits multiple players in the same room. They can send messages to each other and see them in a chat transcript. They can click buttons to send canned messages also."
+, "rules" : "Send messages by typing text then clicking 'send', or clicking one of 4 buttons.  All messages show in a transcript window. The window scrolls up.  If you are not at bottom of window, a down arrow appears in bottom left of transcript window meaning there are unseen messages there, and clicking on it scrolls to the bottom immediately."
+, "dev_server"   : "http://localhost"
+, "local_server" : "http://localhost"
+, "alpha_server" : "http://localhost"
+, "beta_server"  : "http://localhost"
+, "prod_server"  : "http://localhost"
+, "entry_page"   : "lobby"
+}
+
+
+
+

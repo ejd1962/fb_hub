@@ -167,6 +167,7 @@ function parseArgs(args) {
         restart: 'auto',
         newtab: 'yes',
         deployment: 'local',  // local, alpha, beta, or prod
+        proxy: 'no',       // yes or no - use reverse proxy mode
         games: []
     };
 
@@ -183,6 +184,8 @@ function parseArgs(args) {
             options.newtab = args[++i];
         } else if (arg === '--deployment' && i + 1 < args.length) {
             options.deployment = args[++i];
+        } else if (arg === '--proxy' && i + 1 < args.length) {
+            options.proxy = args[++i];
         } else if (arg === '--games' && i + 1 < args.length) {
             // Split comma-separated game list
             const gamesList = args[++i];
@@ -283,10 +286,11 @@ async function launchProcessInNewTab(command, args, options, label, color) {
     // Create a temporary bash script to avoid escaping issues
     const scriptPath = path.join(__dirname, `launch_script_${gameName}_${serverType}.bash`);
     const trueUrlExport = envVars.TRUE_URL ? `export TRUE_URL="${envVars.TRUE_URL}"\n` : '';
+    const viteBasePathExport = envVars.VITE_BASE_PATH ? `export VITE_BASE_PATH="${envVars.VITE_BASE_PATH}"\n` : '';
     const scriptContent = `#!/bin/bash
 cd "${bashCwd}"
 export PORT=${envVars.PORT}
-${trueUrlExport}${command} ${args.join(' ')}
+${trueUrlExport}${viteBasePathExport}${command} ${args.join(' ')}
 echo ""
 echo "Server exited. Press Enter to close..."
 read
@@ -389,6 +393,7 @@ async function main() {
     if (!isBuildOnly) {
         console.log(`  Auto-restart: ${options.restart}`);
         console.log(`  Deployment: ${options.deployment}`);
+        console.log(`  Proxy mode: ${options.proxy}`);
         console.log(`  New tabs: ${options.newtab}`);
     }
     console.log(`  Games: ${options.games.join(', ')}\n`);
@@ -513,12 +518,18 @@ async function main() {
                 const frontendCmd = 'npm';
                 const frontendArgs = ['run', 'dev'];
 
+                // Set VITE_BASE_PATH in proxy mode
+                const frontendEnv = { ...process.env, PORT: frontendPort.toString() };
+                if (options.proxy === 'yes') {
+                    frontendEnv.VITE_BASE_PATH = `/localhost_${frontendPort}/`;
+                }
+
                 const frontendProc = await launchFunc(
                     frontendCmd,
                     frontendArgs,
                     {
                         cwd: gamePath,
-                        env: { ...process.env, PORT: frontendPort.toString() }
+                        env: frontendEnv
                     },
                     frontendLabel,
                     'green'

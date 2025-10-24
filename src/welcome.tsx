@@ -13,7 +13,7 @@ import "./App.css";
 export default function Welcome() {
     const navigate = useNavigate();
     const [user, setUser] = useState<any>(null);
-    const [guestUUID, setGuestUUID] = useState<string | null>(null);
+    const [, setGuestUUID] = useState<string | null>(null);
 
     useEffect(() => {
         const auth = getAuth(app);

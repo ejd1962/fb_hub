@@ -1,7 +1,6 @@
 // Site map defines parent-child relationships: parent : child
 export const siteMap: { [key: string]: string } = {
     "/signin": "/home",
-    "/home": "/profile",
     "/home": "/lobby",
     "/lobby": "/game_lobby"  // This represents any game lobby accessed from main lobby
 };

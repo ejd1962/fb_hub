@@ -1,9 +1,7 @@
-import { getAuth } from "firebase/auth";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { app } from "./firebase";
-import { getParentPage } from "./siteMap";
 import { useDebug } from "./DebugContext";
 import { ALLOW_DEBUG } from "./constants";
 import { useNavigationHistory } from "./NavigationHistoryContext";

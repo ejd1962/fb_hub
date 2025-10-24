@@ -44,7 +44,7 @@ export default function Profile() {
 
     const navigate = useNavigate();
     const db = getFirestore(app);
-    const colorInputRef = useRef<HTMLInputElement>(null);
+    const colorInputRef = useRef<HTMLButtonElement>(null);
 
     // Generate a random dark color (ensures white text is readable)
     const generateDarkColor = () => {

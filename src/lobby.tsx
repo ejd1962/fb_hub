@@ -52,7 +52,7 @@ export default function Lobby() {
     const [games, setGames] = useState<GameData[]>([]);
     const [expandedDescription, setExpandedDescription] = useState<string | null>(null);
     const [expandedRules, setExpandedRules] = useState<string | null>(null);
-    const [guestUUID, setGuestUUID] = useState<string | null>(null);
+    const [, setGuestUUID] = useState<string | null>(null);
     const [serverStatuses, setServerStatuses] = useState<Map<number, ServerStatus>>(new Map());
     const navigate = useNavigate();
     const { DEBUG } = useDebug();

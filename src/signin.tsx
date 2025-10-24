@@ -24,7 +24,7 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [isSignUp, setIsSignUp] = useState(false);
     const [error, setError] = useState("");
-    const [guestUUID, setGuestUUID] = useState<string | null>(null);
+    const [, setGuestUUID] = useState<string | null>(null);
     const navigate = useNavigate();
     const db = getFirestore(app);
 

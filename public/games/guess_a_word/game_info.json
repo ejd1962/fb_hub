@@ -1,0 +1,22 @@
+{ "game_name" : "Guess A Word"
+, "game_number" : 2
+, "game_panel_image" : "game_panel_image.png"
+, "min_players" : 1
+, "max_players" : 8
+, "languages_supported" : "English"
+, "suggested_age_range" : "0 to 99"
+, "minimum_age" : 0
+, "promotion" : "Build your vocabulary and learn to pronouce familiar words in English."
+, "description" : "On your turn you are shown a written word, then click on the image that matches the word before time runs out.  The faster you click the right image, the more points you get."
+, "rules" : "Players take turns, 10 turns per player. Each question is worth up to 10 points.  You have 20 seconds to click the correct image and points decay by the second.  First wrong guess reduces points remaining by 50%.  Second wrong guess and you get no points for your turn.  After guessing is done, the answer is revealed, and each image plus the target word can be played in English by clicking on the speaker icon beside the word."
+, "dev_server"   : "http://localhost"
+, "local_server" : "http://localhost"
+, "alpha_server" : "http://localhost"
+, "beta_server"  : "http://localhost"
+, "prod_server"  : "http://localhost"
+, "entry_page"   : "lobby"
+}
+
+
+
+

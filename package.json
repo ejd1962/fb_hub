@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@types/react": "^19.2.0",
+    "@types/react-color": "^3.0.13",
     "@types/react-dom": "^19.2.0",
     "@typescript-eslint/eslint-plugin": "^8.45.0",
     "@typescript-eslint/parser": "^8.45.0",
@@ -29,6 +30,7 @@
     "vite": "^7.1.7"
   },
   "dependencies": {
+    "@transverse/shared-components": "file:../../p20_shared_components/shared",
     "@vitejs/plugin-react": "^5.0.4",
     "cors": "^2.8.5",
     "express": "^5.1.0",
