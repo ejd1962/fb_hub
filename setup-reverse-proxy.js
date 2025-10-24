@@ -18,7 +18,7 @@ const PORT_RANGES = {
   devVite: Array.from({length: num_ports}, (_, i) => 11001 + i)     // 11001-11005
 };
 
-const PROXY_PORT = 8080; // The single port we'll expose via ngrok
+const PROXY_PORT = 8999; // The single port we'll expose via ngrok
 
 // Parse command-line arguments
 function parseArgs() {
@@ -81,27 +81,40 @@ async function startNgrok(port) {
   });
 }
 
-// Check if a port is active
+// Check if a port is active (tries both IPv4 and IPv6)
 async function isPortActive(port) {
+  // Try IPv4 first
+  const ipv4Result = await tryConnect(port, '127.0.0.1');
+  if (ipv4Result) {
+    return true;
+  }
+
+  // If IPv4 fails, try IPv6
+  const ipv6Result = await tryConnect(port, '::1');
+  return ipv6Result;
+}
+
+// Helper function to try connecting to a specific host:port
+function tryConnect(port, host) {
   return new Promise((resolve) => {
     const socket = new net.Socket();
     socket.setTimeout(1000);
-    
+
     socket.on('connect', () => {
       socket.destroy();
       resolve(true);
     });
-    
+
     socket.on('timeout', () => {
       socket.destroy();
       resolve(false);
     });
-    
+
     socket.on('error', () => {
       resolve(false);
     });
-    
-    socket.connect(port, '127.0.0.1');
+
+    socket.connect(port, host);
   });
 }
 
@@ -290,7 +303,7 @@ function createReverseProxy(mappings) {
 async function saveMappings(mappings) {
   await fs.writeFile('./reverse_proxy.json', JSON.stringify(mappings, null, 2));
   console.log('\n✓ Mappings saved to reverse_proxy.json');
-  
+
   // Create human-readable report
   let report = 'REVERSE PROXY MAPPINGS\n';
   report += '=====================\n\n';
@@ -298,13 +311,16 @@ async function saveMappings(mappings) {
   report += `Base URL: ${mappings.base_url}\n\n`;
   report += 'Routes:\n';
   report += '-------\n';
-  
+
   for (const [path, config] of Object.entries(mappings.routes)) {
     report += `${config.public_url.padEnd(50)} → localhost:${config.local_port} (${config.type})\n`;
   }
-  
+
   await fs.writeFile('./reverse_proxy_report.txt', report);
   console.log('✓ Report saved to reverse_proxy_report.txt\n');
+
+  // Display the report to console
+  console.log(report);
 }
 
 // Main execution
