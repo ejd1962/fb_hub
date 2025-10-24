@@ -1,35 +1,38 @@
 #!/usr/bin/env node
 
 /**
- * launch_game.js
+ * launch_servers.js
  *
- * Launches game servers for specified games with configurable options.
+ * Launches hub and game servers with configurable options.
  *
- * Usage: node launch_game.js [options] <game1> <game2> ...
+ * Usage: node launch_servers.js [options] [hub] [game1] [game2] ...
  *
  * Options:
  *   --mode <prod|dev|dev-vite>  Launch mode (default: dev-vite)
  *                               prod: Production (port 9000+game#, backend only)
  *                               dev: Dev backend only (port 10000+game#, serves built frontend)
  *                               dev-vite: Dev with live Vite (backend 10000+game#, frontend 11000+game#)
+ *   --proxy <yes|no>            Enable reverse proxy mode (default: no)
+ *                               When enabled: kills all existing servers, always launches hub,
+ *                               sets VITE_BASE_PATH for proper asset serving through proxy
  *   --build-only <yes|no>       Only build frontend, don't launch servers (default: no)
  *   --restart <auto|no>         Enable auto-restart on file changes (default: auto)
  *   --newtab <yes|no>           Launch each server in a new Windows Terminal tab (default: yes)
  *
  * Examples:
- *   node launch_game.js trivia guess_a_word
- *   node launch_game.js --mode prod trivia
- *   node launch_game.js --mode dev chateasy
- *   node launch_game.js --build-only yes guess_a_word trivia
- *   node launch_game.js --restart no chateasy
- *   node launch_game.js --newtab yes trivia
- *   node launch_game.js --mode dev-vite --restart auto --newtab yes trivia guess_a_word chateasy
+ *   node launch_servers.js hub wordguess
+ *   node launch_servers.js --proxy yes wordguess
+ *   node launch_servers.js --mode prod wordguess
+ *   node launch_servers.js --mode dev wordguess
+ *   node launch_servers.js --build-only yes wordguess
  *
  * The script will:
+ * - Launch hub (game_number=0) and specified games
+ * - In proxy mode: clean up all ports, always include hub
  * - Read game_info.json to get game numbers
  * - Launch backend servers on appropriate ports (9xxx for prod, 10xxx for dev)
- * - Launch Vite frontend servers on 11xxx ports (dev mode only)
- * - Display status and logs for all running servers
+ * - Launch Vite frontend servers on 11xxx ports (dev-vite mode only)
+ * - Set VITE_BASE_PATH in proxy mode for correct asset paths
  */
 
 import { spawn, execSync } from 'child_process';
@@ -66,7 +69,7 @@ async function waitForUserConfirmation(message) {
 }
 
 // Lockfile to prevent multiple instances
-const lockFile = path.join(__dirname, '.launch_game.lock');
+const lockFile = path.join(__dirname, '.launch_servers.lock');
 
 function checkAndCreateLockfile() {
     if (fs.existsSync(lockFile)) {
@@ -419,6 +422,33 @@ async function main() {
         process.exit(1);
     }
 
+    // Proxy mode setup
+    if (options.proxy === 'yes') {
+        console.log(`${colors.bright}${colors.yellow}Proxy mode enabled${colors.reset}`);
+        console.log(`${colors.yellow}Cleaning up all server ports...${colors.reset}\n`);
+
+        // Kill all ports in the hub/game range
+        const allPorts = [
+            9000, 10000, 11000,  // Hub ports
+            ...Array.from({length: 5}, (_, i) => 9001 + i),   // Production game ports
+            ...Array.from({length: 5}, (_, i) => 10001 + i),  // Dev game ports
+            ...Array.from({length: 5}, (_, i) => 11001 + i),  // Dev-vite game ports
+            8999  // Reverse proxy port
+        ];
+
+        for (const port of allPorts) {
+            killProcessOnPort(port);
+        }
+
+        console.log(`${colors.green}Port cleanup complete${colors.reset}\n`);
+
+        // Ensure hub is in the list if not already
+        if (!options.games.includes('hub')) {
+            console.log(`${colors.cyan}Adding hub to launch list (required for proxy mode)${colors.reset}\n`);
+            options.games.unshift('hub');
+        }
+    }
+
     // Choose launch function based on newtab option
     const launchFunc = useNewTabs ? launchProcessInNewTab : launchProcess;
 
@@ -430,16 +460,32 @@ async function main() {
 
     for (const gameName of options.games) {
         try {
-            // Find project directory
-            const projectDir = findGameProject(gameName);
-            if (!projectDir) {
-                console.log(`${colors.red}Error: Project not found for game '${gameName}'${colors.reset}`);
-                continue;
-            }
+            // Handle "hub" as a special case
+            let projectDir, gameInfo, gameNumber;
 
-            // Get game info
-            const gameInfo = getGameInfo(projectDir, gameName);
-            const gameNumber = gameInfo.game_number;
+            if (gameName === 'hub') {
+                projectDir = 'p23_fb_hub';
+                gameNumber = 0;
+                gameInfo = {
+                    game_name: 'FB Hub',
+                    game_number: 0,
+                    local_server: 'http://localhost:10000',
+                    alpha_server: 'http://localhost:10000',
+                    beta_server: 'http://localhost:10000',
+                    prod_server: 'http://localhost:9000'
+                };
+            } else {
+                // Find project directory
+                projectDir = findGameProject(gameName);
+                if (!projectDir) {
+                    console.log(`${colors.red}Error: Project not found for game '${gameName}'${colors.reset}`);
+                    continue;
+                }
+
+                // Get game info
+                gameInfo = getGameInfo(projectDir, gameName);
+                gameNumber = gameInfo.game_number;
+            }
 
             console.log(`${colors.cyan}${colors.bright}Game: ${gameInfo.game_name} (${gameName})${colors.reset}`);
             console.log(`  Project: ${projectDir}`);
@@ -449,7 +495,10 @@ async function main() {
             const backendPort = isProd ? 9000 + gameNumber : 10000 + gameNumber;
             const frontendPort = 11000 + gameNumber;
 
-            const gamePath = path.join(PROJECTS_DIR, projectDir, gameName);
+            // Set paths (hub is directly in its project dir, games have a subdir)
+            const gamePath = gameName === 'hub'
+                ? path.join(PROJECTS_DIR, projectDir, 'fb_hub')
+                : path.join(PROJECTS_DIR, projectDir, gameName);
             const serverPath = path.join(gamePath, 'server');
 
             // BUILD ONLY MODE: Just build the frontend and exit
