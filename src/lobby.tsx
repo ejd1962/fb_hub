@@ -122,7 +122,7 @@ export default function Lobby() {
     useEffect(() => {
         const loadGames = async () => {
             // Hardcoded list of game folder names (Option A)
-            const gameFolders = ['testgame', 'guess_a_word', 'trivia', 'chateasy'];
+            const gameFolders = ['wordguess'];
 
             const loadedGames: GameData[] = [];
 
