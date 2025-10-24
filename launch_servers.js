@@ -5,7 +5,7 @@
  *
  * Launches hub and game servers with configurable options.
  *
- * Usage: node launch_servers.js [options] [hub] [game1] [game2] ...
+ * Usage: node launch_servers.js [options] [game1] [game2] ...
  *
  * Options:
  *   --mode <prod|dev|dev-vite>  Launch mode (default: dev-vite)
@@ -13,26 +13,26 @@
  *                               dev: Dev backend only (port 10000+game#, serves built frontend)
  *                               dev-vite: Dev with live Vite (backend 10000+game#, frontend 11000+game#)
  *   --proxy <yes|no>            Enable reverse proxy mode (default: no)
- *                               When enabled: kills all existing servers, always launches hub,
- *                               sets VITE_BASE_PATH for proper asset serving through proxy
+ *                               Sets VITE_BASE_PATH for proper asset serving through proxy
  *   --build-only <yes|no>       Only build frontend, don't launch servers (default: no)
  *   --restart <auto|no>         Enable auto-restart on file changes (default: auto)
  *   --newtab <yes|no>           Launch each server in a new Windows Terminal tab (default: yes)
  *
  * Examples:
- *   node launch_servers.js hub wordguess
- *   node launch_servers.js --proxy yes wordguess
+ *   node launch_servers.js wordguess              # Launches hub + wordguess
+ *   node launch_servers.js --proxy yes wordguess  # Proxy mode
  *   node launch_servers.js --mode prod wordguess
  *   node launch_servers.js --mode dev wordguess
  *   node launch_servers.js --build-only yes wordguess
  *
- * The script will:
- * - Launch hub (game_number=0) and specified games
- * - In proxy mode: clean up all ports, always include hub
+ * The script will ALWAYS:
+ * - Kill all existing servers on ports 9000-11005 and 8999
+ * - Launch hub (game_number=0) - auto-added if not specified
+ * - Launch specified games
  * - Read game_info.json to get game numbers
  * - Launch backend servers on appropriate ports (9xxx for prod, 10xxx for dev)
  * - Launch Vite frontend servers on 11xxx ports (dev-vite mode only)
- * - Set VITE_BASE_PATH in proxy mode for correct asset paths
+ * - In proxy mode: set VITE_BASE_PATH for correct asset paths
  */
 
 import { spawn, execSync } from 'child_process';
@@ -441,15 +441,16 @@ async function main() {
 
     console.log(`${colors.green}Port cleanup complete${colors.reset}\n`);
 
+    // Always ensure hub is in the list (since we kill all servers, we need to relaunch it)
+    // Hub can be explicitly named on command line, but will be added automatically if not
+    if (!options.games.includes('hub')) {
+        console.log(`${colors.cyan}Adding hub to launch list (auto-added since all servers were killed)${colors.reset}\n`);
+        options.games.unshift('hub');
+    }
+
     // Proxy mode setup
     if (options.proxy === 'yes') {
         console.log(`${colors.bright}${colors.yellow}Proxy mode enabled${colors.reset}\n`);
-
-        // Ensure hub is in the list if not already
-        if (!options.games.includes('hub')) {
-            console.log(`${colors.cyan}Adding hub to launch list (required for proxy mode)${colors.reset}\n`);
-            options.games.unshift('hub');
-        }
     }
 
     // Choose launch function based on newtab option
