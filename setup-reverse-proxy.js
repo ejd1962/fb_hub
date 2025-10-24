@@ -9,8 +9,9 @@ import { spawn } from 'child_process';
 const num_ports = 5;  // number of ports in each range that might need proxies
 
 // Define your port ranges
+// Hub uses game_number=0, so it's on 9000 (prod), 10000 (dev), or 11000 (dev-vite)
 const PORT_RANGES = {
-  hub: [5173],
+  hub: [9000, 10000, 11000], // Check all three possible hub ports
   production: Array.from({length: num_ports}, (_, i) => 9000 + i),
   dev: Array.from({length: num_ports}, (_, i) => 10000 + i),
   devVite: Array.from({length: num_ports}, (_, i) => 11000 + i)
@@ -113,10 +114,13 @@ async function scanAllPorts() {
     devVite: []
   };
   
-  // Check hub
-  if (await isPortActive(PORT_RANGES.hub[0])) {
-    console.log(`✓ Hub on port ${PORT_RANGES.hub[0]}`);
-    activeServices.hub = PORT_RANGES.hub[0];
+  // Check hub (can be on 9000, 10000, or 11000 depending on mode)
+  for (const port of PORT_RANGES.hub) {
+    if (await isPortActive(port)) {
+      console.log(`✓ Hub on port ${port}`);
+      activeServices.hub = port;
+      break; // Only one hub port will be active
+    }
   }
   
   // Check production ports

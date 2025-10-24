@@ -8,7 +8,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 5173;
+// Hub uses game_number=0: port 10000 for dev backend, 9000 for production
+const PORT = process.env.PORT || 10000;
 
 // Enable CORS for all routes
 app.use(cors());
