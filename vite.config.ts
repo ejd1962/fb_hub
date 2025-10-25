@@ -1,9 +1,13 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { displayUrlsPlugin } from '@transverse/shared-components/vite/display-urls-plugin'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [react()],
+    plugins: [
+        react(),
+        displayUrlsPlugin('FB Hub')
+    ],
     // Set base path for reverse proxy mode
     // Use VITE_BASE_PATH env var, or default to '/' for direct access
     base: process.env.VITE_BASE_PATH || '/',

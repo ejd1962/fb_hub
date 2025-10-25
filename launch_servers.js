@@ -8,22 +8,50 @@
  * Usage: node launch_servers.js [options] [game1] [game2] ...
  *
  * Options:
- *   --mode <prod|dev|dev-vite>  Launch mode (default: dev-vite)
+ *   --mode=<prod|dev|dev-vite>  Launch mode (default: dev-vite)
  *                               prod: Production (port 9000+game#, backend only)
  *                               dev: Dev backend only (port 10000+game#, serves built frontend)
  *                               dev-vite: Dev with live Vite (backend 10000+game#, frontend 11000+game#)
- *   --proxy <yes|no>            Enable reverse proxy mode (default: no)
+ *
+ *   --purpose=<designer_test|alpha_test|beta_test|customer_access>
+ *                               Purpose/environment of the codebase (default: designer_test)
+ *                               designer_test: Early development, designer testing
+ *                               alpha_test: Internal alpha testing
+ *                               beta_test: External beta testing
+ *                               customer_access: Production/customer-facing
+ *                               This determines which server URL is used from game_info.json
+ *
+ *   --proxy=<yes|no>            Enable reverse proxy mode (default: no)
+ *                               Automatically launches setup-reverse-proxy.js on port 8999
  *                               Sets VITE_BASE_PATH for proper asset serving through proxy
- *   --build-only <yes|no>       Only build frontend, don't launch servers (default: no)
- *   --restart <auto|no>         Enable auto-restart on file changes (default: auto)
- *   --newtab <yes|no>           Launch each server in a new Windows Terminal tab (default: yes)
+ *
+ *   --deployment=<local|ngrok>  Proxy deployment method (default: local)
+ *                               Only used when --proxy=yes is specified
+ *                               local: Proxy for local testing (http://localhost:8999)
+ *                               ngrok: Proxy for external access via ngrok public URL
+ *
+ *   --build-only=<yes|no>       Only build frontend, don't launch servers (default: no)
+ *   --restart=<auto|no>         Enable auto-restart on file changes (default: auto)
+ *   --newtab=<yes|no>           Launch each server in a new Windows Terminal tab (default: yes)
  *
  * Examples:
- *   node launch_servers.js wordguess              # Launches hub + wordguess
- *   node launch_servers.js --proxy yes wordguess  # Proxy mode
- *   node launch_servers.js --mode prod wordguess
- *   node launch_servers.js --mode dev wordguess
- *   node launch_servers.js --build-only yes wordguess
+ *   node launch_servers.js wordguess
+ *     # Launches hub + wordguess in dev-vite mode with designer_test purpose
+ *
+ *   node launch_servers.js --purpose=beta_test wordguess
+ *     # Uses beta_test server URLs from game_info.json
+ *
+ *   node launch_servers.js --proxy=yes wordguess
+ *     # Enables local reverse proxy on port 8999 for testing
+ *
+ *   node launch_servers.js --proxy=yes --deployment=ngrok wordguess
+ *     # Enables reverse proxy with ngrok for external access
+ *
+ *   node launch_servers.js --mode=prod --purpose=customer_access wordguess
+ *     # Production mode with customer-facing configuration
+ *
+ *   node launch_servers.js --build-only=yes wordguess
+ *     # Only builds frontend, doesn't launch servers
  *
  * The script will ALWAYS:
  * - Kill all existing servers on ports 9000-11005 and 8999
@@ -33,6 +61,20 @@
  * - Launch backend servers on appropriate ports (9xxx for prod, 10xxx for dev)
  * - Launch Vite frontend servers on 11xxx ports (dev-vite mode only)
  * - In proxy mode: set VITE_BASE_PATH for correct asset paths
+ *
+ * Tab Management (when --newtab yes):
+ * - Each server launches in a separate Windows Terminal tab
+ * - When re-running this script:
+ *   1. Script kills all existing servers on known ports
+ *   2. Old tabs display "Server exited with code 143" (SIGTERM)
+ *   3. Old tabs auto-close after 5 seconds
+ *   4. New tabs launch immediately with fresh servers
+ *   5. Brief overlap (~5 seconds) of old and new tabs, then old tabs disappear
+ * - Exception: If a server crashed (exit code ≠ 0, 130, 143):
+ *   - Tab shows "⚠️  Server crashed or exited with error!"
+ *   - Tab remains open indefinitely to preserve crash information
+ *   - User must manually press Enter to close after reviewing the error
+ * - This allows easy re-launching without manual tab cleanup while preserving crash details
  */
 
 import { spawn, execSync } from 'child_process';
@@ -128,9 +170,10 @@ function killProcessOnPort(port) {
 
         for (const pid of pids) {
             try {
-                log(`[PORT-KILL] Killing process ${pid}...`);
-                execSync(`taskkill /F /PID ${pid}`, { encoding: 'utf8' });
-                log(`${colors.green}[PORT-KILL] Successfully killed process ${pid}${colors.reset}`);
+                log(`[PORT-KILL] Killing process tree for ${pid}...`);
+                // Use /T to kill the entire process tree (including child processes like nodemon)
+                execSync(`taskkill /F /T /PID ${pid}`, { encoding: 'utf8' });
+                log(`${colors.green}[PORT-KILL] Successfully killed process tree ${pid}${colors.reset}`);
             } catch (killError) {
                 log(`${colors.yellow}[PORT-KILL] Warning: Could not kill process ${pid}: ${killError.message}${colors.reset}`);
             }
@@ -169,7 +212,8 @@ function parseArgs(args) {
         buildOnly: 'no',   // yes or no
         restart: 'auto',
         newtab: 'yes',
-        deployment: 'local',  // local, alpha, beta, or prod
+        purpose: 'designer_test',  // designer_test, alpha_test, beta_test, or customer_access
+        deployment: 'local',  // local or ngrok - proxy deployment method
         proxy: 'no',       // yes or no - use reverse proxy mode
         games: []
     };
@@ -177,21 +221,24 @@ function parseArgs(args) {
     for (let i = 0; i < args.length; i++) {
         const arg = args[i];
 
-        if (arg === '--mode' && i + 1 < args.length) {
-            options.mode = args[++i];
-        } else if (arg === '--build-only' && i + 1 < args.length) {
-            options.buildOnly = args[++i];
-        } else if (arg === '--restart' && i + 1 < args.length) {
-            options.restart = args[++i];
-        } else if (arg === '--newtab' && i + 1 < args.length) {
-            options.newtab = args[++i];
-        } else if (arg === '--deployment' && i + 1 < args.length) {
-            options.deployment = args[++i];
-        } else if (arg === '--proxy' && i + 1 < args.length) {
-            options.proxy = args[++i];
-        } else if (arg === '--games' && i + 1 < args.length) {
+        // Parse --flag=value format
+        if (arg.startsWith('--mode=')) {
+            options.mode = arg.split('=')[1];
+        } else if (arg.startsWith('--build-only=')) {
+            options.buildOnly = arg.split('=')[1];
+        } else if (arg.startsWith('--restart=')) {
+            options.restart = arg.split('=')[1];
+        } else if (arg.startsWith('--newtab=')) {
+            options.newtab = arg.split('=')[1];
+        } else if (arg.startsWith('--purpose=')) {
+            options.purpose = arg.split('=')[1];
+        } else if (arg.startsWith('--deployment=')) {
+            options.deployment = arg.split('=')[1];
+        } else if (arg.startsWith('--proxy=')) {
+            options.proxy = arg.split('=')[1];
+        } else if (arg.startsWith('--games=')) {
             // Split comma-separated game list
-            const gamesList = args[++i];
+            const gamesList = arg.split('=')[1];
             options.games.push(...gamesList.split(',').map(g => g.trim()));
         } else if (!arg.startsWith('--')) {
             options.games.push(arg);
@@ -254,18 +301,21 @@ async function launchProcessInNewTab(command, args, options, label, color) {
     const cwd = options.cwd || process.cwd();
     const envVars = options.env || {};
 
-    // Only set PORT explicitly - no fallbacks, fail early if missing
-    if (!envVars.PORT) {
+    // PORT is required for game servers, but not for reverse-proxy
+    const isProxy = label.includes('reverse-proxy');
+    if (!isProxy && !envVars.PORT) {
         throw new Error(`PORT must be explicitly set in env options for ${label}`);
     }
 
-    // TRUE_URL is only required for backend servers, not frontend Vite servers
+    // TRUE_URL is only required for backend servers, not frontend Vite servers or proxy
     const isBackend = label.includes('-backend');
     if (isBackend && !envVars.TRUE_URL) {
         throw new Error(`TRUE_URL must be explicitly set in env options for ${label}`);
     }
 
-    log(`${colors.cyan}[DEBUG] PORT: ${envVars.PORT}${colors.reset}`);
+    if (envVars.PORT) {
+        log(`${colors.cyan}[DEBUG] PORT: ${envVars.PORT}${colors.reset}`);
+    }
     if (envVars.TRUE_URL) {
         log(`${colors.cyan}[DEBUG] TRUE_URL: ${envVars.TRUE_URL}${colors.reset}`);
     }
@@ -288,16 +338,35 @@ async function launchProcessInNewTab(command, args, options, label, color) {
 
     // Create a temporary bash script to avoid escaping issues
     const scriptPath = path.join(__dirname, `launch_script_${gameName}_${serverType}.bash`);
+    const portExport = envVars.PORT ? `export PORT=${envVars.PORT}\n` : '';
     const trueUrlExport = envVars.TRUE_URL ? `export TRUE_URL="${envVars.TRUE_URL}"\n` : '';
+    const proxyEnabledExport = envVars.PROXY_ENABLED ? `export PROXY_ENABLED="${envVars.PROXY_ENABLED}"\n` : '';
+    const proxyInfoPathExport = envVars.PROXY_INFO_PATH ? `export PROXY_INFO_PATH="${envVars.PROXY_INFO_PATH}"\n` : '';
     // Use MSYS_NO_PATHCONV to prevent Git Bash from converting the path
     const viteBasePathExport = envVars.VITE_BASE_PATH ? `export MSYS_NO_PATHCONV=1\nexport VITE_BASE_PATH="${envVars.VITE_BASE_PATH}"\n` : '';
     const scriptContent = `#!/bin/bash
 cd "${bashCwd}"
-export PORT=${envVars.PORT}
-${trueUrlExport}${viteBasePathExport}${command} ${args.join(' ')}
+${portExport}${trueUrlExport}${proxyEnabledExport}${proxyInfoPathExport}${viteBasePathExport}${command} ${args.join(' ')}
+EXIT_CODE=$?
 echo ""
-echo "Server exited. Press Enter to close..."
-read
+echo "Server exited with code $EXIT_CODE"
+
+# Only auto-close on clean shutdown or intentional kill
+# Exit codes that trigger auto-close:
+#   0 = clean exit
+#   1 = taskkill force termination (from launch_servers.js killing the process tree)
+#   130 = SIGINT (Ctrl+C)
+#   143 = SIGTERM (graceful shutdown)
+# Any other exit code = unexpected crash, keep tab open
+if [ $EXIT_CODE -eq 0 ] || [ $EXIT_CODE -eq 1 ] || [ $EXIT_CODE -eq 130 ] || [ $EXIT_CODE -eq 143 ]; then
+    echo "Tab will auto-close in 5 seconds (or press Enter to close now)..."
+    read -t 5 || true
+else
+    echo "⚠️  Server crashed or exited with error!"
+    echo "Tab will remain open. Press Enter to close and review the error above..."
+    read
+fi
+exit $EXIT_CODE
 `;
 
     fs.writeFileSync(scriptPath, scriptContent);
@@ -396,30 +465,33 @@ async function main() {
     console.log(`  Build only: ${options.buildOnly}`);
     if (!isBuildOnly) {
         console.log(`  Auto-restart: ${options.restart}`);
-        console.log(`  Deployment: ${options.deployment}`);
+        console.log(`  Purpose: ${options.purpose}`);
         console.log(`  Proxy mode: ${options.proxy}`);
+        if (options.proxy === 'yes') {
+            console.log(`  Deployment: ${options.deployment}`);
+        }
         console.log(`  New tabs: ${options.newtab}`);
     }
     console.log(`  Games: ${options.games.join(', ')}\n`);
 
     if (options.games.length === 0) {
         console.log(`${colors.red}Error: No games specified${colors.reset}`);
-        console.log(`\nUsage: node launch_game.js [options] <game1> <game2> ...`);
+        console.log(`\nUsage: node launch_servers.js [options] <game1> <game2> ...`);
         console.log(`\nOptions:`);
-        console.log(`  --mode <prod|dev|dev-vite>  Launch mode (default: dev-vite)`);
-        console.log(`                              prod: Production (backend only)`);
-        console.log(`                              dev: Dev backend (serves built frontend)`);
-        console.log(`                              dev-vite: Dev with live Vite frontend`);
-        console.log(`  --build-only <yes|no>       Only build frontend, don't launch (default: no)`);
-        console.log(`  --restart <auto|no>         Enable auto-restart (default: auto)`);
-        console.log(`  --newtab <yes|no>           Launch in new tabs (default: yes)`);
+        console.log(`  --mode=<prod|dev|dev-vite>  Launch mode (default: dev-vite)`);
+        console.log(`  --purpose=<designer_test|alpha_test|beta_test|customer_access>`);
+        console.log(`                              Codebase purpose (default: designer_test)`);
+        console.log(`  --proxy=<yes|no>            Enable reverse proxy (default: no)`);
+        console.log(`  --deployment=<local|ngrok>  Proxy method (default: local)`);
+        console.log(`  --build-only=<yes|no>       Only build frontend (default: no)`);
+        console.log(`  --restart=<auto|no>         Auto-restart on changes (default: auto)`);
+        console.log(`  --newtab=<yes|no>           Launch in new tabs (default: yes)`);
         console.log(`\nExamples:`);
-        console.log(`  node launch_game.js trivia guess_a_word`);
-        console.log(`  node launch_game.js --mode prod trivia`);
-        console.log(`  node launch_game.js --mode dev chateasy`);
-        console.log(`  node launch_game.js --build-only yes guess_a_word trivia`);
-        console.log(`  node launch_game.js --restart no chateasy`);
-        console.log(`  node launch_game.js --newtab no trivia`);
+        console.log(`  node launch_servers.js wordguess`);
+        console.log(`  node launch_servers.js --purpose=beta_test wordguess`);
+        console.log(`  node launch_servers.js --proxy=yes wordguess`);
+        console.log(`  node launch_servers.js --proxy=yes --deployment=ngrok wordguess`);
+        console.log(`  node launch_servers.js --mode=prod --purpose=customer_access wordguess`);
         process.exit(1);
     }
 
@@ -439,6 +511,28 @@ async function main() {
         killProcessOnPort(port);
     }
 
+    // Remove stale reverse_proxy files (prevents servers from seeing old proxy info)
+    const proxyJsonPath = path.join(__dirname, 'reverse_proxy.json');
+    const proxyJsonTmpPath = path.join(__dirname, 'reverse_proxy.json.tmp');
+    const proxyReportPath = path.join(__dirname, 'reverse_proxy_report.txt');
+
+    try {
+        if (fs.existsSync(proxyJsonPath)) {
+            fs.unlinkSync(proxyJsonPath);
+            log(`${colors.yellow}[CLEANUP] Removed stale reverse_proxy.json${colors.reset}`);
+        }
+        if (fs.existsSync(proxyJsonTmpPath)) {
+            fs.unlinkSync(proxyJsonTmpPath);
+            log(`${colors.yellow}[CLEANUP] Removed stale reverse_proxy.json.tmp${colors.reset}`);
+        }
+        if (fs.existsSync(proxyReportPath)) {
+            fs.unlinkSync(proxyReportPath);
+            log(`${colors.yellow}[CLEANUP] Removed stale reverse_proxy_report.txt${colors.reset}`);
+        }
+    } catch (error) {
+        log(`${colors.yellow}[CLEANUP] Warning: Could not remove proxy files: ${error.message}${colors.reset}`);
+    }
+
     console.log(`${colors.green}Port cleanup complete${colors.reset}\n`);
 
     // Always ensure hub is in the list (since we kill all servers, we need to relaunch it)
@@ -448,9 +542,40 @@ async function main() {
         options.games.unshift('hub');
     }
 
-    // Proxy mode setup
+    // If proxy=no, launch config creator BEFORE servers start
+    if (options.proxy === 'no') {
+        console.log(`${colors.cyan}Launching no-proxy configuration manager...${colors.reset}\n`);
+
+        const proxyLabel = 'proxy-config:no-proxy';
+        const proxyCmd = 'node';
+        const proxyArgs = ['setup-reverse-proxy.js', '--proxy=no'];
+
+        if (useNewTabs) {
+            const proxyProc = await launchProcessInNewTab(
+                proxyCmd,
+                proxyArgs,
+                {
+                    cwd: __dirname,
+                    env: { ...process.env }
+                },
+                proxyLabel,
+                'yellow'
+            );
+
+            if (proxyProc) {
+                processes.push({ proc: proxyProc, label: proxyLabel });
+            }
+        }
+
+        // Wait a moment for config file to be created
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log(`${colors.green}No-proxy configuration manager running${colors.reset}\n`);
+    }
+
+    // Show proxy mode status
     if (options.proxy === 'yes') {
-        console.log(`${colors.bright}${colors.yellow}Proxy mode enabled${colors.reset}\n`);
+        console.log(`${colors.bright}${colors.yellow}Proxy mode enabled (deployment: ${options.deployment})${colors.reset}`);
+        console.log(`${colors.yellow}Note: Proxy will be launched AFTER all game servers are running${colors.reset}\n`);
     }
 
     // Choose launch function based on newtab option
@@ -473,10 +598,10 @@ async function main() {
                 gameInfo = {
                     game_name: 'FB Hub',
                     game_number: 0,
-                    local_server: 'http://localhost:10000',
-                    alpha_server: 'http://localhost:10000',
-                    beta_server: 'http://localhost:10000',
-                    prod_server: 'http://localhost:9000'
+                    designer_test_server: 'http://localhost:10000',
+                    alpha_test_server: 'http://localhost:10000',
+                    beta_test_server: 'http://localhost:10000',
+                    customer_access_server: 'http://localhost:9000'
                 };
             } else {
                 // Find project directory
@@ -527,12 +652,12 @@ async function main() {
             }
             console.log('');
 
-            // Determine TRUE_URL based on deployment
-            const deploymentKey = `${options.deployment}_server`;
-            const baseUrl = gameInfo[deploymentKey];
+            // Determine TRUE_URL based on purpose
+            const purposeKey = `${options.purpose}_server`;
+            const baseUrl = gameInfo[purposeKey];
 
             if (!baseUrl) {
-                throw new Error(`Missing ${deploymentKey} in game_info.json for ${gameName}`);
+                throw new Error(`Missing ${purposeKey} in game_info.json for ${gameName}`);
             }
 
             // Parse the base URL and replace the port with our calculated port
@@ -549,12 +674,24 @@ async function main() {
                 const backendCmd = autoRestart ? 'npm' : 'npm';
                 const backendArgs = autoRestart ? ['run', 'dev'] : ['start'];
 
+                // Set VITE_BASE_PATH for backend so it knows its public path prefix
+                const backendEnv = {
+                    ...process.env,
+                    PORT: backendPort.toString(),
+                    TRUE_URL,
+                    PROXY_ENABLED: options.proxy === 'yes' ? 'true' : 'false',
+                    PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json')
+                };
+                if (options.proxy === 'yes') {
+                    backendEnv.VITE_BASE_PATH = `/localhost_${backendPort}/`;
+                }
+
                 const backendProc = await launchFunc(
                     backendCmd,
                     backendArgs,
                     {
                         cwd: serverPath,
-                        env: { ...process.env, PORT: backendPort.toString(), TRUE_URL }
+                        env: backendEnv
                     },
                     backendLabel,
                     isProd ? 'magenta' : 'blue'
@@ -571,8 +708,13 @@ async function main() {
                 const frontendCmd = 'npm';
                 const frontendArgs = ['run', 'dev'];
 
-                // Set VITE_BASE_PATH in proxy mode
-                const frontendEnv = { ...process.env, PORT: frontendPort.toString() };
+                // Set VITE_BASE_PATH so Vite knows to serve assets with the path prefix
+                const frontendEnv = {
+                    ...process.env,
+                    PORT: frontendPort.toString(),
+                    PROXY_ENABLED: options.proxy === 'yes' ? 'true' : 'false',
+                    PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json')
+                };
                 if (options.proxy === 'yes') {
                     frontendEnv.VITE_BASE_PATH = `/localhost_${frontendPort}/`;
                 }
@@ -613,6 +755,55 @@ async function main() {
     }
 
     console.log(`${colors.bright}${colors.green}Started ${processes.length} server(s)${colors.reset}`);
+
+    // Launch reverse proxy AFTER all game servers are running
+    if (options.proxy === 'yes') {
+        console.log(`\n${colors.bright}${colors.yellow}Launching reverse proxy...${colors.reset}`);
+        console.log(`${colors.yellow}Waiting 10 seconds for game servers to fully initialize and bind to ports...${colors.reset}`);
+
+        // Wait for servers to start listening (they need time to bind to ports)
+        await new Promise(resolve => setTimeout(resolve, 10000));
+
+        const proxyLabel = 'reverse-proxy:8999';
+        const proxyCmd = 'node';
+        const proxyArgs = ['setup-reverse-proxy.js', `--proxy=yes`, `--deployment=${options.deployment}`];
+
+        console.log(`${colors.cyan}Starting reverse proxy server...${colors.reset}\n`);
+
+        if (useNewTabs) {
+            const proxyProc = await launchProcessInNewTab(
+                proxyCmd,
+                proxyArgs,
+                {
+                    cwd: __dirname,
+                    env: { ...process.env }
+                },
+                proxyLabel,
+                'yellow'
+            );
+
+            if (proxyProc) {
+                processes.push({ proc: proxyProc, label: proxyLabel });
+            }
+        } else {
+            const proxyProc = launchProcess(
+                proxyCmd,
+                proxyArgs,
+                {
+                    cwd: __dirname,
+                    env: { ...process.env }
+                },
+                proxyLabel,
+                'yellow'
+            );
+
+            if (proxyProc) {
+                processes.push({ proc: proxyProc, label: proxyLabel });
+            }
+        }
+
+        console.log(`${colors.green}Reverse proxy launched on port 8999${colors.reset}\n`);
+    }
 
     if (useNewTabs) {
         console.log(`${colors.yellow}Servers running in separate tabs. Close individual tabs to stop servers.${colors.reset}\n`);

@@ -1,11 +1,6 @@
 #!/bin/bash
-cd "C:/_projects/p27_wordguess/wordguess"
-export PORT=11001
-export PROXY_ENABLED="true"
-export PROXY_INFO_PATH="C:\_projects\p23_fb_hub\fb_hub\reverse_proxy.json"
-export MSYS_NO_PATHCONV=1
-export VITE_BASE_PATH="/localhost_11001/"
-npm run dev
+cd "C:/_projects/p23_fb_hub/fb_hub"
+node setup-reverse-proxy.js --proxy=yes --deployment=local
 EXIT_CODE=$?
 echo ""
 echo "Server exited with code $EXIT_CODE"

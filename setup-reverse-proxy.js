@@ -1,7 +1,7 @@
 import http from 'http';
 import httpProxy from 'http-proxy';
 import net from 'net';
-import { promises as fs } from 'fs';
+import { promises as fs, existsSync, unlinkSync } from 'fs';
 import { createInterface } from 'readline';
 import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
@@ -24,14 +24,21 @@ const PROXY_PORT = 8999; // The single port we'll expose via ngrok
 function parseArgs() {
   const args = process.argv.slice(2);
   const deployment = args.find(arg => arg.startsWith('--deployment='))?.split('=')[1] || 'local';
+  const proxy = args.find(arg => arg.startsWith('--proxy='))?.split('=')[1] || 'no';
 
   if (!['local', 'ngrok'].includes(deployment)) {
     console.error('Error: --deployment must be "local" or "ngrok"');
-    console.error('Usage: node setup-reverse-proxy.js --deployment=local|ngrok');
+    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|ngrok');
     process.exit(1);
   }
 
-  return { deployment };
+  if (!['yes', 'no'].includes(proxy)) {
+    console.error('Error: --proxy must be "yes" or "no"');
+    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|ngrok');
+    process.exit(1);
+  }
+
+  return { deployment, proxy };
 }
 
 // Spawn ngrok and extract the public URL
@@ -122,18 +129,19 @@ function tryConnect(port, host) {
 async function scanAllPorts() {
   console.log('Scanning ports...\n');
   const activeServices = {
-    hub: null,
+    hub: [],  // Changed from null to array - hub can have multiple ports (backend + frontend)
     production: [],
     dev: [],
     devVite: []
   };
-  
+
   // Check hub (can be on 9000, 10000, or 11000 depending on mode)
+  // In dev-vite mode, hub will have TWO ports: backend (10000) + frontend (11000)
   for (const port of PORT_RANGES.hub) {
     if (await isPortActive(port)) {
       console.log(`✓ Hub on port ${port}`);
-      activeServices.hub = port;
-      break; // Only one hub port will be active
+      activeServices.hub.push(port);
+      // Don't break - keep checking for other hub ports
     }
   }
   
@@ -169,18 +177,20 @@ function generateMappings(activeServices, baseUrl) {
   const mappings = {
     proxy_port: PROXY_PORT,
     base_url: baseUrl,
+    created_at: new Date().toISOString(),
+    created_by_pid: process.pid,
     routes: {}
   };
   
-  // Hub follows same pattern as games: /localhost_PORT
-  if (activeServices.hub) {
-    const path = `/localhost_${activeServices.hub}`;
+  // Hub can have multiple ports (backend + frontend in dev-vite mode)
+  activeServices.hub.forEach(port => {
+    const path = `/localhost_${port}`;
     mappings.routes[path] = {
-      local_port: activeServices.hub,
+      local_port: port,
       public_url: `${baseUrl}${path}`,
       type: 'hub'
     };
-  }
+  });
   
   // Production games
   activeServices.production.forEach(port => {
@@ -217,14 +227,28 @@ function generateMappings(activeServices, baseUrl) {
 
 // Create and start the reverse proxy server
 function createReverseProxy(mappings) {
+  // Helper function to get timestamp with millisecond resolution
+  const getTimestamp = () => {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+    return `${hours}:${minutes}:${seconds}.${milliseconds}`;
+  };
+
   const proxy = httpProxy.createProxyServer({});
   
   // Handle proxy errors
   proxy.on('error', (err, req, res) => {
     console.error('Proxy error:', err.message);
-    if (!res.headersSent) {
+    // Check if res is an HTTP response (not a Socket for WebSocket upgrades)
+    if (res && typeof res.writeHead === 'function' && !res.headersSent) {
       res.writeHead(502, { 'Content-Type': 'text/plain' });
       res.end('Bad Gateway: Could not connect to upstream server');
+    } else if (res && typeof res.destroy === 'function') {
+      // For WebSocket upgrades, just destroy the socket
+      res.destroy();
     }
   });
   
@@ -246,22 +270,21 @@ function createReverseProxy(mappings) {
       } else if (path !== '/' && url.startsWith(path)) {
         targetPort = mappings.routes[path].local_port;
         matchedPath = path;
-        
-        // Rewrite the URL to remove the path prefix
-        const newUrl = url.substring(path.length) || '/';
-        req.url = newUrl;
+
+        // DO NOT rewrite the URL - pass it through as-is so Vite sees the full path
+        // Vite will handle the base path via VITE_BASE_PATH environment variable
         break;
       }
     }
     
     if (targetPort) {
-      console.log(`${req.method} ${url} → localhost:${targetPort}${req.url !== url ? ` (rewritten to ${req.url})` : ''}`);
-      proxy.web(req, res, { 
+      console.log(`[${getTimestamp()}] ${req.method} ${url} → localhost:${targetPort}${req.url !== url ? ` (rewritten to ${req.url})` : ''}`);
+      proxy.web(req, res, {
         target: `http://localhost:${targetPort}`,
         changeOrigin: true
       });
     } else {
-      console.log(`${req.method} ${url} → 404 (no route found)`);
+      console.log(`[${getTimestamp()}] ${req.method} ${url} → 404 (no route found)`);
       res.writeHead(404, { 'Content-Type': 'text/plain' });
       res.end('Not Found: No route configured for this path');
     }
@@ -280,14 +303,14 @@ function createReverseProxy(mappings) {
         break;
       } else if (path !== '/' && url.startsWith(path)) {
         targetPort = mappings.routes[path].local_port;
-        req.url = url.substring(path.length) || '/';
+        // DO NOT rewrite WebSocket URLs - pass through as-is
         break;
       }
     }
     
     if (targetPort) {
-      console.log(`WebSocket upgrade ${url} → localhost:${targetPort}`);
-      proxy.ws(req, socket, head, { 
+      console.log(`[${getTimestamp()}] WebSocket upgrade ${url} → localhost:${targetPort}`);
+      proxy.ws(req, socket, head, {
         target: `http://localhost:${targetPort}`,
         ws: true
       });
@@ -301,7 +324,12 @@ function createReverseProxy(mappings) {
 
 // Save mappings to file
 async function saveMappings(mappings) {
-  await fs.writeFile('./reverse_proxy.json', JSON.stringify(mappings, null, 2));
+  // Write to temporary file first, then atomically rename to prevent partial reads
+  const tempFile = './reverse_proxy.json.tmp';
+  const finalFile = './reverse_proxy.json';
+
+  await fs.writeFile(tempFile, JSON.stringify(mappings, null, 2));
+  await fs.rename(tempFile, finalFile);
   console.log('\n✓ Mappings saved to reverse_proxy.json');
 
   // Create human-readable report
@@ -325,22 +353,55 @@ async function saveMappings(mappings) {
 
 // Main execution
 async function main() {
+  const scriptStartTime = Date.now();
+
   console.log('=================================');
   console.log('Reverse Proxy Setup');
+  console.log(`[T+0.0s | ${new Date(scriptStartTime).toISOString()}] Script launched`);
   console.log('=================================\n');
 
   // Parse command-line arguments
-  const { deployment } = parseArgs();
+  const { deployment, proxy } = parseArgs();
+  console.log(`Proxy mode: ${proxy}`);
   console.log(`Deployment mode: ${deployment}\n`);
 
-  // Step 1: Scan ports
-  const activeServices = await scanAllPorts();
+  // If proxy=no, create a "no proxy" config file and keep process alive
+  if (proxy === 'no') {
+    console.log('Proxy disabled - creating "no proxy" configuration file...\n');
+    const noProxyConfig = {
+      proxy_port: null,
+      base_url: null,
+      routes: {},
+      mode: 'direct',
+      created_at: new Date().toISOString(),
+      created_by_pid: process.pid,
+      message: 'No reverse proxy configured - running in direct localhost mode'
+    };
 
-  const totalActive = (activeServices.hub ? 1 : 0) +
+    await saveMappings(noProxyConfig);
+    console.log('✓ No-proxy configuration file created');
+    console.log('Servers will run in direct localhost mode (no proxy)\n');
+    console.log('This process will remain active to maintain the config file.');
+    console.log('Press Ctrl+C to stop (config file will be cleaned up automatically)\n');
+
+    // Keep process alive indefinitely
+    await new Promise(() => {}); // Never resolves
+    return;
+  }
+
+  // Step 1: Scan ports
+  console.log(`[T+${((Date.now() - scriptStartTime) / 1000).toFixed(3)}s] Starting port scan...`);
+  const scanStartTime = Date.now();
+  const activeServices = await scanAllPorts();
+  const scanEndTime = Date.now();
+  const scanElapsed = ((scanEndTime - scanStartTime) / 1000).toFixed(3);
+
+  const totalActive = activeServices.hub.length +
                      activeServices.production.length +
                      activeServices.dev.length +
                      activeServices.devVite.length;
 
+  console.log(`[T+${((Date.now() - scriptStartTime) / 1000).toFixed(3)}s | ${new Date(scanEndTime).toISOString()}] Port scan complete (took ${scanElapsed}s)`);
   console.log(`\nFound ${totalActive} active services`);
 
   if (totalActive === 0) {
@@ -370,8 +431,11 @@ async function main() {
   }
   
   // Step 3: Generate mappings
+  const mappingsStartTime = Date.now();
   const mappings = generateMappings(activeServices, baseUrl);
   await saveMappings(mappings);
+  const mappingsEndTime = Date.now();
+  console.log(`[T+${((mappingsEndTime - scriptStartTime) / 1000).toFixed(3)}s | ${new Date(mappingsEndTime).toISOString()}] Mappings generated and saved to reverse_proxy.json`);
   
   // Step 4: Start reverse proxy
   console.log('Starting reverse proxy server...');
@@ -393,6 +457,22 @@ async function main() {
     console.log('Press Ctrl+C to stop\n');
   });
   
+  // Cleanup function to remove reverse_proxy files
+  const cleanup = () => {
+    try {
+      if (existsSync('./reverse_proxy.json')) {
+        unlinkSync('./reverse_proxy.json');
+        console.log('Removed reverse_proxy.json');
+      }
+      if (existsSync('./reverse_proxy_report.txt')) {
+        unlinkSync('./reverse_proxy_report.txt');
+        console.log('Removed reverse_proxy_report.txt');
+      }
+    } catch (error) {
+      console.error('Error removing proxy files:', error.message);
+    }
+  };
+
   // Handle shutdown
   process.on('SIGINT', () => {
     console.log('\n\nShutting down reverse proxy...');
@@ -403,11 +483,17 @@ async function main() {
       ngrokProcess.kill();
     }
 
+    // Remove proxy info files
+    cleanup();
+
     server.close(() => {
       console.log('Reverse proxy stopped');
       process.exit(0);
     });
   });
+
+  // Also cleanup on any exit
+  process.on('exit', cleanup);
 }
 
 // Run if executed directly

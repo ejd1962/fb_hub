@@ -16,9 +16,12 @@ import { DebugProvider } from "./DebugContext";
 import { NavigationHistoryProvider } from "./NavigationHistoryContext";
 
 function App() {
+    // Get base path from Vite's import.meta.env.BASE_URL (set by VITE_BASE_PATH)
+    const basename = import.meta.env.BASE_URL;
+
     return (
         <DebugProvider>
-            <BrowserRouter>
+            <BrowserRouter basename={basename}>
                 <NavigationHistoryProvider>
                     <Routes>
                         <Route path="/" element={<Navigate replace to="/welcome" />} />

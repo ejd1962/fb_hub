@@ -8,6 +8,7 @@ import { useDebug } from "./DebugContext";
 import Footer from "./footer";
 import { getOrCreateGuestUUID } from "./guestUtils";
 import { getUrlForPort, isReverseProxyMode } from "@transverse/shared-components";
+import { PUBLIC_DIR } from "./constants";
 
 // TypeScript interface for game_info.json
 interface GameInfo {
@@ -106,15 +107,32 @@ export default function Lobby() {
 
     // Check all servers for a game
     const checkGameServers = async (gameNumber: number): Promise<ServerStatus> => {
-        const prodUrl = `http://localhost:${9000 + gameNumber}`;
-        const devBackendUrl = `http://localhost:${10000 + gameNumber}`;
-        const devFrontendUrl = `http://localhost:${11000 + gameNumber}`;
+        // Try to get URLs for each server type, handle cases where server doesn't exist
+        let prod = false;
+        let devBackend = false;
+        let devFrontend = false;
 
-        const [prod, devBackend, devFrontend] = await Promise.all([
-            checkServerHealth(prodUrl),
-            checkServerHealth(devBackendUrl),
-            checkServerHealth(devFrontendUrl)
-        ]);
+        try {
+            const prodUrl = await getUrlForPort(9000 + gameNumber);
+            prod = await checkServerHealth(prodUrl);
+        } catch (error) {
+            // Production server not available (expected in dev mode)
+            console.log(`Production server for game ${gameNumber} not available:`, error instanceof Error ? error.message : error);
+        }
+
+        try {
+            const devBackendUrl = await getUrlForPort(10000 + gameNumber);
+            devBackend = await checkServerHealth(devBackendUrl);
+        } catch (error) {
+            console.log(`Dev backend for game ${gameNumber} not available:`, error instanceof Error ? error.message : error);
+        }
+
+        try {
+            const devFrontendUrl = await getUrlForPort(11000 + gameNumber);
+            devFrontend = await checkServerHealth(devFrontendUrl);
+        } catch (error) {
+            console.log(`Dev frontend for game ${gameNumber} not available:`, error instanceof Error ? error.message : error);
+        }
 
         return { prod, devBackend, devFrontend };
     };
@@ -129,7 +147,7 @@ export default function Lobby() {
 
             for (const folder of gameFolders) {
                 try {
-                    const response = await fetch(`/games/${folder}/game_info.json`);
+                    const response = await fetch(`${PUBLIC_DIR}/games/${folder}/game_info.json`);
                     if (!response.ok) {
                         console.error(`Failed to load game info for ${folder}`);
                         continue;
@@ -154,7 +172,7 @@ export default function Lobby() {
             // THEN start preloading images
             loadedGames.forEach((gameData) => {
                 const img = new Image();
-                img.src = `/games/${gameData.folderName}/${gameData.game_panel_image}`;
+                img.src = `${PUBLIC_DIR}/games/${gameData.folderName}/${gameData.game_panel_image}`;
 
                 img.onload = () => {
                     setGames(prev => prev.map(g =>
@@ -194,8 +212,14 @@ export default function Lobby() {
             const statusMap = new Map<number, ServerStatus>();
 
             for (const game of games) {
-                const status = await checkGameServers(game.game_number);
-                statusMap.set(game.game_number, status);
+                try {
+                    const status = await checkGameServers(game.game_number);
+                    statusMap.set(game.game_number, status);
+                } catch (error) {
+                    console.error(`Health check failed for game ${game.game_number}:`, error);
+                    // Set all servers as down for this game
+                    statusMap.set(game.game_number, { prod: false, devBackend: false, devFrontend: false });
+                }
             }
 
             setServerStatuses(statusMap);
@@ -309,7 +333,9 @@ export default function Lobby() {
                             // Always use backend URL with GET request (sessionId as query param)
                             // Backend will detect if Vite is running and redirect if needed (dev-vite mode)
                             // or serve the built app directly (dev/prod mode)
-                            const url = `${backendUrl}/${gameData.entry_page}?sessionId=${sessionData.sessionId}`;
+                            // Ensure proper path construction: backendUrl may already include path like /localhost_10001
+                            const separator = backendUrl.endsWith('/') ? '' : '/';
+                            const url = `${backendUrl}${separator}${gameData.entry_page}?sessionId=${sessionData.sessionId}`;
                             console.log(`Opening game URL: ${url}`);
                             window.open(url, '_blank');
                         } else {
@@ -391,7 +417,7 @@ export default function Lobby() {
                                     <div style={{ fontSize: "24px", color: "#999" }}>⟳ Loading...</div>
                                 )}
                                 <img
-                                    src={`/games/${game.folderName}/${game.game_panel_image}`}
+                                    src={`${PUBLIC_DIR}/games/${game.folderName}/${game.game_panel_image}`}
                                     alt={game.game_name}
                                     style={{
                                         width: "100%",

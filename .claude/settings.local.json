@@ -13,7 +13,9 @@
       "Read(//c/_projects/p27_wordguess/**)",
       "Read(//c/_projects/p20_shared_components//**)",
       "Read(//c/_projects//**)",
-      "Read(//c/_projects/**)"
+      "Read(//c/_projects/**)",
+      "Read(//c/Users/ericd/.claude/**)",
+      "Bash(sed:*)"
     ],
     "deny": [],
     "ask": []
