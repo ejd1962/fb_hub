@@ -1,4 +1,5 @@
 // git-backup.js  (run example:   node git-backup.js --help ) 
+// by Eric Dormer, with incredible help from his friend Claude Code. 
 
 import fs from 'fs';
 import path from 'path';
