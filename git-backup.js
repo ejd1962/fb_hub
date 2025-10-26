@@ -122,6 +122,22 @@ function normalizePath(inputPath) {
     return toWindowsPath(inputPath);
 }
 
+// Validate if a path is a git repository
+function isGitRepository(projectPath) {
+    const winPath = toWindowsPath(projectPath);
+    
+    if (!fs.existsSync(winPath)) {
+        return { valid: false, error: 'Path does not exist' };
+    }
+    
+    const gitDir = path.join(winPath, '.git');
+    if (!fs.existsSync(gitDir)) {
+        return { valid: false, error: 'Not a git repository (no .git directory found)' };
+    }
+    
+    return { valid: true };
+}
+
 // Parse command line arguments
 function parseArgs() {
     const args = {
@@ -358,33 +374,70 @@ function main() {
 
         // Process arguments in order
         if (args.projects !== null) {
-            config.projects = args.projects;
-            console.log(`[MANAGER] Projects set to: ${config.projects.join(', ')}`);
+            console.log('\n[MANAGER] Setting projects list (replacing existing)...');
+            const validProjects = [];
+            
+            args.projects.forEach(proj => {
+                const validation = isGitRepository(proj);
+                if (validation.valid) {
+                    validProjects.push(proj);
+                    console.log(`[ADDED] ${proj}`);
+                } else {
+                    console.error(`[ERROR] Cannot add ${proj}: ${validation.error}`);
+                }
+            });
+            
+            config.projects = validProjects;
+            console.log(`[MANAGER] Projects list now contains ${validProjects.length} project(s)`);
         }
 
         if (args.projects_add !== null) {
+            console.log('\n[MANAGER] Adding projects to list...');
+            
             args.projects_add.forEach(proj => {
-                if (!config.projects.includes(proj)) {
+                if (config.projects.includes(proj)) {
+                    console.log(`[SKIP] Project already in list: ${proj}`);
+                    return;
+                }
+                
+                const validation = isGitRepository(proj);
+                if (validation.valid) {
                     config.projects.push(proj);
+                    console.log(`[ADDED] ${proj}`);
+                } else {
+                    console.error(`[ERROR] Cannot add ${proj}: ${validation.error}`);
                 }
             });
-            console.log(`[MANAGER] Projects added. Current list: ${config.projects.join(', ')}`);
+            
+            console.log(`[MANAGER] Projects list now contains ${config.projects.length} project(s)`);
         }
 
         if (args.projects_remove !== null) {
-            config.projects = config.projects.filter(p => !args.projects_remove.includes(p));
-            console.log(`[MANAGER] Projects removed. Current list: ${config.projects.join(', ')}`);
+            console.log('\n[MANAGER] Removing projects from list...');
+            
+            args.projects_remove.forEach(proj => {
+                if (!config.projects.includes(proj)) {
+                    console.error(`[ERROR] Cannot remove ${proj}: Not in the projects list`);
+                } else {
+                    config.projects = config.projects.filter(p => p !== proj);
+                    console.log(`[REMOVED] ${proj}`);
+                }
+            });
+            
+            console.log(`[MANAGER] Projects list now contains ${config.projects.length} project(s)`);
         }
 
         if (args.interval !== null) {
             config.interval = args.interval;
-            console.log(`[MANAGER] Interval set to: ${config.interval} seconds`);
+            console.log(`\n[MANAGER] Interval set to: ${config.interval} seconds`);
         }
 
         // Commit all projects
         if (config.projects.length > 0) {
             console.log('\n[MANAGER] Committing all projects...');
             gitCommitProjects(config.projects);
+        } else {
+            console.log('\n[MANAGER] No projects configured, skipping commit');
         }
 
         // Update last_saved_time
