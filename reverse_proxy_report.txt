@@ -1,0 +1,11 @@
+REVERSE PROXY MAPPINGS
+=====================
+
+Proxy Port: 8999
+Base URL: http://localhost:8999
+
+Routes:
+-------
+http://localhost:8999/localhost_10000              → localhost:10000 (hub)
+http://localhost:8999/localhost_11000              → localhost:11000 (hub)
+http://localhost:8999/localhost_11001              → localhost:11001 (dev-vite)
