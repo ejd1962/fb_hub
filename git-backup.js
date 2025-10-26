@@ -31,6 +31,7 @@ Arguments:
    --kill                                     : Kill the daemon if running
    --restart                                  : Restart the daemon (kill and start new one)
    --status                                   : Show current status and configuration
+   --help                        or --h       : Show this help message
    
 The operation of git-backup.js is:
 
@@ -173,7 +174,7 @@ function getLastCommitInfo(projectPath) {
     }
 }
 
-// Parse command line arguments - maintaining order
+// Parse command line arguments - maintaining order and detecting unrecognized args
 function parseArgs() {
     const args = {
         interval: null,
@@ -181,7 +182,8 @@ function parseArgs() {
         help: false,
         kill: false,
         restart: false,
-        status: false
+        status: false,
+        unrecognizedArgs: []
     };
 
     process.argv.slice(2).forEach(arg => {
@@ -223,6 +225,11 @@ function parseArgs() {
                     project: proj
                 });
             });
+        } else if (arg === '--daemon') {
+            // Internal flag, ignore
+        } else {
+            // Unrecognized argument
+            args.unrecognizedArgs.push(arg);
         }
     });
 
@@ -587,7 +594,15 @@ function main() {
         return;
     }
 
-    // Handle --status
+    // Check for unrecognized arguments first
+    if (args.unrecognizedArgs.length > 0) {
+        console.error('[ERROR] Unrecognized argument(s): ' + args.unrecognizedArgs.join(', '));
+        console.error('[ERROR] No actions will be performed');
+        console.log('\nUse --help or --h to see valid arguments');
+        process.exit(1);
+    }
+
+    // Handle --status (read-only operation, no lock needed)
     if (args.status) {
         showStatus();
         return;
