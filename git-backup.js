@@ -14,6 +14,9 @@ const CONFIG_FILE = path.join(os.homedir(), 'git-backup.json');
 const LOCK_FILE = CONFIG_FILE + '.lock';
 const DEFAULT_INTERVAL = 600;
 
+// Path to git.exe
+const GIT_EXE = 'C:\\Program Files\\Git\\bin\\git.exe';
+
 // Help text
 function showHelp() {
     console.log(`
@@ -227,7 +230,7 @@ function saveConfig(config) {
     fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
 }
 
-// Git operations
+// Git operations - using git.exe directly with windowsHide
 function gitCommitProjects(projects) {
     const timestamp = new Date().toISOString();
     let success = 0;
@@ -252,15 +255,11 @@ function gitCommitProjects(projects) {
                 return;
             }
 
-            // Convert to GitBash path for git commands
-            const bashPath = toGitBashPath(winPath);
-            
-            // Execute git commands using Git Bash
-            const gitBashPath = 'C:\\Program Files\\Git\\bin\\bash.exe';
-            
-            // Check for changes first
-            const status = execSync(`"${gitBashPath}" -c "cd '${bashPath}' && git status --porcelain"`, 
-                { encoding: 'utf8' });
+            // Check for changes first using git.exe directly
+            const status = execSync(`"${GIT_EXE}" -C "${winPath}" status --porcelain`, {
+                encoding: 'utf8',
+                windowsHide: true
+            });
             
             if (!status.trim()) {
                 console.log(`[OK] No changes in: ${proj}`);
@@ -268,9 +267,16 @@ function gitCommitProjects(projects) {
                 return;
             }
 
-            // Add and commit
-            execSync(`"${gitBashPath}" -c "cd '${bashPath}' && git add -A && git commit -m 'Auto-backup: ${timestamp}'"`, 
-                { encoding: 'utf8', stdio: 'inherit' });
+            // Add and commit using git.exe directly
+            execSync(`"${GIT_EXE}" -C "${winPath}" add -A`, {
+                encoding: 'utf8',
+                windowsHide: true
+            });
+            
+            execSync(`"${GIT_EXE}" -C "${winPath}" commit -m "Auto-backup: ${timestamp}"`, {
+                encoding: 'utf8',
+                windowsHide: true
+            });
             
             console.log(`[COMMITTED] ${proj}`);
             success++;
@@ -311,7 +317,8 @@ function killDaemon(pid) {
 function spawnDaemon() {
     const daemon = spawn(process.execPath, [__filename, '--daemon'], {
         detached: true,
-        stdio: 'ignore'
+        stdio: 'ignore',
+        windowsHide: true
     });
     daemon.unref();
     
