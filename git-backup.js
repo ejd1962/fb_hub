@@ -294,6 +294,19 @@ function isDaemonRunning(pid) {
     }
 }
 
+// Kill daemon
+function killDaemon(pid) {
+    if (!pid) return false;
+    try {
+        process.kill(pid, 'SIGTERM');
+        // Wait a moment for daemon to terminate
+        sleepSync(500);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
 // Spawn daemon
 function spawnDaemon() {
     const daemon = spawn(process.execPath, [__filename, '--daemon'], {
@@ -460,45 +473,76 @@ function main() {
 
         // Load config
         let config = loadConfig();
+        const originalConfig = JSON.parse(JSON.stringify(config)); // Deep copy for comparison
 
-        // Check daemon status
-        if (!isDaemonRunning(config.daemon_pid)) {
-            console.log('[MANAGER] Daemon not running, starting new daemon...');
-            config.daemon_pid = spawnDaemon();
-            console.log(`[MANAGER] Daemon started with PID ${config.daemon_pid}`);
-        } else {
-            console.log(`[MANAGER] Daemon already running with PID ${config.daemon_pid}`);
+        // Validate all arguments before making any changes
+        let validationErrors = [];
+        let validatedProjects = config.projects;
+        let intervalChanged = false;
+
+        // Check daemon status first (don't start yet if there might be errors)
+        const daemonRunning = isDaemonRunning(config.daemon_pid);
+        if (!daemonRunning && config.daemon_pid) {
+            console.log('[MANAGER] Previous daemon (PID ' + config.daemon_pid + ') is not running');
         }
 
-        // Process project operations if any
+        // Validate project operations if any
         if (args.projectOperations.length > 0) {
             const result = processProjectOperations(args.projectOperations, config.projects);
             
             if (result.hasErrors) {
-                console.error('\n[MANAGER] ERRORS DETECTED - No changes will be made to project list');
-                console.error('[MANAGER] Please fix the errors and try again');
-                console.log(`[MANAGER] Current project list remains unchanged with ${config.projects.length} project(s)`);
-                
-                // Print final error summary
-                const errorCount = result.errorDetails.length;
-                const errorSummary = result.errorDetails.join('; ');
-                console.error(`\n[ERROR] Failed with ${errorCount} error(s): ${errorSummary}`);
-                exitCode = 1;
+                validationErrors.push(...result.errorDetails);
             } else {
-                console.log('\n[MANAGER] All operations validated successfully - Applying changes...');
-                config.projects = result.workingProjects;
-                console.log(`[MANAGER] Projects list now contains ${config.projects.length} project(s)`);
+                validatedProjects = result.workingProjects;
             }
         }
 
-        // Process interval argument
-        if (args.interval !== null) {
-            config.interval = args.interval;
-            console.log(`\n[MANAGER] Interval set to: ${config.interval} seconds`);
+        // Check if interval changed
+        if (args.interval !== null && args.interval !== config.interval) {
+            intervalChanged = true;
+            console.log(`\n[MANAGER] Interval will change from ${config.interval} to ${args.interval} seconds`);
         }
 
-        // Only commit and save if no errors occurred
-        if (exitCode === 0) {
+        // If there are any validation errors, abort everything
+        if (validationErrors.length > 0) {
+            console.error('\n[MANAGER] ERRORS DETECTED - No changes will be made');
+            console.error('[MANAGER] Please fix the errors and try again');
+            console.log(`[MANAGER] Configuration remains unchanged`);
+            
+            // Print final error summary
+            const errorSummary = validationErrors.join('; ');
+            console.error(`\n[ERROR] Failed with ${validationErrors.length} error(s): ${errorSummary}`);
+            exitCode = 1;
+        } else {
+            // All validations passed - now apply all changes
+            console.log('\n[MANAGER] All validations passed - Applying changes...');
+
+            // Apply project changes
+            if (args.projectOperations.length > 0) {
+                config.projects = validatedProjects;
+                console.log(`[MANAGER] Projects list updated to ${config.projects.length} project(s)`);
+            }
+
+            // Apply interval change
+            if (args.interval !== null) {
+                config.interval = args.interval;
+                console.log(`[MANAGER] Interval set to: ${config.interval} seconds`);
+            }
+
+            // Handle daemon management
+            if (!daemonRunning) {
+                console.log('[MANAGER] Starting new daemon...');
+                config.daemon_pid = spawnDaemon();
+                console.log(`[MANAGER] Daemon started with PID ${config.daemon_pid}`);
+            } else if (intervalChanged) {
+                console.log(`[MANAGER] Interval changed - Restarting daemon (old PID ${config.daemon_pid})...`);
+                killDaemon(config.daemon_pid);
+                config.daemon_pid = spawnDaemon();
+                console.log(`[MANAGER] Daemon restarted with new PID ${config.daemon_pid}`);
+            } else {
+                console.log(`[MANAGER] Daemon already running with PID ${config.daemon_pid}`);
+            }
+
             // Commit all projects
             if (config.projects.length > 0) {
                 console.log('\n[MANAGER] Committing all projects...');
