@@ -138,13 +138,11 @@ function isGitRepository(projectPath) {
     return { valid: true };
 }
 
-// Parse command line arguments
+// Parse command line arguments - maintaining order
 function parseArgs() {
     const args = {
         interval: null,
-        projects: null,
-        projects_add: null,
-        projects_remove: null,
+        projectOperations: [], // Ordered list of operations
         help: false
     };
 
@@ -154,17 +152,33 @@ function parseArgs() {
         } else if (arg.startsWith('--interval=') || arg.startsWith('--i=')) {
             args.interval = parseInt(arg.split('=')[1]);
         } else if (arg.startsWith('--projects=') || arg.startsWith('--p=')) {
-            args.projects = arg.split('=')[1].split(',')
+            const projects = arg.split('=')[1].split(',')
                 .map(p => normalizePath(p.trim()))
                 .filter(p => p);
+            args.projectOperations.push({
+                type: 'replace',
+                projects: projects
+            });
         } else if (arg.startsWith('--projects_add=') || arg.startsWith('--pa=')) {
-            args.projects_add = arg.split('=')[1].split(',')
+            const projects = arg.split('=')[1].split(',')
                 .map(p => normalizePath(p.trim()))
                 .filter(p => p);
+            projects.forEach(proj => {
+                args.projectOperations.push({
+                    type: 'add',
+                    project: proj
+                });
+            });
         } else if (arg.startsWith('--projects_remove=') || arg.startsWith('--pr=')) {
-            args.projects_remove = arg.split('=')[1].split(',')
+            const projects = arg.split('=')[1].split(',')
                 .map(p => normalizePath(p.trim()))
                 .filter(p => p);
+            projects.forEach(proj => {
+                args.projectOperations.push({
+                    type: 'remove',
+                    project: proj
+                });
+            });
         }
     });
 
@@ -340,6 +354,84 @@ function runDaemon() {
     daemonLoop();
 }
 
+// Process project operations and validate
+function processProjectOperations(operations, currentProjects) {
+    console.log('\n[MANAGER] Processing project operations...');
+    
+    // Create a working copy of current projects
+    let workingProjects = [...currentProjects];
+    let hasErrors = false;
+    let operationLog = [];
+    let opNum = 0;
+    
+    // Process each operation in order
+    for (const op of operations) {
+        if (op.type === 'replace') {
+            // Replace entire list
+            console.log('\n[VALIDATE] Replacing entire project list:');
+            const validProjects = [];
+            
+            for (const proj of op.projects) {
+                opNum++;
+                const validation = isGitRepository(proj);
+                
+                if (validation.valid) {
+                    validProjects.push(proj);
+                    console.log(`  [OK] Operation ${opNum}: Will add ${proj}`);
+                    operationLog.push({ opNum, type: 'replace-add', project: proj, status: 'ok' });
+                } else {
+                    console.error(`  [ERROR] Operation ${opNum}: Cannot add ${proj} - ${validation.error}`);
+                    operationLog.push({ opNum, type: 'replace-add', project: proj, status: 'error', error: validation.error });
+                    hasErrors = true;
+                }
+            }
+            
+            // Update working copy
+            workingProjects = validProjects;
+            
+        } else if (op.type === 'add') {
+            opNum++;
+            const proj = op.project;
+            
+            // Check if already in list
+            if (workingProjects.includes(proj)) {
+                console.log(`  [SKIP] Operation ${opNum}: Already in list - ${proj}`);
+                operationLog.push({ opNum, type: 'add', project: proj, status: 'skip' });
+                continue;
+            }
+            
+            // Validate the project
+            const validation = isGitRepository(proj);
+            if (validation.valid) {
+                console.log(`  [OK] Operation ${opNum}: Will add ${proj}`);
+                operationLog.push({ opNum, type: 'add', project: proj, status: 'ok' });
+                workingProjects.push(proj);
+            } else {
+                console.error(`  [ERROR] Operation ${opNum}: Cannot add ${proj} - ${validation.error}`);
+                operationLog.push({ opNum, type: 'add', project: proj, status: 'error', error: validation.error });
+                hasErrors = true;
+            }
+            
+        } else if (op.type === 'remove') {
+            opNum++;
+            const proj = op.project;
+            
+            // Check if in list
+            if (!workingProjects.includes(proj)) {
+                console.error(`  [ERROR] Operation ${opNum}: Cannot remove ${proj} - Not in the projects list`);
+                operationLog.push({ opNum, type: 'remove', project: proj, status: 'error', error: 'Not in the projects list' });
+                hasErrors = true;
+            } else {
+                console.log(`  [OK] Operation ${opNum}: Will remove ${proj}`);
+                operationLog.push({ opNum, type: 'remove', project: proj, status: 'ok' });
+                workingProjects = workingProjects.filter(p => p !== proj);
+            }
+        }
+    }
+    
+    return { workingProjects, hasErrors, operationLog };
+}
+
 // Main function
 function main() {
     // Check if running in daemon mode
@@ -372,72 +464,22 @@ function main() {
             console.log(`[MANAGER] Daemon already running with PID ${config.daemon_pid}`);
         }
 
-        // Process arguments in order
-        if (args.projects !== null) {
-            console.log('\n[MANAGER] Setting projects list (replacing existing)...');
-            const validProjects = [];
+        // Process project operations if any
+        if (args.projectOperations.length > 0) {
+            const result = processProjectOperations(args.projectOperations, config.projects);
             
-            for (let i = 0; i < args.projects.length; i++) {
-                const proj = args.projects[i];
-                const projectNum = i + 1;
-                
-                const validation = isGitRepository(proj);
-                if (validation.valid) {
-                    validProjects.push(proj);
-                    console.log(`[ADDED] Project ${projectNum}: ${proj}`);
-                } else {
-                    console.error(`[ERROR] Project ${projectNum}: Cannot add ${proj} - ${validation.error}`);
-                }
+            if (result.hasErrors) {
+                console.error('\n[MANAGER] ERRORS DETECTED - No changes will be made to project list');
+                console.error('[MANAGER] Please fix the errors and try again');
+                console.log(`[MANAGER] Current project list remains unchanged with ${config.projects.length} project(s)`);
+            } else {
+                console.log('\n[MANAGER] All operations validated successfully - Applying changes...');
+                config.projects = result.workingProjects;
+                console.log(`[MANAGER] Projects list now contains ${config.projects.length} project(s)`);
             }
-            
-            config.projects = validProjects;
-            console.log(`[MANAGER] Projects list now contains ${validProjects.length} project(s)`);
         }
 
-        if (args.projects_add !== null) {
-            console.log('\n[MANAGER] Adding projects to list...');
-            
-            for (let i = 0; i < args.projects_add.length; i++) {
-                const proj = args.projects_add[i];
-                const projectNum = i + 1;
-                
-                // Check if already in list first - this is the ONLY case for SKIP
-                if (config.projects.includes(proj)) {
-                    console.log(`[SKIP] Project ${projectNum}: Already in list - ${proj}`);
-                    continue;
-                }
-                
-                // Validate the project - any validation failure is an ERROR
-                const validation = isGitRepository(proj);
-                if (validation.valid) {
-                    config.projects.push(proj);
-                    console.log(`[ADDED] Project ${projectNum}: ${proj}`);
-                } else {
-                    console.error(`[ERROR] Project ${projectNum}: Cannot add ${proj} - ${validation.error}`);
-                }
-            }
-            
-            console.log(`[MANAGER] Projects list now contains ${config.projects.length} project(s)`);
-        }
-
-        if (args.projects_remove !== null) {
-            console.log('\n[MANAGER] Removing projects from list...');
-            
-            for (let i = 0; i < args.projects_remove.length; i++) {
-                const proj = args.projects_remove[i];
-                const projectNum = i + 1;
-                
-                if (!config.projects.includes(proj)) {
-                    console.error(`[ERROR] Project ${projectNum}: Cannot remove ${proj} - Not in the projects list`);
-                } else {
-                    config.projects = config.projects.filter(p => p !== proj);
-                    console.log(`[REMOVED] Project ${projectNum}: ${proj}`);
-                }
-            }
-            
-            console.log(`[MANAGER] Projects list now contains ${config.projects.length} project(s)`);
-        }
-
+        // Process interval argument
         if (args.interval !== null) {
             config.interval = args.interval;
             console.log(`\n[MANAGER] Interval set to: ${config.interval} seconds`);
