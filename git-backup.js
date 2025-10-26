@@ -27,7 +27,10 @@ Arguments:
    --interval=NNN                or --i=NNN   : NNN is seconds. Default is 600 seconds. 
    --projects=proj1,proj2,proj3  or --p=xxx   : a list of projects to use (prior list is discarded) 
    --projects_add=proj4,proj5    or --pa=xxx  : a list of projects to add to the list. 
-   --projects_remove=proj2,proj3 or --pr=xxx  : a list of projects to remove from the list. 
+   --projects_remove=proj2,proj3 or --pr=xxx  : a list of projects to remove from the list.
+   --kill                                     : Kill the daemon if running
+   --restart                                  : Restart the daemon (kill and start new one)
+   --status                                   : Show current status and configuration
    
 The operation of git-backup.js is:
 
@@ -141,17 +144,55 @@ function isGitRepository(projectPath) {
     return { valid: true };
 }
 
+// Get last commit info for a project
+function getLastCommitInfo(projectPath) {
+    try {
+        const winPath = toWindowsPath(projectPath);
+        
+        // Get last commit hash
+        const hash = execSync(`"${GIT_EXE}" -C "${winPath}" rev-parse HEAD`, {
+            encoding: 'utf8',
+            windowsHide: true
+        }).trim();
+        
+        // Get last commit date
+        const date = execSync(`"${GIT_EXE}" -C "${winPath}" log -1 --format=%ai`, {
+            encoding: 'utf8',
+            windowsHide: true
+        }).trim();
+        
+        // Get last commit message
+        const message = execSync(`"${GIT_EXE}" -C "${winPath}" log -1 --format=%s`, {
+            encoding: 'utf8',
+            windowsHide: true
+        }).trim();
+        
+        return { hash, date, message };
+    } catch (error) {
+        return { hash: 'N/A', date: 'N/A', message: 'Error: ' + error.message };
+    }
+}
+
 // Parse command line arguments - maintaining order
 function parseArgs() {
     const args = {
         interval: null,
         projectOperations: [], // Ordered list of operations
-        help: false
+        help: false,
+        kill: false,
+        restart: false,
+        status: false
     };
 
     process.argv.slice(2).forEach(arg => {
         if (arg === '--help' || arg === '--h') {
             args.help = true;
+        } else if (arg === '--kill') {
+            args.kill = true;
+        } else if (arg === '--restart') {
+            args.restart = true;
+        } else if (arg === '--status') {
+            args.status = true;
         } else if (arg.startsWith('--interval=') || arg.startsWith('--i=')) {
             args.interval = parseInt(arg.split('=')[1]);
         } else if (arg.startsWith('--projects=') || arg.startsWith('--p=')) {
@@ -219,11 +260,19 @@ function loadConfig() {
             projects: [],
             interval: DEFAULT_INTERVAL,
             last_saved_time: '',
-            daemon_pid: ''
+            daemon_pid: '',
+            last_commits: {}
         };
     }
     const data = fs.readFileSync(CONFIG_FILE, 'utf8');
-    return JSON.parse(data);
+    const config = JSON.parse(data);
+    
+    // Ensure last_commits field exists
+    if (!config.last_commits) {
+        config.last_commits = {};
+    }
+    
+    return config;
 }
 
 function saveConfig(config) {
@@ -231,7 +280,7 @@ function saveConfig(config) {
 }
 
 // Git operations - using git.exe directly with windowsHide
-function gitCommitProjects(projects) {
+function gitCommitProjects(projects, config) {
     const timestamp = new Date().toISOString();
     let success = 0;
     let failed = 0;
@@ -278,7 +327,20 @@ function gitCommitProjects(projects) {
                 windowsHide: true
             });
             
-            console.log(`[COMMITTED] ${proj}`);
+            // Get the commit hash that was just created
+            const commitHash = execSync(`"${GIT_EXE}" -C "${winPath}" rev-parse HEAD`, {
+                encoding: 'utf8',
+                windowsHide: true
+            }).trim();
+            
+            // Store commit info
+            config.last_commits[proj] = {
+                hash: commitHash,
+                timestamp: timestamp,
+                message: `Auto-backup: ${timestamp}`
+            };
+            
+            console.log(`[COMMITTED] ${proj} (${commitHash.substring(0, 8)})`);
             success++;
         } catch (error) {
             console.error(`[ERROR] Failed to commit ${proj}:`, error.message);
@@ -352,7 +414,7 @@ function runDaemon() {
                 console.log(`[DAEMON] Interval exceeded, committing projects...`);
                 
                 if (config.projects && config.projects.length > 0) {
-                    gitCommitProjects(config.projects);
+                    gitCommitProjects(config.projects, config);
                     
                     // Update last_saved_time
                     config.last_saved_time = now.toISOString();
@@ -372,6 +434,58 @@ function runDaemon() {
     };
 
     daemonLoop();
+}
+
+// Show status
+function showStatus() {
+    console.log('\n========== GIT BACKUP STATUS ==========\n');
+    
+    const config = loadConfig();
+    
+    // Daemon status
+    const daemonRunning = isDaemonRunning(config.daemon_pid);
+    console.log('DAEMON STATUS:');
+    console.log(`  Running: ${daemonRunning ? 'YES' : 'NO'}`);
+    console.log(`  PID: ${config.daemon_pid || 'N/A'}`);
+    console.log('');
+    
+    // Configuration
+    console.log('CONFIGURATION:');
+    console.log(`  Config File: ${CONFIG_FILE}`);
+    console.log(`  Interval: ${config.interval} seconds`);
+    console.log(`  Last Save Time: ${config.last_saved_time || 'Never'}`);
+    console.log(`  Number of Projects: ${config.projects.length}`);
+    console.log('');
+    
+    // Projects and their last commits
+    console.log('PROJECTS:');
+    if (config.projects.length === 0) {
+        console.log('  No projects configured');
+    } else {
+        config.projects.forEach((proj, index) => {
+            console.log(`\n  [${index + 1}] ${proj}`);
+            
+            // Get actual last commit from git
+            const commitInfo = getLastCommitInfo(proj);
+            console.log(`      Last Commit Hash: ${commitInfo.hash}`);
+            console.log(`      Last Commit Date: ${commitInfo.date}`);
+            console.log(`      Last Commit Message: ${commitInfo.message}`);
+            
+            // Show last auto-backup commit if tracked
+            if (config.last_commits && config.last_commits[proj]) {
+                const lastBackup = config.last_commits[proj];
+                console.log(`      Last Auto-Backup: ${lastBackup.timestamp}`);
+                console.log(`      Auto-Backup Hash: ${lastBackup.hash.substring(0, 8)}`);
+            } else {
+                console.log(`      Last Auto-Backup: Never`);
+            }
+        });
+    }
+    
+    console.log('\n');
+    console.log('FULL CONFIGURATION (JSON):');
+    console.log(JSON.stringify(config, null, 2));
+    console.log('\n=======================================\n');
 }
 
 // Process project operations and validate
@@ -473,6 +587,12 @@ function main() {
         return;
     }
 
+    // Handle --status
+    if (args.status) {
+        showStatus();
+        return;
+    }
+
     let exitCode = 0;
 
     try {
@@ -480,6 +600,51 @@ function main() {
 
         // Load config
         let config = loadConfig();
+
+        // Handle --kill
+        if (args.kill) {
+            if (config.daemon_pid) {
+                const wasRunning = isDaemonRunning(config.daemon_pid);
+                if (wasRunning) {
+                    console.log(`[MANAGER] Killing daemon (PID ${config.daemon_pid})...`);
+                    killDaemon(config.daemon_pid);
+                    console.log('[MANAGER] Daemon killed');
+                } else {
+                    console.log(`[MANAGER] Daemon (PID ${config.daemon_pid}) is not running`);
+                }
+                config.daemon_pid = '';
+                saveConfig(config);
+                console.log(`[MANAGER] Configuration saved to ${CONFIG_FILE}`);
+            } else {
+                console.log('[MANAGER] No daemon PID in configuration');
+            }
+            releaseLock();
+            return;
+        }
+
+        // Handle --restart
+        if (args.restart) {
+            if (config.daemon_pid) {
+                const wasRunning = isDaemonRunning(config.daemon_pid);
+                if (wasRunning) {
+                    console.log(`[MANAGER] Killing daemon (PID ${config.daemon_pid})...`);
+                    killDaemon(config.daemon_pid);
+                    console.log('[MANAGER] Daemon killed');
+                } else {
+                    console.log(`[MANAGER] Old daemon (PID ${config.daemon_pid}) was not running`);
+                }
+            }
+            console.log('[MANAGER] Starting new daemon...');
+            config.daemon_pid = spawnDaemon();
+            config.last_saved_time = new Date().toISOString();
+            saveConfig(config);
+            console.log(`[MANAGER] Daemon started with PID ${config.daemon_pid}`);
+            console.log(`[MANAGER] Configuration saved to ${CONFIG_FILE}`);
+            releaseLock();
+            return;
+        }
+
+        // Normal operation continues below...
         const originalConfig = JSON.parse(JSON.stringify(config)); // Deep copy for comparison
 
         // Validate all arguments before making any changes
@@ -553,7 +718,7 @@ function main() {
             // Commit all projects
             if (config.projects.length > 0) {
                 console.log('\n[MANAGER] Committing all projects...');
-                gitCommitProjects(config.projects);
+                gitCommitProjects(config.projects, config);
             } else {
                 console.log('\n[MANAGER] No projects configured, skipping commit');
             }
