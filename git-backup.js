@@ -376,16 +376,17 @@ function main() {
         if (args.projects !== null) {
             console.log('\n[MANAGER] Setting projects list (replacing existing)...');
             const validProjects = [];
-            let projectIndex = 0;
             
-            for (const proj of args.projects) {
-                projectIndex++;
+            for (let i = 0; i < args.projects.length; i++) {
+                const proj = args.projects[i];
+                const projectNum = i + 1;
+                
                 const validation = isGitRepository(proj);
                 if (validation.valid) {
                     validProjects.push(proj);
-                    console.log(`[ADDED] Project ${projectIndex}: ${proj}`);
+                    console.log(`[ADDED] Project ${projectNum}: ${proj}`);
                 } else {
-                    console.error(`[ERROR] Project ${projectIndex}: Cannot add ${proj} - ${validation.error}`);
+                    console.error(`[ERROR] Project ${projectNum}: Cannot add ${proj} - ${validation.error}`);
                 }
             }
             
@@ -395,14 +396,14 @@ function main() {
 
         if (args.projects_add !== null) {
             console.log('\n[MANAGER] Adding projects to list...');
-            let projectIndex = 0;
             
-            for (const proj of args.projects_add) {
-                projectIndex++;
+            for (let i = 0; i < args.projects_add.length; i++) {
+                const proj = args.projects_add[i];
+                const projectNum = i + 1;
                 
                 // Check if already in list first - this is the ONLY case for SKIP
                 if (config.projects.includes(proj)) {
-                    console.log(`[SKIP] Project ${projectIndex}: Already in list - ${proj}`);
+                    console.log(`[SKIP] Project ${projectNum}: Already in list - ${proj}`);
                     continue;
                 }
                 
@@ -410,9 +411,9 @@ function main() {
                 const validation = isGitRepository(proj);
                 if (validation.valid) {
                     config.projects.push(proj);
-                    console.log(`[ADDED] Project ${projectIndex}: ${proj}`);
+                    console.log(`[ADDED] Project ${projectNum}: ${proj}`);
                 } else {
-                    console.error(`[ERROR] Project ${projectIndex}: Cannot add ${proj} - ${validation.error}`);
+                    console.error(`[ERROR] Project ${projectNum}: Cannot add ${proj} - ${validation.error}`);
                 }
             }
             
@@ -421,16 +422,16 @@ function main() {
 
         if (args.projects_remove !== null) {
             console.log('\n[MANAGER] Removing projects from list...');
-            let projectIndex = 0;
             
-            for (const proj of args.projects_remove) {
-                projectIndex++;
+            for (let i = 0; i < args.projects_remove.length; i++) {
+                const proj = args.projects_remove[i];
+                const projectNum = i + 1;
                 
                 if (!config.projects.includes(proj)) {
-                    console.error(`[ERROR] Project ${projectIndex}: Cannot remove ${proj} - Not in the projects list`);
+                    console.error(`[ERROR] Project ${projectNum}: Cannot remove ${proj} - Not in the projects list`);
                 } else {
                     config.projects = config.projects.filter(p => p !== proj);
-                    console.log(`[REMOVED] Project ${projectIndex}: ${proj}`);
+                    console.log(`[REMOVED] Project ${projectNum}: ${proj}`);
                 }
             }
             
