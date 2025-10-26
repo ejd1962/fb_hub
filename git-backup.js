@@ -225,7 +225,7 @@ function gitCommitProjects(projects) {
             const winPath = toWindowsPath(proj);
             
             if (!fs.existsSync(winPath)) {
-                console.log(`[SKIP] Project path does not exist: ${proj}`);
+                console.error(`[ERROR] Project path does not exist: ${proj}`);
                 failed++;
                 return;
             }
@@ -233,7 +233,7 @@ function gitCommitProjects(projects) {
             // Check if it's a git repo
             const gitDir = path.join(winPath, '.git');
             if (!fs.existsSync(gitDir)) {
-                console.log(`[SKIP] Not a git repository: ${proj}`);
+                console.error(`[ERROR] Not a git repository: ${proj}`);
                 failed++;
                 return;
             }
@@ -266,7 +266,7 @@ function gitCommitProjects(projects) {
         }
     });
 
-    console.log(`\nCommit summary: ${success} successful, ${failed} failed/skipped`);
+    console.log(`\nCommit summary: ${success} successful, ${failed} failed`);
 }
 
 // Check if daemon is running
@@ -376,16 +376,18 @@ function main() {
         if (args.projects !== null) {
             console.log('\n[MANAGER] Setting projects list (replacing existing)...');
             const validProjects = [];
+            let projectIndex = 0;
             
-            args.projects.forEach(proj => {
+            for (const proj of args.projects) {
+                projectIndex++;
                 const validation = isGitRepository(proj);
                 if (validation.valid) {
                     validProjects.push(proj);
-                    console.log(`[ADDED] ${proj}`);
+                    console.log(`[ADDED] Project ${projectIndex}: ${proj}`);
                 } else {
-                    console.error(`[ERROR] Cannot add ${proj}: ${validation.error}`);
+                    console.error(`[ERROR] Project ${projectIndex}: Cannot add ${proj} - ${validation.error}`);
                 }
-            });
+            }
             
             config.projects = validProjects;
             console.log(`[MANAGER] Projects list now contains ${validProjects.length} project(s)`);
@@ -393,36 +395,44 @@ function main() {
 
         if (args.projects_add !== null) {
             console.log('\n[MANAGER] Adding projects to list...');
+            let projectIndex = 0;
             
-            args.projects_add.forEach(proj => {
+            for (const proj of args.projects_add) {
+                projectIndex++;
+                
+                // Check if already in list first - this is the ONLY case for SKIP
                 if (config.projects.includes(proj)) {
-                    console.log(`[SKIP] Project already in list: ${proj}`);
-                    return;
+                    console.log(`[SKIP] Project ${projectIndex}: Already in list - ${proj}`);
+                    continue;
                 }
                 
+                // Validate the project - any validation failure is an ERROR
                 const validation = isGitRepository(proj);
                 if (validation.valid) {
                     config.projects.push(proj);
-                    console.log(`[ADDED] ${proj}`);
+                    console.log(`[ADDED] Project ${projectIndex}: ${proj}`);
                 } else {
-                    console.error(`[ERROR] Cannot add ${proj}: ${validation.error}`);
+                    console.error(`[ERROR] Project ${projectIndex}: Cannot add ${proj} - ${validation.error}`);
                 }
-            });
+            }
             
             console.log(`[MANAGER] Projects list now contains ${config.projects.length} project(s)`);
         }
 
         if (args.projects_remove !== null) {
             console.log('\n[MANAGER] Removing projects from list...');
+            let projectIndex = 0;
             
-            args.projects_remove.forEach(proj => {
+            for (const proj of args.projects_remove) {
+                projectIndex++;
+                
                 if (!config.projects.includes(proj)) {
-                    console.error(`[ERROR] Cannot remove ${proj}: Not in the projects list`);
+                    console.error(`[ERROR] Project ${projectIndex}: Cannot remove ${proj} - Not in the projects list`);
                 } else {
                     config.projects = config.projects.filter(p => p !== proj);
-                    console.log(`[REMOVED] ${proj}`);
+                    console.log(`[REMOVED] Project ${projectIndex}: ${proj}`);
                 }
-            });
+            }
             
             console.log(`[MANAGER] Projects list now contains ${config.projects.length} project(s)`);
         }
