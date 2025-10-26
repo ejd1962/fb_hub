@@ -1,5 +1,4 @@
 // git-backup.js  (run example:   node git-backup.js --help ) 
-// by Eric Dormer, with incredible help from his friend Claude Code. 
 
 import fs from 'fs';
 import path from 'path';
@@ -87,6 +86,53 @@ GitBash format (/c/path/to/project). Both formats are supported and normalized i
 `);
 }
 
+// Format time difference and local time
+function formatTimeDifference(timestampStr) {
+    if (!timestampStr || timestampStr === 'Never' || timestampStr === 'N/A') {
+        return '';
+    }
+    
+    try {
+        const timestamp = new Date(timestampStr);
+        const now = new Date();
+        const diffMs = now - timestamp;
+        
+        // Calculate time difference
+        const diffMinutes = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMinutes / 60);
+        const diffDays = Math.floor(diffHours / 24);
+        
+        const remainingHours = diffHours % 24;
+        const remainingMinutes = diffMinutes % 60;
+        
+        // Build time ago string
+        let timeAgo = '';
+        if (diffDays > 0) {
+            timeAgo += `${diffDays} day${diffDays !== 1 ? 's' : ''}, `;
+        }
+        if (remainingHours > 0 || diffDays > 0) {
+            timeAgo += `${remainingHours} hour${remainingHours !== 1 ? 's' : ''}, `;
+        }
+        timeAgo += `${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''} ago`;
+        
+        // Format in local timezone
+        const localTime = timestamp.toLocaleString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false,
+            timeZoneName: 'short'
+        });
+        
+        return `                       (${timeAgo} | Local: ${localTime})`;
+    } catch (error) {
+        return '';
+    }
+}
+
 // Convert path to GitBash format for use in git commands
 function toGitBashPath(winPath) {
     // If already in GitBash format, return as-is
@@ -157,8 +203,8 @@ function getLastCommitInfo(projectPath) {
             windowsHide: true
         }).trim();
         
-        // Get last commit date
-        const date = execSync(`"${GIT_EXE}" -C "${winPath}" log -1 --format=%ai`, {
+        // Get last commit date in ISO format
+        const date = execSync(`"${GIT_EXE}" -C "${winPath}" log -1 --format=%aI`, {
             encoding: 'utf8',
             windowsHide: true
         }).trim();
@@ -462,6 +508,9 @@ function showStatus() {
     console.log(`  Config File: ${CONFIG_FILE}`);
     console.log(`  Interval: ${config.interval} seconds`);
     console.log(`  Last Save Time: ${config.last_saved_time || 'Never'}`);
+    if (config.last_saved_time) {
+        console.log(formatTimeDifference(config.last_saved_time));
+    }
     console.log(`  Number of Projects: ${config.projects.length}`);
     console.log('');
     
@@ -477,12 +526,16 @@ function showStatus() {
             const commitInfo = getLastCommitInfo(proj);
             console.log(`      Last Commit Hash: ${commitInfo.hash}`);
             console.log(`      Last Commit Date: ${commitInfo.date}`);
+            if (commitInfo.date !== 'N/A') {
+                console.log(formatTimeDifference(commitInfo.date));
+            }
             console.log(`      Last Commit Message: ${commitInfo.message}`);
             
             // Show last auto-backup commit if tracked
             if (config.last_commits && config.last_commits[proj]) {
                 const lastBackup = config.last_commits[proj];
                 console.log(`      Last Auto-Backup: ${lastBackup.timestamp}`);
+                console.log(formatTimeDifference(lastBackup.timestamp));
                 console.log(`      Auto-Backup Hash: ${lastBackup.hash.substring(0, 8)}`);
             } else {
                 console.log(`      Last Auto-Backup: Never`);
