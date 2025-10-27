@@ -441,6 +441,7 @@ function launchProcess(command, args, options, label, color) {
 
 // Main function
 // Post-launch verification: check that proxy table has expected number of servers
+// and perform health checks on each server
 async function postLaunchCheck(options, gameNames) {
     console.log(`${colors.cyan}Performing post-launch verification...${colors.reset}\n`);
 
@@ -479,7 +480,59 @@ async function postLaunchCheck(options, gameNames) {
             return { success: false, hubUrl: null };
         }
 
-        // All ports found - determine hub URL
+        // Perform health checks on all backend servers
+        console.log(`${colors.cyan}Performing health checks on backend servers...${colors.reset}\n`);
+        const healthChecks = [];
+        const backendRoutes = [];
+
+        for (const [route, info] of Object.entries(proxyConfig.routes)) {
+            // Only check backend servers (they have /api/health endpoints)
+            if (info.type === 'backend') {
+                backendRoutes.push({ route, port: info.local_port });
+                const healthUrl = `http://localhost:${info.local_port}/api/health`;
+
+                healthChecks.push(
+                    fetch(healthUrl, { signal: AbortSignal.timeout(5000) })
+                        .then(async res => {
+                            if (!res.ok) {
+                                return { port: info.local_port, healthy: false, error: `HTTP ${res.status}` };
+                            }
+                            const data = await res.json();
+                            if (data.status === 'ok') {
+                                return { port: info.local_port, healthy: true };
+                            } else {
+                                return { port: info.local_port, healthy: false, error: 'Invalid status' };
+                            }
+                        })
+                        .catch(err => ({ port: info.local_port, healthy: false, error: err.message }))
+                );
+            }
+        }
+
+        const healthResults = await Promise.all(healthChecks);
+        const unhealthyServers = healthResults.filter(r => !r.healthy);
+
+        // Display health check results
+        for (const result of healthResults) {
+            if (result.healthy) {
+                console.log(`  ${colors.green}✓${colors.reset} localhost:${result.port} - Healthy`);
+            } else {
+                console.log(`  ${colors.red}✗${colors.reset} localhost:${result.port} - Failed (${result.error})`);
+            }
+        }
+        console.log('');
+
+        if (unhealthyServers.length > 0) {
+            console.log(`${colors.red}⚠️  WARNING: ${unhealthyServers.length} server(s) failed health check!${colors.reset}`);
+            console.log(`${colors.yellow}The following servers are not responding correctly:${colors.reset}`);
+            for (const server of unhealthyServers) {
+                console.log(`  ${colors.red}✗${colors.reset} localhost:${server.port} - ${server.error}`);
+            }
+            console.log('');
+            return { success: false, hubUrl: null, unhealthyServers };
+        }
+
+        // All ports found and all health checks passed - determine hub URL
         const hubRoute = proxyConfig.routes['/localhost_11000'] || proxyConfig.routes['/localhost_10000'] || proxyConfig.routes['/localhost_9000'];
 
         if (!hubRoute) {
@@ -864,31 +917,31 @@ async function main() {
         console.log(`${colors.cyan}Waiting 5 more seconds for proxy routes to be established...${colors.reset}\n`);
         await new Promise(resolve => setTimeout(resolve, 5000));
 
-        // Read proxy config to get the hub URL
-        try {
-            const proxyConfigPath = path.join(__dirname, 'reverse_proxy.json');
-            const proxyConfig = JSON.parse(readFileSync(proxyConfigPath, 'utf-8'));
-            const baseUrl = proxyConfig.base_url;
+        // Perform post-launch verification
+        const result = await postLaunchCheck(options, gameNames);
 
-            // In dev-vite mode, hub frontend is on 11000. In dev mode it's on 10000. In prod it's on 9000.
-            const hubRoute = proxyConfig.routes['/localhost_11000'] || proxyConfig.routes['/localhost_10000'] || proxyConfig.routes['/localhost_9000'];
-
-            if (hubRoute) {
-                const hubUrl = hubRoute.public_url;
-
-                // Display big success banner
-                console.log('\n' + '═'.repeat(80));
-                console.log('║' + ' '.repeat(78) + '║');
-                console.log('║' + colors.bright + colors.green + ' '.repeat(25) + '🚀  LAUNCH SUCCESSFUL!  🚀' + ' '.repeat(24) + colors.reset + '║');
-                console.log('║' + ' '.repeat(78) + '║');
-                console.log('║' + colors.bright + colors.cyan + '  Open this URL in your browser to access the Hub:' + ' '.repeat(27) + colors.reset + '║');
-                console.log('║' + ' '.repeat(78) + '║');
-                console.log('║' + colors.bright + colors.yellow + '  👉  ' + hubUrl + ' '.repeat(Math.max(0, 68 - hubUrl.length)) + colors.reset + '║');
-                console.log('║' + ' '.repeat(78) + '║');
-                console.log('═'.repeat(80) + '\n');
-            }
-        } catch (error) {
-            console.log(`${colors.yellow}Could not read proxy config, but servers should be running${colors.reset}\n`);
+        if (result.success) {
+            // Display big success banner
+            console.log('\n' + '═'.repeat(80));
+            console.log('║' + ' '.repeat(78) + '║');
+            console.log('║' + colors.bright + colors.green + ' '.repeat(25) + '🚀  LAUNCH SUCCESSFUL!  🚀' + ' '.repeat(24) + colors.reset + '║');
+            console.log('║' + ' '.repeat(78) + '║');
+            console.log('║' + colors.bright + colors.cyan + '  All ' + result.expectedPorts + ' servers started correctly!' + ' '.repeat(Math.max(0, 40 - result.expectedPorts.toString().length)) + colors.reset + '║');
+            console.log('║' + ' '.repeat(78) + '║');
+            console.log('║' + colors.bright + colors.cyan + '  Open this URL in your browser to access the Hub:' + ' '.repeat(27) + colors.reset + '║');
+            console.log('║' + ' '.repeat(78) + '║');
+            console.log('║' + colors.bright + colors.yellow + '  👉  ' + result.hubUrl + ' '.repeat(Math.max(0, 68 - result.hubUrl.length)) + colors.reset + '║');
+            console.log('║' + ' '.repeat(78) + '║');
+            console.log('═'.repeat(80) + '\n');
+        } else {
+            console.log('\n' + '═'.repeat(80));
+            console.log('║' + ' '.repeat(78) + '║');
+            console.log('║' + colors.bright + colors.red + ' '.repeat(28) + '⚠️  LAUNCH INCOMPLETE  ⚠️' + ' '.repeat(25) + colors.reset + '║');
+            console.log('║' + ' '.repeat(78) + '║');
+            console.log('║' + colors.yellow + '  Some servers may not have started correctly.' + ' '.repeat(30) + colors.reset + '║');
+            console.log('║' + colors.yellow + '  Check the output above for details.' + ' '.repeat(39) + colors.reset + '║');
+            console.log('║' + ' '.repeat(78) + '║');
+            console.log('═'.repeat(80) + '\n');
         }
     }
 
