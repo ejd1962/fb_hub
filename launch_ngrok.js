@@ -3,19 +3,18 @@
 /**
  * launch_ngrok.js
  *
- * Launches ngrok tunnel pointing to the reverse proxy manager (localhost:8999)
- * and verifies the tunnel is healthy before returning the public URL.
+ * Launches ngrok tunnel using the standalone ngrok executable (not npm package)
+ * and returns the public URL by querying ngrok's API.
  *
  * Usage:
  *   node launch_ngrok.js [options]
  *
  * Options:
- *   --port=<number>             Local port to tunnel to (default: 8999)
- *   --managementPort=<number>   Ngrok management API port (default: 8998)
- *   --region=<code>             Ngrok region (us, eu, ap, au, sa, jp, in) (default: us)
- *   --wait=<seconds>            Max seconds to wait for tunnel (default: 30)
- *   --help                      Show this help message
- *   --json                      Output only JSON (no human-readable text)
+ *   --port=<number>     Local port to tunnel to (default: 8999)
+ *   --region=<code>     Ngrok region (us, eu, ap, au, sa, jp, in) (default: us)
+ *   --wait=<seconds>    Max seconds to wait for tunnel (default: 30)
+ *   --help              Show this help message
+ *   --json              Output only JSON (no human-readable text)
  *
  * Exit Codes:
  *   0 - Success, tunnel established
@@ -24,10 +23,9 @@
  *   3 - Invalid arguments
  */
 
-import ngrok from 'ngrok';
+import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-import { readFileSync, existsSync } from 'fs';
+import { dirname } from 'path';
 import JSON5 from 'json5';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -35,16 +33,14 @@ const __dirname = dirname(__filename);
 
 // Default configuration
 const DEFAULT_PORT = 8999;
-const DEFAULT_MANAGEMENT_PORT = 8998;
 const DEFAULT_REGION = 'us';
 const DEFAULT_WAIT_SECONDS = 30;
+const NGROK_API_PORT = 4040; // Ngrok's default web interface port
 
 // Parse command line arguments
 function parseArgs(args) {
   const options = {
     port: DEFAULT_PORT,
-    managementPort: null, // Will be set to port - 1 if not explicitly provided
-    managementPortExplicit: false, // Track if user explicitly set managementPort
     region: DEFAULT_REGION,
     waitSeconds: DEFAULT_WAIT_SECONDS,
     help: false,
@@ -63,14 +59,6 @@ function parseArgs(args) {
         process.exit(3);
       }
       options.port = port;
-    } else if (arg.startsWith('--managementPort=')) {
-      const port = parseInt(arg.split('=')[1]);
-      if (isNaN(port) || port < 1 || port > 65535) {
-        console.error(`ERROR: Invalid management port number: ${arg.split('=')[1]}`);
-        process.exit(3);
-      }
-      options.managementPort = port;
-      options.managementPortExplicit = true;
     } else if (arg.startsWith('--region=')) {
       const region = arg.split('=')[1];
       const validRegions = ['us', 'eu', 'ap', 'au', 'sa', 'jp', 'in'];
@@ -94,209 +82,126 @@ function parseArgs(args) {
     }
   }
 
-  // If managementPort not explicitly set, default to port - 1
-  if (!options.managementPortExplicit) {
-    options.managementPort = options.port - 1;
-  }
-
   return options;
 }
 
 // Show help message
 function showHelp() {
   console.log(`
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  launch_ngrok.js - Start ngrok tunnel for TransVerse reverse proxy
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Usage: node launch_ngrok.js [options]
 
-DESCRIPTION:
-  Launches an ngrok tunnel pointing to the reverse proxy manager (localhost:8999
-  by default) and waits until the tunnel is established and healthy.
+Options:
+  --port=<number>     Local port to tunnel to (default: ${DEFAULT_PORT})
+  --region=<code>     Ngrok region: us, eu, ap, au, sa, jp, in (default: ${DEFAULT_REGION})
+  --wait=<seconds>    Max seconds to wait for tunnel (default: ${DEFAULT_WAIT_SECONDS})
+  --json              Output only JSON (no human-readable text)
+  --help              Show this help message
 
-  Returns the public ngrok URL (e.g., https://abc123.ngrok.io) that can be used
-  to access the TransVerse system from outside your local network.
-
-USAGE:
-  node launch_ngrok.js [options]
-
-OPTIONS:
-  --port=<number>             Local port to tunnel to (default: 8999)
-                              This should be your reverse proxy manager port
-                              If set, managementPort implicitly becomes port - 1
-
-  --managementPort=<number>   Ngrok management API port (default: port - 1)
-                              Port where ngrok's web interface and API run
-                              Defaults to one below tunnel port (8998 for port 8999)
-                              Only specify if you need a different management port
-
-  --region=<code>             Ngrok region code (default: us)
-                              Valid: us, eu, ap, au, sa, jp, in
-                              Choose closest region for best performance
-
-  --wait=<seconds>            Maximum seconds to wait for tunnel (default: 30)
-                              Script will fail if tunnel not ready in time
-
-  --json                      Output only JSON result (no human-readable text)
-                              Useful for programmatic integration
-
-  --help                      Show this help message and exit
-
-EXAMPLES:
-  # Basic usage (tunnel localhost:8999, management on 8998)
-  node launch_ngrok.js
-
-  # Tunnel different port with custom management port
-  node launch_ngrok.js --port=3000 --managementPort=3001
-
-  # Use Europe region for better latency
-  node launch_ngrok.js --region=eu
-
-  # JSON output only (for scripts)
-  node launch_ngrok.js --json
-
-  # Custom ports with longer timeout
-  node launch_ngrok.js --port=8999 --managementPort=8998 --wait=60
-
-EXIT CODES:
-  0 - Success, tunnel established and healthy
-  1 - Ngrok not installed or failed to start
-  2 - Timeout waiting for tunnel to become ready
-  3 - Invalid command line arguments
-
-OUTPUT:
-  Human-readable mode:
-    - Progress messages showing startup steps
-    - Final public URL and connection details
-    - Health check results
-
-  JSON mode (--json):
-    {
-      "success": true,
-      "publicUrl": "https://abc123.ngrok.io",
-      "localPort": 8999,
-      "region": "us",
-      "ngrokManagementUrl": "http://localhost:8998"
-    }
-
-NGROK MANAGEMENT INTERFACE:
-  Ngrok provides a web interface and REST API for monitoring and managing
-  tunnels. Access it at the management URL (default: http://localhost:8998)
-
-  Features:
-    - Real-time request logs and traffic inspection
-    - Tunnel status and configuration
-    - Request replay for debugging
-    - JSON API at /api/tunnels endpoint
-
-REQUIREMENTS:
-  - ngrok must be installed and available in PATH
-  - Port ${DEFAULT_PORT} (or specified port) must be available
-  - Management port ${DEFAULT_MANAGEMENT_PORT} must be available
-  - Internet connection required
-
-INTEGRATION:
-  This script is designed to be called by launch_servers.js when
-  --deployment=ngrok is specified. It can also be run standalone for testing.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Examples:
+  node launch_ngrok.js --port=8999
+  node launch_ngrok.js --port=8999 --region=us --json
 `);
 }
 
-// Read ngrok authtoken from file
-function readAuthtoken() {
-  const authtokenPath = join(__dirname, 'ngrok_authtoken.txt');
-
-  if (!existsSync(authtokenPath)) {
-    return null;
+// Kill any existing ngrok processes
+async function killExistingNgrok(jsonMode) {
+  if (!jsonMode) {
+    console.log(`\n🔌 Killing any existing ngrok processes...`);
   }
 
   try {
-    const content = readFileSync(authtokenPath, 'utf8');
-    // Extract token from file (skip header lines and blank lines)
-    const lines = content.split('\n').map(line => line.trim());
-    for (const line of lines) {
-      // Look for line that looks like a token (long alphanumeric with underscores)
-      if (line.length > 20 && /^[A-Za-z0-9_-]+$/.test(line)) {
-        return line;
+    const { exec } = await import('child_process');
+    const { promisify } = await import('util');
+    const execAsync = promisify(exec);
+
+    try {
+      await execAsync('taskkill /F /IM ngrok.exe 2>nul');
+      if (!jsonMode) {
+        console.log(`   ✓ Killed existing ngrok processes`);
+      }
+      // Wait for cleanup
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    } catch (e) {
+      // No processes to kill, that's fine
+      if (!jsonMode) {
+        console.log(`   No existing ngrok processes found`);
       }
     }
-    return null;
   } catch (error) {
-    console.error(`Error reading authtoken file: ${error.message}`);
-    return null;
+    // Ignore cleanup errors
   }
 }
 
-// Check if ngrok module is available
-async function checkNgrokInstalled() {
-  try {
-    // If we can import ngrok, it's installed
-    return true;
-  } catch (error) {
-    return false;
-  }
-}
-
-// Start ngrok tunnel using Node.js API
-async function startNgrokTunnel(port, managementPort, region, jsonMode, authtoken) {
+// Start ngrok process in background
+function startNgrokProcess(port, region, jsonMode) {
   if (!jsonMode) {
     console.log(`\n🚇 Starting ngrok tunnel...`);
     console.log(`   Local port: ${port}`);
-    // TODO: Re-enable when we figure out how to configure management port with ngrok npm package
-    // console.log(`   Management port: ${managementPort}`);
     console.log(`   Region: ${region}`);
-    console.log(`   Authtoken: ${authtoken ? 'Loaded from file' : 'Not found'}`);
   }
 
-  try {
-    const connectOptions = {
-      addr: port,  // Use just the port number
-      proto: 'http',  // Explicitly specify protocol
-      region: region,
-      // Use a custom name to avoid UUID collisions (cousin Claude's fix #2)
-      name: `transverse-proxy-${port}`
-      // TODO: Re-enable when we figure out correct option name for management port
-      // web_addr: `localhost:${managementPort}`
-    };
+  // Spawn ngrok http command
+  const ngrokProcess = spawn('ngrok', ['http', port.toString(), '--region', region], {
+    detached: true,
+    stdio: 'ignore'
+  });
 
-    // Add authtoken if available
-    if (authtoken) {
-      connectOptions.authtoken = authtoken;
-    }
+  // Allow parent to exit independently
+  ngrokProcess.unref();
 
-    if (!jsonMode) {
-      console.log(`\n🔍 Debug: Connect options:`, JSON.stringify(connectOptions, null, 2));
-    }
-
-    const url = await ngrok.connect(connectOptions);
-
-    // TODO: Get actual ngrok API URL when management port is configurable
-    const ngrokManagementUrl = `http://127.0.0.1:4040`; // ngrok default
-
-    if (!jsonMode) {
-      console.log(`\n✅ Ngrok tunnel established!`);
-      console.log(`   Public URL: ${url}`);
-      console.log(`   Protocol: HTTPS`);
-      console.log(`   Management: ${ngrokManagementUrl}`);
-    }
-
-    return {
-      success: true,
-      publicUrl: url,
-      localPort: port,
-      region: region,
-      ngrokManagementUrl: ngrokManagementUrl
-    };
-  } catch (error) {
-    if (!jsonMode) {
-      console.error(`\n❌ Failed to start ngrok: ${error.message}`);
-      console.error(`\nFull error details:`);
-      console.error(error);
-    }
-    throw error;
+  if (!jsonMode) {
+    console.log(`   ✓ Ngrok process started (PID: ${ngrokProcess.pid})`);
   }
+
+  return ngrokProcess;
 }
 
+// Poll ngrok API to get tunnel URL
+async function getTunnelUrl(waitSeconds, jsonMode) {
+  if (!jsonMode) {
+    console.log(`\n⏳ Waiting for ngrok API to become available...`);
+  }
+
+  const maxAttempts = waitSeconds * 2; // Poll every 500ms
+  let attempt = 0;
+
+  while (attempt < maxAttempts) {
+    try {
+      const response = await fetch(`http://127.0.0.1:${NGROK_API_PORT}/api/tunnels`);
+
+      if (response.ok) {
+        const data = await response.json();
+
+        if (data.tunnels && data.tunnels.length > 0) {
+          // Get the HTTPS tunnel (ngrok creates both http and https)
+          const httpsTunnel = data.tunnels.find(t => t.public_url.startsWith('https://'));
+          const tunnel = httpsTunnel || data.tunnels[0];
+
+          if (!jsonMode) {
+            console.log(`   ✓ Tunnel established!`);
+          }
+
+          return {
+            publicUrl: tunnel.public_url,
+            config: tunnel.config,
+            proto: tunnel.proto
+          };
+        }
+      }
+    } catch (error) {
+      // API not ready yet, continue waiting
+    }
+
+    attempt++;
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    if (!jsonMode && attempt % 4 === 0) {
+      console.log(`   Attempt ${Math.floor(attempt / 2)}/${Math.floor(maxAttempts / 2)}...`);
+    }
+  }
+
+  throw new Error(`Timeout: Ngrok API did not respond after ${waitSeconds} seconds`);
+}
 
 // Perform health check on the tunnel
 async function healthCheckTunnel(publicUrl, jsonMode) {
@@ -317,7 +222,7 @@ async function healthCheckTunnel(publicUrl, jsonMode) {
 
     if (!jsonMode) {
       console.log(`   Status: ${response.status} ${response.statusText}`);
-      console.log(`   ✅ Tunnel is healthy and responding`);
+      console.log(`   ✓ Tunnel is healthy and responding`);
     }
 
     return true;
@@ -340,128 +245,95 @@ async function main() {
     process.exit(0);
   }
 
-  // Check if ngrok is installed
-  if (!options.json) {
-    console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-    console.log(`  TransVerse Ngrok Launcher`);
-    console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-    console.log(`\n🔍 Checking for ngrok installation...`);
-  }
+  const jsonMode = options.json;
 
-  const ngrokInstalled = await checkNgrokInstalled();
-
-  if (!ngrokInstalled) {
-    if (options.json) {
-      console.log(JSON5.stringify({
-        success: false,
-        error: 'Ngrok not installed or not in PATH'
-      }, null, 2));
-    } else {
-      console.error(`\n❌ ERROR: ngrok is not installed`);
-      console.error(`\nPlease install ngrok via npm:`);
-      console.error(`  npm install -g ngrok`);
-    }
-    process.exit(1);
-  }
-
-  if (!options.json) {
-    console.log(`   ✅ Ngrok module is available`);
-  }
-
-  // Read authtoken from file
-  const authtoken = readAuthtoken();
-
-  if (!authtoken && !options.json) {
-    console.warn(`\n⚠️  Warning: No authtoken found in ngrok_authtoken.txt`);
-    console.warn(`   Ngrok may fail without authentication.`);
-    console.warn(`   Get your token from: https://dashboard.ngrok.com/get-started/your-authtoken`);
-  }
-
-  // Disconnect any existing tunnels first (cousin Claude's fix #1)
-  if (!options.json) {
-    console.log(`\n🔌 Disconnecting any existing ngrok tunnels...`);
-  }
   try {
-    // First, try to kill any ngrok processes system-wide
-    const { exec } = await import('child_process');
-    const { promisify } = await import('util');
-    const execAsync = promisify(exec);
+    if (!jsonMode) {
+      console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+      console.log(`  TransVerse Ngrok Launcher (Standalone Executable)`);
+      console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+    }
 
+    // Step 1: Kill any existing ngrok processes
+    await killExistingNgrok(jsonMode);
+
+    // Step 2: Start ngrok process
+    const ngrokProcess = startNgrokProcess(options.port, options.region, jsonMode);
+
+    // Step 3: Wait for tunnel URL from API
+    let tunnelInfo;
     try {
-      // Windows: taskkill
-      await execAsync('taskkill /F /IM ngrok.exe 2>nul');
-      if (!options.json) {
-        console.log(`   Killed any running ngrok.exe processes`);
+      tunnelInfo = await getTunnelUrl(options.waitSeconds, jsonMode);
+    } catch (error) {
+      if (jsonMode) {
+        console.log(JSON5.stringify({
+          success: false,
+          error: error.message
+        }, null, 2));
+      } else {
+        console.error(`\n❌ Failed to get tunnel URL: ${error.message}`);
       }
-    } catch (e) {
-      // Process might not exist, that's fine
+      process.exit(2);
     }
 
-    // Then use SDK cleanup
-    await ngrok.disconnect();
-    await ngrok.kill();
+    // Step 4: Health check
+    await healthCheckTunnel(tunnelInfo.publicUrl, jsonMode);
 
-    // Wait a moment for cleanup
-    await new Promise(resolve => setTimeout(resolve, 2000));
-  } catch (error) {
-    // Ignore errors if no tunnels exist
-    if (!options.json) {
-      console.log(`   Cleanup completed (some operations may have failed, this is normal)`);
+    // Step 5: Output result
+    const result = {
+      success: true,
+      publicUrl: tunnelInfo.publicUrl,
+      localPort: options.port,
+      region: options.region,
+      ngrokManagementUrl: `http://127.0.0.1:${NGROK_API_PORT}`,
+      proto: tunnelInfo.proto
+    };
+
+    if (jsonMode) {
+      console.log(JSON5.stringify(result, null, 2));
+    } else {
+      console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+      console.log(`  Ngrok tunnel is ready!`);
+      console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+      console.log(`\n  Use this URL to access your system from anywhere:`);
+      console.log(`  ${tunnelInfo.publicUrl}`);
+      console.log(`\n  Ngrok management interface:`);
+      console.log(`  http://127.0.0.1:${NGROK_API_PORT}`);
+      console.log(`\n  Press Ctrl+C to stop the tunnel when done.`);
+      console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
     }
-  }
 
-  // Start ngrok tunnel (this will wait until tunnel is established)
-  let result;
-  try {
-    result = await startNgrokTunnel(options.port, options.managementPort, options.region, options.json, authtoken);
+    // Keep process alive (ngrok is running in background)
+    process.on('SIGINT', async () => {
+      if (!jsonMode) {
+        console.log(`\n\n🛑 Shutting down ngrok tunnel...`);
+      }
+      await killExistingNgrok(jsonMode);
+      process.exit(0);
+    });
+
+    // Keep alive
+    await new Promise(() => {});
+
   } catch (error) {
-    if (options.json) {
+    if (jsonMode) {
       console.log(JSON5.stringify({
         success: false,
         error: error.message
       }, null, 2));
+    } else {
+      console.error(`\n❌ Error: ${error.message}`);
+      console.error(error.stack);
     }
     process.exit(1);
   }
-
-  // Health check
-  await healthCheckTunnel(result.publicUrl, options.json);
-
-  // Output result
-  if (options.json) {
-    console.log(JSON5.stringify(result, null, 2));
-  } else {
-    console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-    console.log(`  ✅ Ngrok tunnel is ready!`);
-    console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-    console.log(`\n  Use this URL to access your system from anywhere:`);
-    console.log(`  👉 ${result.publicUrl}`);
-    console.log(`\n  Ngrok management interface:`);
-    console.log(`  👉 ${result.ngrokManagementUrl}`);
-    console.log(`\n  Press Ctrl+C to stop the tunnel when done.`);
-    console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
-  }
-
-  // Keep process alive
-  process.on('SIGINT', async () => {
-    if (!options.json) {
-      console.log(`\n\n🛑 Shutting down ngrok tunnel...`);
-    }
-    await ngrok.disconnect();
-    await ngrok.kill();
-    process.exit(0);
-  });
-
-  process.on('SIGTERM', async () => {
-    await ngrok.disconnect();
-    await ngrok.kill();
-    process.exit(0);
-  });
 }
 
-// Run main function
-main().catch(error => {
-  console.error(`FATAL ERROR: ${error.message}`);
-  console.error(error.stack);
-  process.exit(1);
-});
+// Run if executed directly
+const isMainModule = process.argv[1] === __filename;
+if (isMainModule) {
+  main().catch(error => {
+    console.error('Unhandled error:', error);
+    process.exit(1);
+  });
+}

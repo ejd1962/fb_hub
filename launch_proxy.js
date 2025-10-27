@@ -91,7 +91,7 @@ async function loadPortforwardConfig(residence) {
       }
 
       try {
-        const result = JSON.parse(outputBuffer);
+        const result = JSON5.parse(outputBuffer);
         if (result.success && result.publicUrl) {
           console.log(`Port forward URL loaded: ${result.publicUrl}`);
           resolve({ url: result.publicUrl });
@@ -135,7 +135,7 @@ async function launchNgrok(port) {
       }
 
       try {
-        const result = JSON.parse(outputBuffer);
+        const result = JSON5.parse(outputBuffer);
         if (result.success && result.publicUrl) {
           console.log(`Ngrok URL established: ${result.publicUrl}`);
           resolve({ url: result.publicUrl });
@@ -179,7 +179,7 @@ async function startLocaltunnel(port, timeoutSeconds = 10) {
 
       // Try to parse complete JSON object
       try {
-        const result = JSON.parse(outputBuffer);
+        const result = JSON5.parse(outputBuffer);
         if (result.success && result.publicUrl && !ltUrl) {
           ltUrl = result.publicUrl;
           clearTimeout(timeout);
