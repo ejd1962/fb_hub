@@ -21,12 +21,8 @@
  *                               customer_access: Production/customer-facing
  *                               This determines which server URL is used from game_info.json
  *
- *   --proxy=<yes|no>            Enable reverse proxy mode (default: no)
- *                               Automatically launches setup-reverse-proxy.js on port 8999
- *                               Sets VITE_BASE_PATH for proper asset serving through proxy
- *
  *   --deployment=<direct|localproxy|ngrok|localtunnel|portforward:RESIDENCE>
- *                               Proxy deployment method (default: localproxy)
+ *                               Deployment method (default: direct)
  *                               direct: No proxy - servers accessed directly at localhost:PORT
  *                               localproxy: Proxy for local testing (http://localhost:8999)
  *                               ngrok: Proxy for external access via ngrok (FAST, requires account)
@@ -222,9 +218,8 @@ function parseArgs(args) {
         restart: 'auto',
         newtab: 'yes',
         purpose: 'designer_test',  // designer_test, alpha_test, beta_test, or customer_access
-        deployment: 'localproxy',  // direct, localproxy, ngrok, localtunnel, portforward:<residence> - proxy deployment method
+        deployment: 'direct',  // direct, localproxy, ngrok, localtunnel, portforward:<residence> - deployment method
         residence: null,   // Extracted from deployment=portforward:<residence>
-        proxy: 'no',       // yes or no - use reverse proxy mode
         games: []
     };
 
@@ -251,8 +246,6 @@ function parseArgs(args) {
             } else {
                 options.deployment = deploymentValue;
             }
-        } else if (arg.startsWith('--proxy=')) {
-            options.proxy = arg.split('=')[1];
         } else if (arg.startsWith('--games=')) {
             // Split comma-separated game list
             const gamesList = arg.split('=')[1];
@@ -618,19 +611,18 @@ async function main() {
         console.log(`  --mode=<prod|dev|dev-vite>  Launch mode (default: dev-vite)`);
         console.log(`  --purpose=<designer_test|alpha_test|beta_test|customer_access>`);
         console.log(`                              Codebase purpose (default: designer_test)`);
-        console.log(`  --proxy=<yes|no>            Enable reverse proxy (default: no)`);
         console.log(`  --deployment=<direct|localproxy|ngrok|localtunnel|portforward:RESIDENCE>`);
-        console.log(`                              Proxy method (default: localproxy)`);
+        console.log(`                              Deployment method (default: direct)`);
         console.log(`  --build-only=<yes|no>       Only build frontend (default: no)`);
         console.log(`  --restart=<auto|no>         Auto-restart on changes (default: auto)`);
         console.log(`  --newtab=<yes|no>           Launch in new tabs (default: yes)`);
         console.log(`\nExamples:`);
         console.log(`  node launch_servers.js wordguess`);
         console.log(`  node launch_servers.js --purpose=beta_test wordguess`);
-        console.log(`  node launch_servers.js --proxy=yes wordguess`);
-        console.log(`  node launch_servers.js --proxy=yes --deployment=ngrok wordguess`);
-        console.log(`  node launch_servers.js --proxy=yes --deployment=localtunnel wordguess`);
-        console.log(`  node launch_servers.js --proxy=yes --deployment=portforward:erics_cottage wordguess`);
+        console.log(`  node launch_servers.js --deployment=localproxy wordguess`);
+        console.log(`  node launch_servers.js --deployment=ngrok wordguess`);
+        console.log(`  node launch_servers.js --deployment=localtunnel wordguess`);
+        console.log(`  node launch_servers.js --deployment=portforward:erics_cottage wordguess`);
         console.log(`  node launch_servers.js --mode=prod --purpose=customer_access wordguess`);
         process.exit(1);
     }

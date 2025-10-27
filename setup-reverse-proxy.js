@@ -340,7 +340,7 @@ function generateMappings(activeServices, baseUrl, tunnelPassword = null) {
   const mappings = {
     proxy_port: PROXY_PORT,
     base_url: baseUrl,
-    mode: 'proxy',
+    mode: baseUrl === null ? 'direct' : 'proxy',  // direct mode if no baseUrl
     created_at: new Date().toISOString(),
     created_by_pid: process.pid,
     tunnel_password: tunnelPassword,  // Add tunnel password if using localtunnel
