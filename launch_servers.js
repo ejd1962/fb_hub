@@ -489,22 +489,26 @@ async function postLaunchCheck(options, gameNames) {
             // Only check backend servers (they have /api/health endpoints)
             if (info.type === 'backend') {
                 backendRoutes.push({ route, port: info.local_port });
-                const healthUrl = `http://localhost:${info.local_port}/api/health`;
+
+                // Use public_url (proxy-aware) instead of direct localhost:port
+                // In proxy mode: public_url = "http://localhost:8999/localhost_10000"
+                // In direct mode: public_url = "http://localhost:10000"
+                const healthUrl = `${info.public_url}/api/health`;
 
                 healthChecks.push(
                     fetch(healthUrl, { signal: AbortSignal.timeout(5000) })
                         .then(async res => {
                             if (!res.ok) {
-                                return { port: info.local_port, healthy: false, error: `HTTP ${res.status}` };
+                                return { port: info.local_port, mode: info.mode, healthy: false, error: `HTTP ${res.status}` };
                             }
                             const data = await res.json();
                             if (data.status === 'ok') {
-                                return { port: info.local_port, healthy: true };
+                                return { port: info.local_port, mode: info.mode, healthy: true };
                             } else {
-                                return { port: info.local_port, healthy: false, error: 'Invalid status' };
+                                return { port: info.local_port, mode: info.mode, healthy: false, error: 'Invalid status' };
                             }
                         })
-                        .catch(err => ({ port: info.local_port, healthy: false, error: err.message }))
+                        .catch(err => ({ port: info.local_port, mode: info.mode, healthy: false, error: err.message }))
                 );
             }
         }
@@ -514,10 +518,11 @@ async function postLaunchCheck(options, gameNames) {
 
         // Display health check results
         for (const result of healthResults) {
+            const modeLabel = result.mode === 'proxy' ? '[PROXY]' : '[DIRECT]';
             if (result.healthy) {
-                console.log(`  ${colors.green}✓${colors.reset} localhost:${result.port} - Healthy`);
+                console.log(`  ${colors.green}✓${colors.reset} localhost:${result.port} ${modeLabel} - Healthy`);
             } else {
-                console.log(`  ${colors.red}✗${colors.reset} localhost:${result.port} - Failed (${result.error})`);
+                console.log(`  ${colors.red}✗${colors.reset} localhost:${result.port} ${modeLabel} - Failed (${result.error})`);
             }
         }
         console.log('');

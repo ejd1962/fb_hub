@@ -177,51 +177,56 @@ function generateMappings(activeServices, baseUrl) {
   const mappings = {
     proxy_port: PROXY_PORT,
     base_url: baseUrl,
+    mode: 'proxy',
     created_at: new Date().toISOString(),
     created_by_pid: process.pid,
     routes: {}
   };
-  
-  // Hub can have multiple ports (backend + frontend in dev-vite mode)
+
+  // Hub can have multiple ports (backend: 10000, frontend: 11000)
   activeServices.hub.forEach(port => {
     const path = `/localhost_${port}`;
     mappings.routes[path] = {
       local_port: port,
       public_url: `${baseUrl}${path}`,
-      type: 'hub'
+      mode: 'proxy',
+      type: port === 10000 ? 'backend' : 'frontend'
     };
   });
-  
-  // Production games
+
+  // Production games (backend only)
   activeServices.production.forEach(port => {
     const path = `/localhost_${port}`;
     mappings.routes[path] = {
       local_port: port,
       public_url: `${baseUrl}${path}`,
-      type: 'production'
+      mode: 'proxy',
+      type: 'backend'
     };
   });
 
-  // Dev games
+  // Dev games (backend only: 10001+)
   activeServices.dev.forEach(port => {
     const path = `/localhost_${port}`;
     mappings.routes[path] = {
       local_port: port,
       public_url: `${baseUrl}${path}`,
-      type: 'dev'
+      mode: 'proxy',
+      type: 'backend'
     };
   });
 
-  // Dev-Vite games
+  // Dev-Vite games (frontend only: 11001+)
   activeServices.devVite.forEach(port => {
     const path = `/localhost_${port}`;
     mappings.routes[path] = {
       local_port: port,
       public_url: `${baseUrl}${path}`,
-      type: 'dev-vite'
+      mode: 'proxy',
+      type: 'frontend'
     };
   });
-  
+
   return mappings;
 }
 
@@ -365,22 +370,116 @@ async function main() {
   console.log(`Proxy mode: ${proxy}`);
   console.log(`Deployment mode: ${deployment}\n`);
 
-  // If proxy=no, create a "no proxy" config file and keep process alive
+  // If proxy=no, scan ports and create direct mode config file
   if (proxy === 'no') {
-    console.log('Proxy disabled - creating "no proxy" configuration file...\n');
-    const noProxyConfig = {
+    console.log('Proxy disabled - scanning ports and creating direct mode configuration...\n');
+
+    // Step 1: Scan ports (same as proxy mode)
+    console.log(`[T+${((Date.now() - scriptStartTime) / 1000).toFixed(3)}s] Starting port scan...`);
+    const scanStartTime = Date.now();
+    const activeServices = await scanAllPorts();
+    const scanEndTime = Date.now();
+    const scanElapsed = ((scanEndTime - scanStartTime) / 1000).toFixed(3);
+
+    const totalActive = activeServices.hub.length +
+                       activeServices.production.length +
+                       activeServices.dev.length +
+                       activeServices.devVite.length;
+
+    console.log(`[T+${((Date.now() - scriptStartTime) / 1000).toFixed(3)}s | ${new Date(scanEndTime).toISOString()}] Port scan complete (took ${scanElapsed}s)`);
+    console.log(`\nFound ${totalActive} active services in direct mode\n`);
+
+    if (totalActive === 0) {
+      console.log('No active services found. Start your servers first!');
+      return;
+    }
+
+    // Build direct mode config with all detected ports
+    const directConfig = {
       proxy_port: null,
       base_url: null,
-      routes: {},
       mode: 'direct',
       created_at: new Date().toISOString(),
       created_by_pid: process.pid,
-      message: 'No reverse proxy configured - running in direct localhost mode'
+      message: 'No reverse proxy configured - running in direct localhost mode',
+      routes: {}
     };
 
-    await saveMappings(noProxyConfig);
-    console.log('✓ No-proxy configuration file created');
-    console.log('Servers will run in direct localhost mode (no proxy)\n');
+    // Add all hub ports (backend: 10000, frontend: 11000)
+    activeServices.hub.forEach(port => {
+      const path = `/localhost_${port}`;
+      const publicUrl = `http://localhost:${port}`;
+      directConfig.routes[path] = {
+        local_port: port,
+        public_url: publicUrl,
+        mode: 'direct',
+        type: port === 10000 ? 'backend' : 'frontend'
+      };
+    });
+
+    // Add all production ports (9000+)
+    activeServices.production.forEach(port => {
+      const path = `/localhost_${port}`;
+      const publicUrl = `http://localhost:${port}`;
+      directConfig.routes[path] = {
+        local_port: port,
+        public_url: publicUrl,
+        mode: 'direct',
+        type: 'backend'
+      };
+    });
+
+    // Add all dev ports (backend: 10001+)
+    activeServices.dev.forEach(port => {
+      const path = `/localhost_${port}`;
+      const publicUrl = `http://localhost:${port}`;
+      directConfig.routes[path] = {
+        local_port: port,
+        public_url: publicUrl,
+        mode: 'direct',
+        type: 'backend'
+      };
+    });
+
+    // Add all dev-vite ports (frontend: 11001+)
+    activeServices.devVite.forEach(port => {
+      const path = `/localhost_${port}`;
+      const publicUrl = `http://localhost:${port}`;
+      directConfig.routes[path] = {
+        local_port: port,
+        public_url: publicUrl,
+        mode: 'direct',
+        type: 'frontend'
+      };
+    });
+
+    await saveMappings(directConfig);
+    console.log('✓ Direct mode configuration file created\n');
+
+    // Display report
+    console.log('Active services (DIRECT mode - no proxy):');
+    console.log('==========================================');
+    for (const [path, config] of Object.entries(directConfig.routes)) {
+      console.log(`  ${config.public_url.padEnd(30)} (${config.type})`);
+    }
+    console.log('');
+
+    // Generate text report
+    let report = 'REVERSE PROXY REPORT (DIRECT MODE)\n';
+    report += '==================================\n';
+    report += `Generated: ${new Date().toISOString()}\n`;
+    report += `Mode: DIRECT (no proxy)\n`;
+    report += `Total Services: ${totalActive}\n\n`;
+    report += 'All services are accessible directly via localhost:\n';
+    report += '---------------------------------------------------\n';
+
+    for (const [path, config] of Object.entries(directConfig.routes)) {
+      report += `${config.public_url.padEnd(30)} (${config.type})\n`;
+    }
+
+    await fs.writeFile('./reverse_proxy_report.txt', report);
+    console.log('Report saved to: reverse_proxy_report.txt\n');
+
     console.log('This process will remain active to maintain the config file.');
     console.log('Press Ctrl+C to stop (config file will be cleaned up automatically)\n');
 
