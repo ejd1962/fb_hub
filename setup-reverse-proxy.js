@@ -5,6 +5,7 @@ import { promises as fs, existsSync, unlinkSync } from 'fs';
 import { createInterface } from 'readline';
 import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
+import JSON5 from 'json5';
 
 const num_ports = 5;  // number of ports in each range that might need proxies
 
@@ -333,7 +334,7 @@ async function saveMappings(mappings) {
   const tempFile = './reverse_proxy.json.tmp';
   const finalFile = './reverse_proxy.json';
 
-  await fs.writeFile(tempFile, JSON.stringify(mappings, null, 2));
+  await fs.writeFile(tempFile, JSON5.stringify(mappings, null, 2));
   await fs.rename(tempFile, finalFile);
   console.log('\n✓ Mappings saved to reverse_proxy.json');
 

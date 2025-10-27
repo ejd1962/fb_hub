@@ -6,6 +6,7 @@ import { readFile } from 'fs/promises';
 import { displayServerUrls } from '@transverse/shared-components/server/display-server-urls';
 import { displayServerEnvironment } from '@transverse/shared-components/server/display-server-environment';
 import { BACKEND_PUBLIC_DIR } from './constants.js';
+import JSON5 from 'json5';
 
 // Display server name and environment FIRST
 displayServerEnvironment('Hub Backend');
@@ -39,7 +40,7 @@ app.get(`${BACKEND_PUBLIC_DIR}/api/proxy-config`, async (req, res) => {
 
     console.log(`[HUB SERVER] Reading proxy config from: ${configPath}`);
     const configData = await readFile(configPath, 'utf-8');
-    const config = JSON.parse(configData);
+    const config = JSON5.parse(configData);
 
     console.log('[HUB SERVER] Serving reverse proxy config');
     res.json(config);

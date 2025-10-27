@@ -82,6 +82,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import readline from 'readline';
+import JSON5 from 'json5';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -275,7 +276,7 @@ function getGameInfo(projectDir, gameName) {
     }
 
     const content = fs.readFileSync(gameInfoPath, 'utf8');
-    return JSON.parse(content);
+    return JSON5.parse(content);
 }
 
 // Safety counter to prevent infinite spawning
@@ -447,7 +448,7 @@ async function postLaunchCheck(options, gameNames) {
 
     try {
         const proxyConfigPath = path.join(__dirname, 'reverse_proxy.json');
-        const proxyConfig = JSON.parse(readFileSync(proxyConfigPath, 'utf-8'));
+        const proxyConfig = JSON5.parse(fs.readFileSync(proxyConfigPath, 'utf-8'));
 
         // Calculate expected number of ports
         const serversToLaunch = ['hub', ...gameNames]; // hub is always included
