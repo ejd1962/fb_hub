@@ -173,6 +173,27 @@ async function scanAllPorts() {
   return activeServices;
 }
 
+// Helper function to determine port context
+function getPortContext(port) {
+  const isHub = port.toString().endsWith('000'); // 9000, 10000, 11000
+  const appType = isHub ? 'hub' : 'app';
+
+  let tier, serverType;
+
+  if (port >= 11000 && port <= 11999) {
+    tier = 'dev-vite';
+    serverType = 'frontend';
+  } else if (port >= 10000 && port <= 10999) {
+    tier = 'dev';
+    serverType = 'backend';
+  } else if (port >= 9000 && port <= 9999) {
+    tier = 'prod';
+    serverType = 'backend';
+  }
+
+  return { appType, tier, serverType };
+}
+
 // Generate path mappings
 function generateMappings(activeServices, baseUrl) {
   const mappings = {
@@ -187,44 +208,56 @@ function generateMappings(activeServices, baseUrl) {
   // Hub can have multiple ports (backend: 10000, frontend: 11000)
   activeServices.hub.forEach(port => {
     const path = `/localhost_${port}`;
+    const context = getPortContext(port);
     mappings.routes[path] = {
       local_port: port,
       public_url: `${baseUrl}${path}`,
       mode: 'proxy',
-      type: port === 10000 ? 'backend' : 'frontend'
+      type: context.serverType,
+      app_type: context.appType,
+      tier: context.tier
     };
   });
 
-  // Production games (backend only)
+  // Production apps (backend only)
   activeServices.production.forEach(port => {
     const path = `/localhost_${port}`;
+    const context = getPortContext(port);
     mappings.routes[path] = {
       local_port: port,
       public_url: `${baseUrl}${path}`,
       mode: 'proxy',
-      type: 'backend'
+      type: context.serverType,
+      app_type: context.appType,
+      tier: context.tier
     };
   });
 
-  // Dev games (backend only: 10001+)
+  // Dev apps (backend only: 10001+)
   activeServices.dev.forEach(port => {
     const path = `/localhost_${port}`;
+    const context = getPortContext(port);
     mappings.routes[path] = {
       local_port: port,
       public_url: `${baseUrl}${path}`,
       mode: 'proxy',
-      type: 'backend'
+      type: context.serverType,
+      app_type: context.appType,
+      tier: context.tier
     };
   });
 
-  // Dev-Vite games (frontend only: 11001+)
+  // Dev-Vite apps (frontend only: 11001+)
   activeServices.devVite.forEach(port => {
     const path = `/localhost_${port}`;
+    const context = getPortContext(port);
     mappings.routes[path] = {
       local_port: port,
       public_url: `${baseUrl}${path}`,
       mode: 'proxy',
-      type: 'frontend'
+      type: context.serverType,
+      app_type: context.appType,
+      tier: context.tier
     };
   });
 
@@ -347,7 +380,8 @@ async function saveMappings(mappings) {
   report += '-------\n';
 
   for (const [path, config] of Object.entries(mappings.routes)) {
-    report += `[PROXY ] ${config.public_url.padEnd(50)} → localhost:${config.local_port} (${config.type})\n`;
+    const details = `${config.type} -- ${config.app_type} -- ${config.tier}`;
+    report += `[PROXY ] ${config.public_url.padEnd(50)} → localhost:${config.local_port} (${details})\n`;
   }
 
   await fs.writeFile('./reverse_proxy_report.txt', report);
@@ -410,11 +444,14 @@ async function main() {
     activeServices.hub.forEach(port => {
       const path = `/localhost_${port}`;
       const publicUrl = `http://localhost:${port}`;
+      const context = getPortContext(port);
       directConfig.routes[path] = {
         local_port: port,
         public_url: publicUrl,
         mode: 'direct',
-        type: port === 10000 ? 'backend' : 'frontend'
+        type: context.serverType,
+        app_type: context.appType,
+        tier: context.tier
       };
     });
 
@@ -422,11 +459,14 @@ async function main() {
     activeServices.production.forEach(port => {
       const path = `/localhost_${port}`;
       const publicUrl = `http://localhost:${port}`;
+      const context = getPortContext(port);
       directConfig.routes[path] = {
         local_port: port,
         public_url: publicUrl,
         mode: 'direct',
-        type: 'backend'
+        type: context.serverType,
+        app_type: context.appType,
+        tier: context.tier
       };
     });
 
@@ -434,11 +474,14 @@ async function main() {
     activeServices.dev.forEach(port => {
       const path = `/localhost_${port}`;
       const publicUrl = `http://localhost:${port}`;
+      const context = getPortContext(port);
       directConfig.routes[path] = {
         local_port: port,
         public_url: publicUrl,
         mode: 'direct',
-        type: 'backend'
+        type: context.serverType,
+        app_type: context.appType,
+        tier: context.tier
       };
     });
 
@@ -446,11 +489,14 @@ async function main() {
     activeServices.devVite.forEach(port => {
       const path = `/localhost_${port}`;
       const publicUrl = `http://localhost:${port}`;
+      const context = getPortContext(port);
       directConfig.routes[path] = {
         local_port: port,
         public_url: publicUrl,
         mode: 'direct',
-        type: 'frontend'
+        type: context.serverType,
+        app_type: context.appType,
+        tier: context.tier
       };
     });
 
@@ -461,7 +507,8 @@ async function main() {
     console.log('Active services (DIRECT mode - no proxy):');
     console.log('==========================================');
     for (const [path, config] of Object.entries(directConfig.routes)) {
-      console.log(`  ${config.public_url.padEnd(30)} (${config.type})`);
+      const details = `${config.type} -- ${config.app_type} -- ${config.tier}`;
+      console.log(`  ${config.public_url.padEnd(30)} (${details})`);
     }
     console.log('');
 
@@ -475,7 +522,8 @@ async function main() {
     report += '---------------------------------------------------\n';
 
     for (const [path, config] of Object.entries(directConfig.routes)) {
-      report += `[DIRECT] ${config.public_url.padEnd(30)} (${config.type})\n`;
+      const details = `${config.type} -- ${config.app_type} -- ${config.tier}`;
+      report += `[DIRECT] ${config.public_url.padEnd(30)} (${details})\n`;
     }
 
     await fs.writeFile('./reverse_proxy_report.txt', report);

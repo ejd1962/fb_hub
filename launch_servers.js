@@ -451,7 +451,8 @@ async function postLaunchCheck(options, gameNames) {
         const proxyConfig = JSON5.parse(fs.readFileSync(proxyConfigPath, 'utf-8'));
 
         // Calculate expected number of ports
-        const serversToLaunch = ['hub', ...gameNames]; // hub is always included
+        // Note: gameNames already includes 'hub' (added by main() at line 657)
+        const serversToLaunch = gameNames;
         let expectedPorts = 0;
 
         if (options.mode === 'dev-vite') {
