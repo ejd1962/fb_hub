@@ -48,7 +48,7 @@ function parseArgs() {
 
   if (!['direct', 'localproxy', 'ngrok', 'localtunnel', 'portforward'].includes(deployment)) {
     console.error('Error: --deployment must be "direct", "localproxy", "ngrok", "localtunnel", or "portforward:RESIDENCE"');
-    console.error('Usage: node setup-reverse-proxy.js --deployment=direct|localproxy|ngrok|localtunnel|portforward:RESIDENCE --server_setup_delay=NN');
+    console.error('Usage: node launch_proxy.js --deployment=direct|localproxy|ngrok|localtunnel|portforward:RESIDENCE --server_setup_delay=NN');
     process.exit(1);
   }
 

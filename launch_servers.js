@@ -311,8 +311,8 @@ async function launchProcessInNewTab(command, args, options, label, color) {
     const cwd = options.cwd || process.cwd();
     const envVars = options.env || {};
 
-    // PORT is required for game servers, but not for reverse-proxy
-    const isProxy = label.includes('reverse-proxy');
+    // PORT is required for game servers, but not for proxy-related processes
+    const isProxy = label.includes('reverse-proxy') || label.includes('proxy-config');
     if (!isProxy && !envVars.PORT) {
         throw new Error(`PORT must be explicitly set in env options for ${label}`);
     }
