@@ -346,7 +346,7 @@ async function saveMappings(mappings) {
   report += '-------\n';
 
   for (const [path, config] of Object.entries(mappings.routes)) {
-    report += `${config.public_url.padEnd(50)} → localhost:${config.local_port} (${config.type})\n`;
+    report += `[PROXY ] ${config.public_url.padEnd(50)} → localhost:${config.local_port} (${config.type})\n`;
   }
 
   await fs.writeFile('./reverse_proxy_report.txt', report);
@@ -474,7 +474,7 @@ async function main() {
     report += '---------------------------------------------------\n';
 
     for (const [path, config] of Object.entries(directConfig.routes)) {
-      report += `${config.public_url.padEnd(30)} (${config.type})\n`;
+      report += `[DIRECT] ${config.public_url.padEnd(30)} (${config.type})\n`;
     }
 
     await fs.writeFile('./reverse_proxy_report.txt', report);

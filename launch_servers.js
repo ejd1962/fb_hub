@@ -923,7 +923,7 @@ async function main() {
         await new Promise(resolve => setTimeout(resolve, 5000));
 
         // Perform post-launch verification
-        const result = await postLaunchCheck(options, gameNames);
+        const result = await postLaunchCheck(options, options.games);
 
         if (result.success) {
             // Display big success banner
