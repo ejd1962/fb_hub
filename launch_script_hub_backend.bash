@@ -5,7 +5,7 @@ export TRUE_URL="http://localhost:10000/"
 export PROXY_ENABLED="true"
 export PROXY_INFO_PATH="C:\_projects\p23_fb_hub\fb_hub\reverse_proxy.json"
 export MSYS_NO_PATHCONV=1
-export VITE_BASE_PATH="/localhost_10000/"
+export VITE_BASE_PATH="/localhost_10000"
 npm run dev
 EXIT_CODE=$?
 echo ""

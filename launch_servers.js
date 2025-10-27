@@ -799,7 +799,7 @@ async function main() {
                     PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json')
                 };
                 if (options.proxy === 'yes') {
-                    backendEnv.VITE_BASE_PATH = `/localhost_${backendPort}/`;
+                    backendEnv.VITE_BASE_PATH = `/localhost_${backendPort}`;
                 }
 
                 const backendProc = await launchFunc(

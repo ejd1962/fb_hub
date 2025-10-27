@@ -19,4 +19,4 @@ export const ALLOW_DEBUG = true;
  *
  * NOTE: NO trailing slash (always ends with either '' or '/localhost_XXXXX')
  */
-export const PUBLIC_DIR = import.meta.env.BASE_URL.replace(/\/$/, '');
+export const PUBLIC_DIR = import.meta.env.BASE_URL || '';

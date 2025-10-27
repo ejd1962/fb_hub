@@ -18,4 +18,4 @@
  *
  * NOTE: NO trailing slash (always ends with either '' or '/localhost_XXXXX')
  */
-export const BACKEND_PUBLIC_DIR = process.env.VITE_BASE_PATH?.replace(/\/$/, '') || '';
+export const BACKEND_PUBLIC_DIR = process.env.VITE_BASE_PATH || '';
