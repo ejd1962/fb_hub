@@ -806,6 +806,7 @@ async function main() {
                 // Set VITE_BASE_PATH for backend so it knows its public path prefix
                 const backendEnv = {
                     ...process.env,
+                    MODE: options.mode,  // Pass mode to backend (prod, dev, dev-vite)
                     PORT: backendPort.toString(),
                     TRUE_URL,
                     PROXY_ENABLED: options.deployment !== 'direct' ? 'true' : 'false',
@@ -841,6 +842,8 @@ async function main() {
                 // Set VITE_BASE_PATH so Vite knows to serve assets with the path prefix
                 const frontendEnv = {
                     ...process.env,
+                    MODE: options.mode,  // Pass mode to frontend (prod, dev, dev-vite)
+                    VITE_MODE: options.mode,  // Also pass as VITE_MODE for Vite to expose via import.meta.env
                     PORT: frontendPort.toString(),
                     PROXY_ENABLED: options.deployment !== 'direct' ? 'true' : 'false',
                     PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json'),

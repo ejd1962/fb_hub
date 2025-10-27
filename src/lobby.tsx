@@ -8,7 +8,7 @@ import { useDebug } from "./DebugContext";
 import Footer from "./footer";
 import { getOrCreateGuestUUID } from "./guestUtils";
 import { getUrlForPort, isReverseProxyMode } from "@transverse/shared-components";
-import { PUBLIC_DIR, SERVER_MODE } from "./constants";
+import { PUBLIC_DIR, MODE } from "./constants";
 
 // TypeScript interface for game_info.json
 interface GameInfo {
@@ -236,7 +236,7 @@ export default function Lobby() {
         if (!user) {
             showAlert("Please sign in to play games!");
             navigate("/signin");
-        } else if (SERVER_MODE === 'prod' && !user.emailVerified) {
+        } else if (MODE === 'prod' && !user.emailVerified) {
             showAlert("Please verify your email address before playing games. Check your inbox for the verification email.");
             return;
         } else {
@@ -518,7 +518,7 @@ export default function Lobby() {
                                     >
                                         Sign In to Play
                                     </button>
-                                ) : SERVER_MODE === 'prod' ? (
+                                ) : MODE === 'prod' ? (
                                     // PROD mode: Show only single PROD button
                                     (() => {
                                         const status = serverStatuses.get(game.game_number);
