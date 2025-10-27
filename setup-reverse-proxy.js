@@ -28,20 +28,34 @@ const PROXY_PORT = 8999; // The single port we'll expose externally (via localtu
 // Parse command-line arguments
 function parseArgs() {
   const args = process.argv.slice(2);
-  const deployment = args.find(arg => arg.startsWith('--deployment='))?.split('=')[1] || 'local';
+  const deploymentArg = args.find(arg => arg.startsWith('--deployment='))?.split('=')[1] || 'local';
   const proxy = args.find(arg => arg.startsWith('--proxy='))?.split('=')[1] || 'no';
   const serverSetupDelayArg = args.find(arg => arg.startsWith('--server_setup_delay='))?.split('=')[1];
   const serverSetupDelay = serverSetupDelayArg ? parseInt(serverSetupDelayArg, 10) : 10;
 
-  if (!['local', 'localtunnel'].includes(deployment)) {
-    console.error('Error: --deployment must be "local" or "localtunnel"');
-    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|localtunnel --server_setup_delay=NN');
+  // Parse deployment and extract residence if portforward:RESIDENCE format
+  let deployment = deploymentArg;
+  let residence = null;
+
+  if (deploymentArg.startsWith('portforward:')) {
+    deployment = 'portforward';
+    residence = deploymentArg.split(':')[1];
+    if (!residence) {
+      console.error('Error: --deployment=portforward:RESIDENCE requires a residence name');
+      console.error('Example: --deployment=portforward:erics_cottage');
+      process.exit(1);
+    }
+  }
+
+  if (!['local', 'localhost', 'localtunnel', 'portforward'].includes(deployment)) {
+    console.error('Error: --deployment must be "local", "localhost", "localtunnel", or "portforward:RESIDENCE"');
+    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|localhost|localtunnel|portforward:RESIDENCE --server_setup_delay=NN');
     process.exit(1);
   }
 
   if (!['yes', 'no'].includes(proxy)) {
     console.error('Error: --proxy must be "yes" or "no"');
-    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|localtunnel --server_setup_delay=NN');
+    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|localhost|localtunnel|portforward:RESIDENCE --server_setup_delay=NN');
     process.exit(1);
   }
 
@@ -50,9 +64,53 @@ function parseArgs() {
     process.exit(1);
   }
 
-  return { deployment, proxy, serverSetupDelay };
+  return { deployment, proxy, residence, serverSetupDelay };
 }
 
+
+/**
+ * Load portforward configuration via launch_portforward.js
+ */
+async function loadPortforwardConfig(residence) {
+  console.log(`\nLoading port forwarding configuration for residence: ${residence}...`);
+
+  return new Promise((resolve, reject) => {
+    const pf = spawn('node', [
+      'launch_portforward.js',
+      `--residence=${residence}`,
+      '--json'
+    ]);
+
+    let outputBuffer = '';
+
+    pf.stdout.on('data', (data) => {
+      outputBuffer += data.toString();
+    });
+
+    pf.stderr.on('data', (data) => {
+      console.error(`Port forward error: ${data.toString()}`);
+    });
+
+    pf.on('close', (code) => {
+      if (code !== 0) {
+        reject(new Error(`Failed to load port forward config (exit code: ${code})`));
+        return;
+      }
+
+      try {
+        const result = JSON.parse(outputBuffer);
+        if (result.success && result.publicUrl) {
+          console.log(`Port forward URL loaded: ${result.publicUrl}`);
+          resolve({ url: result.publicUrl });
+        } else {
+          reject(new Error(result.error || 'Unknown error loading port forward config'));
+        }
+      } catch (e) {
+        reject(new Error(`Failed to parse port forward config: ${e.message}`));
+      }
+    });
+  });
+}
 
 // Spawn localtunnel via launch_localtunnel.js and extract the public URL
 async function startLocaltunnel(port, timeoutSeconds = 10) {
@@ -588,7 +646,7 @@ async function main() {
     return;
   }
 
-  // Step 1: Start localtunnel (if needed) and sleep for server initialization IN PARALLEL
+  // Step 1: Start tunnel/load config (if needed) and sleep for server initialization IN PARALLEL
   let baseUrl;
   let tunnelProcess = null;
   let tunnelPassword = null;
@@ -624,6 +682,45 @@ async function main() {
       console.error('  - Localtunnel service is down');
       console.error('  - Timeout too short (increase --server_setup_delay)');
       console.error('  - Port 8999 is not available');
+      console.error('='.repeat(80) + '\n');
+      process.exit(1);
+    }
+  } else if (deployment === 'portforward') {
+    // Load port forwarding configuration
+    try {
+      const pfResult = await loadPortforwardConfig(residence);
+      baseUrl = pfResult.url;
+
+      console.log('\n' + '━'.repeat(80));
+      console.log('');
+      console.log('PORT FORWARDING MODE ACTIVE');
+      console.log('');
+      console.log(`Public URL: ${baseUrl}`);
+      console.log(`Residence: ${residence}`);
+      console.log('');
+      console.log('IMPORTANT: Ensure your router has port forwarding configured:');
+      console.log(`  External Port ${PROXY_PORT} -> Your local machine port ${PROXY_PORT}`);
+      console.log('');
+      console.log('━'.repeat(80) + '\n');
+
+      // Still need to wait for servers
+      if (serverSetupDelay > 0) {
+        console.log(`Waiting ${serverSetupDelay} seconds for servers to initialize...`);
+        await new Promise(resolve => setTimeout(resolve, serverSetupDelay * 1000));
+        console.log('Server setup delay complete\n');
+      }
+    } catch (error) {
+      // FATAL ERROR - port forward config is required
+      console.error('\n' + '='.repeat(80));
+      console.error('FATAL ERROR: Failed to load port forward configuration');
+      console.error('='.repeat(80));
+      console.error(`Error: ${error.message}`);
+      console.error(`Residence: ${residence}`);
+      console.error('\nPort forwarding configuration is REQUIRED when --deployment=portforward:RESIDENCE is specified.');
+      console.error('\nTo fix:');
+      console.error(`  1. Run: node get-public-ip.js --residence=${residence}`);
+      console.error(`  2. Configure port forwarding on your router`);
+      console.error(`  3. Try again`);
       console.error('='.repeat(80) + '\n');
       process.exit(1);
     }

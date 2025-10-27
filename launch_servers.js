@@ -904,12 +904,14 @@ async function main() {
         // Launch reverse proxy immediately - it will handle the server setup delay internally
         const proxyLabel = 'reverse-proxy:8999';
         const proxyCmd = 'node';
-        const proxyArgs = ['setup-reverse-proxy.js', `--proxy=yes`, `--deployment=${options.deployment}`, `--server_setup_delay=10`];
 
-        // Add residence parameter for portforward deployment
+        // Build deployment string - if portforward, include residence
+        let deploymentString = options.deployment;
         if (options.deployment === 'portforward' && options.residence) {
-            proxyArgs.push(`--residence=${options.residence}`);
+            deploymentString = `portforward:${options.residence}`;
         }
+
+        const proxyArgs = ['setup-reverse-proxy.js', `--proxy=yes`, `--deployment=${deploymentString}`, `--server_setup_delay=10`];
 
         console.log(`${colors.cyan}Starting reverse proxy server...${colors.reset}\n`);
 
