@@ -26,7 +26,8 @@
 
 import ngrok from 'ngrok';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { dirname, join } from 'path';
+import { readFileSync, existsSync } from 'fs';
 import JSON5 from 'json5';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -201,6 +202,31 @@ INTEGRATION:
 `);
 }
 
+// Read ngrok authtoken from file
+function readAuthtoken() {
+  const authtokenPath = join(__dirname, 'ngrok_authtoken.txt');
+
+  if (!existsSync(authtokenPath)) {
+    return null;
+  }
+
+  try {
+    const content = readFileSync(authtokenPath, 'utf8');
+    // Extract token from file (skip header lines and blank lines)
+    const lines = content.split('\n').map(line => line.trim());
+    for (const line of lines) {
+      // Look for line that looks like a token (long alphanumeric with underscores)
+      if (line.length > 20 && /^[A-Za-z0-9_-]+$/.test(line)) {
+        return line;
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error(`Error reading authtoken file: ${error.message}`);
+    return null;
+  }
+}
+
 // Check if ngrok module is available
 async function checkNgrokInstalled() {
   try {
@@ -212,22 +238,30 @@ async function checkNgrokInstalled() {
 }
 
 // Start ngrok tunnel using Node.js API
-async function startNgrokTunnel(port, managementPort, region, jsonMode) {
+async function startNgrokTunnel(port, managementPort, region, jsonMode, authtoken) {
   if (!jsonMode) {
     console.log(`\n🚇 Starting ngrok tunnel...`);
     console.log(`   Local port: ${port}`);
     // TODO: Re-enable when we figure out how to configure management port with ngrok npm package
     // console.log(`   Management port: ${managementPort}`);
     console.log(`   Region: ${region}`);
+    console.log(`   Authtoken: ${authtoken ? 'Loaded from file' : 'Not found'}`);
   }
 
   try {
-    const url = await ngrok.connect({
-      addr: port,
+    const connectOptions = {
+      addr: `http://localhost:${port}`,  // Try full URL format
       region: region
       // TODO: Re-enable when we figure out correct option name for management port
       // web_addr: `localhost:${managementPort}`
-    });
+    };
+
+    // Add authtoken if available
+    if (authtoken) {
+      connectOptions.authtoken = authtoken;
+    }
+
+    const url = await ngrok.connect(connectOptions);
 
     // TODO: Get actual ngrok API URL when management port is configurable
     const ngrokManagementUrl = `http://127.0.0.1:4040`; // ngrok default
@@ -249,6 +283,8 @@ async function startNgrokTunnel(port, managementPort, region, jsonMode) {
   } catch (error) {
     if (!jsonMode) {
       console.error(`\n❌ Failed to start ngrok: ${error.message}`);
+      console.error(`\nFull error details:`);
+      console.error(error);
     }
     throw error;
   }
@@ -325,10 +361,32 @@ async function main() {
     console.log(`   ✅ Ngrok module is available`);
   }
 
+  // Read authtoken from file
+  const authtoken = readAuthtoken();
+
+  if (!authtoken && !options.json) {
+    console.warn(`\n⚠️  Warning: No authtoken found in ngrok_authtoken.txt`);
+    console.warn(`   Ngrok may fail without authentication.`);
+    console.warn(`   Get your token from: https://dashboard.ngrok.com/get-started/your-authtoken`);
+  }
+
+  // Disconnect any existing tunnels first
+  if (!options.json) {
+    console.log(`\n🔌 Disconnecting any existing ngrok tunnels...`);
+  }
+  try {
+    await ngrok.disconnect();
+    await ngrok.kill();
+    // Wait a moment for cleanup
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  } catch (error) {
+    // Ignore errors if no tunnels exist
+  }
+
   // Start ngrok tunnel (this will wait until tunnel is established)
   let result;
   try {
-    result = await startNgrokTunnel(options.port, options.managementPort, options.region, options.json);
+    result = await startNgrokTunnel(options.port, options.managementPort, options.region, options.json, authtoken);
   } catch (error) {
     if (options.json) {
       console.log(JSON5.stringify({

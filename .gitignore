@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Ngrok credentials (NEVER commit these)
+ngrok_authtoken.txt
+ngrok_recovery_codes.txt
