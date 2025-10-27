@@ -28,8 +28,7 @@ const PROXY_PORT = 8999; // The single port we'll expose externally (via localtu
 // Parse command-line arguments
 function parseArgs() {
   const args = process.argv.slice(2);
-  const deploymentArg = args.find(arg => arg.startsWith('--deployment='))?.split('=')[1] || 'local';
-  const proxy = args.find(arg => arg.startsWith('--proxy='))?.split('=')[1] || 'no';
+  const deploymentArg = args.find(arg => arg.startsWith('--deployment='))?.split('=')[1] || 'direct';
   const serverSetupDelayArg = args.find(arg => arg.startsWith('--server_setup_delay='))?.split('=')[1];
   const serverSetupDelay = serverSetupDelayArg ? parseInt(serverSetupDelayArg, 10) : 10;
 
@@ -49,13 +48,7 @@ function parseArgs() {
 
   if (!['direct', 'localproxy', 'ngrok', 'localtunnel', 'portforward'].includes(deployment)) {
     console.error('Error: --deployment must be "direct", "localproxy", "ngrok", "localtunnel", or "portforward:RESIDENCE"');
-    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=direct|localproxy|ngrok|localtunnel|portforward:RESIDENCE --server_setup_delay=NN');
-    process.exit(1);
-  }
-
-  if (!['yes', 'no'].includes(proxy)) {
-    console.error('Error: --proxy must be "yes" or "no"');
-    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=direct|localproxy|ngrok|localtunnel|portforward:RESIDENCE --server_setup_delay=NN');
+    console.error('Usage: node setup-reverse-proxy.js --deployment=direct|localproxy|ngrok|localtunnel|portforward:RESIDENCE --server_setup_delay=NN');
     process.exit(1);
   }
 
@@ -64,7 +57,7 @@ function parseArgs() {
     process.exit(1);
   }
 
-  return { deployment, proxy, residence, serverSetupDelay };
+  return { deployment, residence, serverSetupDelay };
 }
 
 
@@ -544,13 +537,12 @@ async function main() {
   console.log('=================================\n');
 
   // Parse command-line arguments
-  const { deployment, proxy, serverSetupDelay } = parseArgs();
-  console.log(`Proxy mode: ${proxy}`);
+  const { deployment, residence, serverSetupDelay } = parseArgs();
   console.log(`Deployment mode: ${deployment}`);
   console.log(`Server setup delay: ${serverSetupDelay} seconds\n`);
 
-  // If proxy=no, scan ports and create direct mode config file
-  if (proxy === 'no') {
+  // If deployment=direct, scan ports and create direct mode config file
+  if (deployment === 'direct') {
     // Step 1: Wait for servers to initialize
     if (serverSetupDelay > 0) {
       console.log(`Waiting ${serverSetupDelay} seconds for servers to initialize...`);

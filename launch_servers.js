@@ -596,10 +596,7 @@ async function main() {
     if (!isBuildOnly) {
         console.log(`  Auto-restart: ${options.restart}`);
         console.log(`  Purpose: ${options.purpose}`);
-        console.log(`  Proxy mode: ${options.proxy}`);
-        if (options.proxy === 'yes') {
-            console.log(`  Deployment: ${options.deployment}`);
-        }
+        console.log(`  Deployment: ${options.deployment}`);
         console.log(`  New tabs: ${options.newtab}`);
     }
     console.log(`  Games: ${options.games.join(', ')}\n`);
@@ -674,13 +671,13 @@ async function main() {
         options.games.unshift('hub');
     }
 
-    // If proxy=no, launch config creator BEFORE servers start
-    if (options.proxy === 'no') {
-        console.log(`${colors.cyan}Launching no-proxy configuration manager...${colors.reset}\n`);
+    // If deployment=direct, launch config creator BEFORE servers start
+    if (options.deployment === 'direct') {
+        console.log(`${colors.cyan}Launching direct mode configuration manager...${colors.reset}\n`);
 
-        const proxyLabel = 'proxy-config:no-proxy';
+        const proxyLabel = 'proxy-config:direct';
         const proxyCmd = 'node';
-        const proxyArgs = ['setup-reverse-proxy.js', '--proxy=no'];
+        const proxyArgs = ['launch_proxy.js', '--deployment=direct'];
 
         if (useNewTabs) {
             const proxyProc = await launchProcessInNewTab(
@@ -704,8 +701,8 @@ async function main() {
         console.log(`${colors.green}No-proxy configuration manager running${colors.reset}\n`);
     }
 
-    // Show proxy mode status
-    if (options.proxy === 'yes') {
+    // Show deployment mode status
+    if (options.deployment !== 'direct') {
         console.log(`${colors.bright}${colors.yellow}Proxy mode enabled (deployment: ${options.deployment})${colors.reset}`);
         console.log(`${colors.yellow}Note: Proxy will be launched AFTER all game servers are running${colors.reset}\n`);
     }
@@ -811,11 +808,11 @@ async function main() {
                     ...process.env,
                     PORT: backendPort.toString(),
                     TRUE_URL,
-                    PROXY_ENABLED: options.proxy === 'yes' ? 'true' : 'false',
+                    PROXY_ENABLED: options.deployment !== 'direct' ? 'true' : 'false',
                     PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json'),
                     MAX_PROXY_SETUP_SECONDS: '20'  // Maximum time to wait for proxy config (server_setup_delay + 10)
                 };
-                if (options.proxy === 'yes') {
+                if (options.deployment !== 'direct') {
                     backendEnv.VITE_BASE_PATH = `/localhost_${backendPort}`;
                 }
 
@@ -845,11 +842,11 @@ async function main() {
                 const frontendEnv = {
                     ...process.env,
                     PORT: frontendPort.toString(),
-                    PROXY_ENABLED: options.proxy === 'yes' ? 'true' : 'false',
+                    PROXY_ENABLED: options.deployment !== 'direct' ? 'true' : 'false',
                     PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json'),
                     MAX_PROXY_SETUP_SECONDS: '20'  // Maximum time to wait for proxy config (server_setup_delay + 10)
                 };
-                if (options.proxy === 'yes') {
+                if (options.deployment !== 'direct') {
                     frontendEnv.VITE_BASE_PATH = `/localhost_${frontendPort}`;
                 }
 
@@ -891,7 +888,7 @@ async function main() {
     console.log(`${colors.bright}${colors.green}Started ${processes.length} server(s)${colors.reset}`);
 
     // Launch reverse proxy AFTER all game servers are running
-    if (options.proxy === 'yes') {
+    if (options.deployment !== 'direct') {
         console.log(`\n${colors.bright}${colors.yellow}Launching reverse proxy...${colors.reset}`);
         console.log(`${colors.yellow}Proxy will wait 10 seconds for game servers to fully initialize...${colors.reset}\n`);
 
@@ -905,7 +902,7 @@ async function main() {
             deploymentString = `portforward:${options.residence}`;
         }
 
-        const proxyArgs = ['setup-reverse-proxy.js', `--proxy=yes`, `--deployment=${deploymentString}`, `--server_setup_delay=10`];
+        const proxyArgs = ['launch_proxy.js', `--deployment=${deploymentString}`, `--server_setup_delay=10`];
 
         console.log(`${colors.cyan}Starting reverse proxy server...${colors.reset}\n`);
 
