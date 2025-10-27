@@ -1,11 +1,15 @@
 import http from 'http';
 import httpProxy from 'http-proxy';
 import net from 'net';
-import { promises as fs, existsSync, unlinkSync } from 'fs';
+import { promises as fs, existsSync, unlinkSync, readFileSync } from 'fs';
 import { createInterface } from 'readline';
 import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import { spawn } from 'child_process';
 import JSON5 from 'json5';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const num_ports = 5;  // number of ports in each range that might need proxies
 

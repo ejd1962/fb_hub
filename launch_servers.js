@@ -25,11 +25,14 @@
  *                               Automatically launches setup-reverse-proxy.js on port 8999
  *                               Sets VITE_BASE_PATH for proper asset serving through proxy
  *
- *   --deployment=<local|ngrok|localtunnel>  Proxy deployment method (default: local)
+ *   --deployment=<local|localhost|localtunnel|portforward:RESIDENCE>
+ *                               Proxy deployment method (default: local)
  *                               Only used when --proxy=yes is specified
  *                               local: Proxy for local testing (http://localhost:8999)
- *                               ngrok: Proxy for external access via ngrok public URL
- *                               localtunnel: Proxy for external access via localtunnel (FREE)
+ *                               localhost: Same as local
+ *                               localtunnel: Proxy for external access via localtunnel (FREE, but slow)
+ *                               portforward:RESIDENCE: Use port forwarding with configured residence
+ *                                 Example: --deployment=portforward:erics_cottage
  *
  *   --build-only=<yes|no>       Only build frontend, don't launch servers (default: no)
  *   --restart=<auto|no>         Enable auto-restart on file changes (default: auto)
@@ -219,7 +222,8 @@ function parseArgs(args) {
         restart: 'auto',
         newtab: 'yes',
         purpose: 'designer_test',  // designer_test, alpha_test, beta_test, or customer_access
-        deployment: 'local',  // local or ngrok - proxy deployment method
+        deployment: 'local',  // local, localhost, localtunnel, portforward:<residence> - proxy deployment method
+        residence: null,   // Extracted from deployment=portforward:<residence>
         proxy: 'no',       // yes or no - use reverse proxy mode
         games: []
     };
@@ -239,7 +243,14 @@ function parseArgs(args) {
         } else if (arg.startsWith('--purpose=')) {
             options.purpose = arg.split('=')[1];
         } else if (arg.startsWith('--deployment=')) {
-            options.deployment = arg.split('=')[1];
+            const deploymentValue = arg.split('=')[1];
+            // Check if it's portforward:<residence> format
+            if (deploymentValue.startsWith('portforward:')) {
+                options.deployment = 'portforward';
+                options.residence = deploymentValue.split(':')[1];
+            } else {
+                options.deployment = deploymentValue;
+            }
         } else if (arg.startsWith('--proxy=')) {
             options.proxy = arg.split('=')[1];
         } else if (arg.startsWith('--games=')) {
@@ -894,6 +905,11 @@ async function main() {
         const proxyLabel = 'reverse-proxy:8999';
         const proxyCmd = 'node';
         const proxyArgs = ['setup-reverse-proxy.js', `--proxy=yes`, `--deployment=${options.deployment}`, `--server_setup_delay=10`];
+
+        // Add residence parameter for portforward deployment
+        if (options.deployment === 'portforward' && options.residence) {
+            proxyArgs.push(`--residence=${options.residence}`);
+        }
 
         console.log(`${colors.cyan}Starting reverse proxy server...${colors.reset}\n`);
 

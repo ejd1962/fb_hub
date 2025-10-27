@@ -1,0 +1,19 @@
+{
+  // Port forwarding configuration for different residences
+  // Each residence defines the public-facing host and port for accessing your proxy server
+
+  "erics_cottage": {
+    "public_host": null,     // Will be auto-filled by get-public-ip.js, or set manually
+    "public_port": 8999,     // Port forwarded on your router to local port 8999
+    "last_updated": null,    // Timestamp of last IP fetch
+    "notes": "Eric's cottage - main residence"
+  },
+
+  // Example of additional residences (add as needed):
+  // "erics_office": {
+  //   "public_host": null,
+  //   "public_port": 8999,
+  //   "last_updated": null,
+  //   "notes": "Office location"
+  // }
+}
