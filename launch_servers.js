@@ -440,6 +440,62 @@ function launchProcess(command, args, options, label, color) {
 }
 
 // Main function
+// Post-launch verification: check that proxy table has expected number of servers
+async function postLaunchCheck(options, gameNames) {
+    console.log(`${colors.cyan}Performing post-launch verification...${colors.reset}\n`);
+
+    try {
+        const proxyConfigPath = path.join(__dirname, 'reverse_proxy.json');
+        const proxyConfig = JSON.parse(readFileSync(proxyConfigPath, 'utf-8'));
+
+        // Calculate expected number of ports
+        const serversToLaunch = ['hub', ...gameNames]; // hub is always included
+        let expectedPorts = 0;
+
+        if (options.mode === 'dev-vite') {
+            // Each server has 2 ports: backend + frontend
+            expectedPorts = serversToLaunch.length * 2;
+        } else {
+            // prod or dev mode: 1 port per server (backend only)
+            expectedPorts = serversToLaunch.length;
+        }
+
+        const actualPorts = Object.keys(proxyConfig.routes).length;
+
+        console.log(`${colors.cyan}Expected ports: ${expectedPorts}${colors.reset}`);
+        console.log(`${colors.cyan}Found ports:    ${actualPorts}${colors.reset}\n`);
+
+        if (actualPorts !== expectedPorts) {
+            console.log(`${colors.red}⚠️  WARNING: Port count mismatch!${colors.reset}`);
+            console.log(`${colors.yellow}Expected ${expectedPorts} ports but found ${actualPorts} in proxy table.${colors.reset}`);
+            console.log(`${colors.yellow}Some servers may have failed to start or bind to their ports.${colors.reset}\n`);
+
+            console.log(`${colors.cyan}Ports found in proxy table:${colors.reset}`);
+            for (const [route, info] of Object.entries(proxyConfig.routes)) {
+                console.log(`  ${colors.green}✓${colors.reset} ${route} → localhost:${info.local_port} (${info.type})`);
+            }
+            console.log('');
+
+            return { success: false, hubUrl: null };
+        }
+
+        // All ports found - determine hub URL
+        const hubRoute = proxyConfig.routes['/localhost_11000'] || proxyConfig.routes['/localhost_10000'] || proxyConfig.routes['/localhost_9000'];
+
+        if (!hubRoute) {
+            console.log(`${colors.red}⚠️  WARNING: Hub frontend not found in proxy table!${colors.reset}\n`);
+            return { success: false, hubUrl: null };
+        }
+
+        const hubUrl = hubRoute.public_url;
+        return { success: true, hubUrl, actualPorts, expectedPorts };
+
+    } catch (error) {
+        console.log(`${colors.red}ERROR: Could not read proxy config: ${error.message}${colors.reset}\n`);
+        return { success: false, hubUrl: null };
+    }
+}
+
 async function main() {
     log(`\n${'='.repeat(60)}`);
     log(`[SCRIPT START] launch_game.js starting, PID: ${process.pid}`);
@@ -803,6 +859,37 @@ async function main() {
         }
 
         console.log(`${colors.green}Reverse proxy launched on port 8999${colors.reset}\n`);
+
+        // Wait for proxy to fully initialize and servers to register
+        console.log(`${colors.cyan}Waiting 5 more seconds for proxy routes to be established...${colors.reset}\n`);
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        // Read proxy config to get the hub URL
+        try {
+            const proxyConfigPath = path.join(__dirname, 'reverse_proxy.json');
+            const proxyConfig = JSON.parse(readFileSync(proxyConfigPath, 'utf-8'));
+            const baseUrl = proxyConfig.base_url;
+
+            // In dev-vite mode, hub frontend is on 11000. In dev mode it's on 10000. In prod it's on 9000.
+            const hubRoute = proxyConfig.routes['/localhost_11000'] || proxyConfig.routes['/localhost_10000'] || proxyConfig.routes['/localhost_9000'];
+
+            if (hubRoute) {
+                const hubUrl = hubRoute.public_url;
+
+                // Display big success banner
+                console.log('\n' + '═'.repeat(80));
+                console.log('║' + ' '.repeat(78) + '║');
+                console.log('║' + colors.bright + colors.green + ' '.repeat(25) + '🚀  LAUNCH SUCCESSFUL!  🚀' + ' '.repeat(24) + colors.reset + '║');
+                console.log('║' + ' '.repeat(78) + '║');
+                console.log('║' + colors.bright + colors.cyan + '  Open this URL in your browser to access the Hub:' + ' '.repeat(27) + colors.reset + '║');
+                console.log('║' + ' '.repeat(78) + '║');
+                console.log('║' + colors.bright + colors.yellow + '  👉  ' + hubUrl + ' '.repeat(Math.max(0, 68 - hubUrl.length)) + colors.reset + '║');
+                console.log('║' + ' '.repeat(78) + '║');
+                console.log('═'.repeat(80) + '\n');
+            }
+        } catch (error) {
+            console.log(`${colors.yellow}Could not read proxy config, but servers should be running${colors.reset}\n`);
+        }
     }
 
     if (useNewTabs) {
