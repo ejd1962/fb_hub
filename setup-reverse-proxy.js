@@ -84,8 +84,19 @@ async function startLocaltunnel(port, timeoutSeconds = 10) {
         if (result.success && result.publicUrl && !ltUrl) {
           ltUrl = result.publicUrl;
           clearTimeout(timeout);
-          console.log(`\n✓ localtunnel URL obtained: ${ltUrl}\n`);
-          resolve({ url: ltUrl, process: lt });
+          console.log(`\n✓ localtunnel URL obtained: ${ltUrl}`);
+          if (result.tunnelPassword) {
+            console.log(`✓ Tunnel password obtained: ${result.tunnelPassword}`);
+            console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+            console.log(`🔑 SHARE WITH USERS:`);
+            console.log(`   URL:      ${ltUrl}`);
+            console.log(`   Password: ${result.tunnelPassword}`);
+            console.log(`   (First-time visitors need password - once per IP per 7 days)`);
+            console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
+          } else {
+            console.log();
+          }
+          resolve({ url: ltUrl, password: result.tunnelPassword, process: lt });
         } else if (!result.success) {
           clearTimeout(timeout);
           lt.kill();
@@ -217,13 +228,14 @@ function getPortContext(port) {
 }
 
 // Generate path mappings
-function generateMappings(activeServices, baseUrl) {
+function generateMappings(activeServices, baseUrl, tunnelPassword = null) {
   const mappings = {
     proxy_port: PROXY_PORT,
     base_url: baseUrl,
     mode: 'proxy',
     created_at: new Date().toISOString(),
     created_by_pid: process.pid,
+    tunnel_password: tunnelPassword,  // Add tunnel password if using localtunnel
     routes: {}
   };
 
@@ -573,6 +585,7 @@ async function main() {
   // Step 1: Start localtunnel (if needed) and sleep for server initialization IN PARALLEL
   let baseUrl;
   let tunnelProcess = null;
+  let tunnelPassword = null;
 
   if (deployment === 'localtunnel') {
     // Start localtunnel AND sleep in parallel
@@ -589,6 +602,7 @@ async function main() {
       ]);
       baseUrl = tunnelResult.url;
       tunnelProcess = tunnelResult.process;
+      tunnelPassword = tunnelResult.password;
     } catch (error) {
       // FATAL ERROR - localtunnel is required when deployment=localtunnel
       console.error('\n' + '='.repeat(80));
@@ -642,7 +656,7 @@ async function main() {
 
   // Step 4: Generate mappings
   const mappingsStartTime = Date.now();
-  const mappings = generateMappings(activeServices, baseUrl);
+  const mappings = generateMappings(activeServices, baseUrl, tunnelPassword);
   await saveMappings(mappings);
   const mappingsEndTime = Date.now();
   console.log(`[T+${((mappingsEndTime - scriptStartTime) / 1000).toFixed(3)}s | ${new Date(mappingsEndTime).toISOString()}] Mappings generated and saved to reverse_proxy.json`);

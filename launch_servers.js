@@ -202,6 +202,7 @@ function killProcessOnPort(port) {
 const colors = {
     reset: '\x1b[0m',
     bright: '\x1b[1m',
+    dim: '\x1b[2m',
     red: '\x1b[31m',
     green: '\x1b[32m',
     yellow: '\x1b[33m',
@@ -554,7 +555,8 @@ async function postLaunchCheck(options, gameNames, silent = false) {
         }
 
         const hubUrl = hubRoute.public_url;
-        return { success: true, hubUrl, actualPorts, expectedPorts };
+        const tunnelPassword = proxyConfig.tunnel_password || null;
+        return { success: true, hubUrl, actualPorts, expectedPorts, tunnelPassword };
 
     } catch (error) {
         if (!silent) {
@@ -973,6 +975,16 @@ async function main() {
             console.log('║' + colors.bright + colors.cyan + '  Open this URL in your browser to access the Hub:' + ' '.repeat(27) + colors.reset + '║');
             console.log('║' + ' '.repeat(78) + '║');
             console.log('║' + colors.bright + colors.yellow + '  👉  ' + result.hubUrl + ' '.repeat(Math.max(0, 68 - result.hubUrl.length)) + colors.reset + '║');
+
+            // Add tunnel password if present
+            if (result.tunnelPassword) {
+                console.log('║' + ' '.repeat(78) + '║');
+                console.log('║' + colors.bright + colors.cyan + '  🔑 Tunnel Password (share with users):' + ' '.repeat(36) + colors.reset + '║');
+                console.log('║' + ' '.repeat(78) + '║');
+                console.log('║' + colors.bright + colors.yellow + '  👉  ' + result.tunnelPassword + ' '.repeat(Math.max(0, 68 - result.tunnelPassword.length)) + colors.reset + '║');
+                console.log('║' + colors.dim + '     (First-time visitors need this - once per IP per 7 days)' + ' '.repeat(16) + colors.reset + '║');
+            }
+
             console.log('║' + ' '.repeat(78) + '║');
             console.log('═'.repeat(80) + '\n');
         } else {

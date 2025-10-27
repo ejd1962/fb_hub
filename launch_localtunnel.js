@@ -485,6 +485,18 @@ async function main() {
   // Health check
   await healthCheckTunnel(result.publicUrl, options.json);
 
+  // Fetch tunnel password (public IP)
+  let tunnelPassword = null;
+  try {
+    const passwordResponse = await fetch('https://loca.lt/mytunnelpassword');
+    tunnelPassword = await passwordResponse.text();
+    tunnelPassword = tunnelPassword.trim();
+  } catch (error) {
+    if (!options.json) {
+      console.error(`\n⚠️  Could not fetch tunnel password: ${error.message}`);
+    }
+  }
+
   // Output result
   if (options.json) {
     // Create JSON-safe output (exclude tunnel object which can't be serialized)
@@ -494,7 +506,8 @@ async function main() {
       localPort: result.localPort,
       requestedSubdomain: result.requestedSubdomain,
       actualSubdomain: result.actualSubdomain,
-      subdomainGranted: result.subdomainGranted
+      subdomainGranted: result.subdomainGranted,
+      tunnelPassword: tunnelPassword
     };
     const jsonString = JSON.stringify(jsonOutput, null, 2);
     process.stdout.write(jsonString + '\n');
@@ -509,6 +522,11 @@ async function main() {
     console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
     console.log(`\n  Use this URL to access your system from anywhere:`);
     console.log(`  👉 ${result.publicUrl}`);
+    if (tunnelPassword) {
+      console.log(`\n  🔑 TUNNEL PASSWORD (share this with users):`);
+      console.log(`  👉 ${tunnelPassword}`);
+      console.log(`\n  ℹ️  First-time visitors need this password (once per IP per 7 days)`);
+    }
     console.log(`\n  Press Ctrl+C to stop the tunnel when done.`);
     console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
   }
