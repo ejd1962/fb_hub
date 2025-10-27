@@ -201,13 +201,25 @@ INTEGRATION:
 `);
 }
 
-// Check if ngrok is installed
+// Check if ngrok is installed (via npm)
 async function checkNgrokInstalled() {
   return new Promise((resolve) => {
-    const check = spawn('ngrok', ['version'], { shell: true });
+    // Try running npx ngrok version (will use installed version if available)
+    const check = spawn('npx', ['ngrok', 'version'], {
+      shell: true,
+      stdio: ['ignore', 'pipe', 'pipe']
+    });
+
+    let output = '';
+    check.stdout.on('data', (data) => {
+      output += data.toString();
+    });
 
     check.on('error', () => resolve(false));
-    check.on('exit', (code) => resolve(code === 0));
+    check.on('exit', (code) => {
+      // Consider it installed if exit code is 0 and we got version output
+      resolve(code === 0 && output.length > 0);
+    });
   });
 }
 
@@ -220,7 +232,8 @@ function startNgrokTunnel(port, managementPort, region, jsonMode) {
     console.log(`   Region: ${region}`);
   }
 
-  const ngrokProcess = spawn('ngrok', [
+  const ngrokProcess = spawn('npx', [
+    'ngrok',
     'http',
     port.toString(),
     '--region', region,
@@ -396,10 +409,9 @@ async function main() {
         error: 'Ngrok not installed or not in PATH'
       }, null, 2));
     } else {
-      console.error(`\n❌ ERROR: ngrok is not installed or not in PATH`);
-      console.error(`\nPlease install ngrok:`);
-      console.error(`  - Download from: https://ngrok.com/download`);
-      console.error(`  - Or install via package manager (e.g., npm install -g ngrok)`);
+      console.error(`\n❌ ERROR: ngrok is not installed`);
+      console.error(`\nPlease install ngrok via npm:`);
+      console.error(`  npm install -g ngrok`);
     }
     process.exit(1);
   }
