@@ -447,8 +447,10 @@ function launchProcess(command, args, options, label, color) {
 // Main function
 // Post-launch verification: check that proxy table has expected number of servers
 // and perform health checks on each server
-async function postLaunchCheck(options, gameNames) {
-    console.log(`${colors.cyan}Performing post-launch verification...${colors.reset}\n`);
+async function postLaunchCheck(options, gameNames, silent = false) {
+    if (!silent) {
+        console.log(`${colors.cyan}Performing post-launch verification...${colors.reset}\n`);
+    }
 
     try {
         const proxyConfigPath = path.join(__dirname, 'reverse_proxy.json');
@@ -555,7 +557,9 @@ async function postLaunchCheck(options, gameNames) {
         return { success: true, hubUrl, actualPorts, expectedPorts };
 
     } catch (error) {
-        console.log(`${colors.red}ERROR: Could not read proxy config: ${error.message}${colors.reset}\n`);
+        if (!silent) {
+            console.log(`${colors.red}ERROR: Could not read proxy config: ${error.message}${colors.reset}\n`);
+        }
         return { success: false, hubUrl: null };
     }
 }
@@ -926,13 +930,39 @@ async function main() {
         console.log(`${colors.green}Reverse proxy launched on port 8999${colors.reset}\n`);
 
         // Wait for proxy to fully initialize and servers to register
-        console.log(`${colors.cyan}Waiting 5 more seconds for proxy routes to be established...${colors.reset}\n`);
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        // MAX_PROXY_SETUP_SECONDS is server_setup_delay (10) + 10 = 20
+        // Add 5 second buffer for file creation and final setup
+        const MAX_PROXY_SETUP_SECONDS = 20;
+        const maxWaitSeconds = MAX_PROXY_SETUP_SECONDS + 5;
+        console.log(`${colors.cyan}Polling for up to ${maxWaitSeconds} seconds until all servers are healthy...${colors.reset}\n`);
 
-        // Perform post-launch verification
-        const result = await postLaunchCheck(options, options.games);
+        let result = null;
+        let secondsElapsed = 0;
+        const startTime = Date.now();
 
-        if (result.success) {
+        // Poll once per second until success or timeout
+        while (secondsElapsed < maxWaitSeconds) {
+            // Use silent mode during polling to avoid spamming error messages
+            result = await postLaunchCheck(options, options.games, true);
+
+            if (result.success) {
+                // Do one final verbose check to show the details
+                console.log(`${colors.green}✓ All servers detected as healthy after ${secondsElapsed} seconds!${colors.reset}\n`);
+                result = await postLaunchCheck(options, options.games, false);
+                break;
+            }
+
+            // Wait 1 second before next check
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            secondsElapsed = Math.floor((Date.now() - startTime) / 1000);
+
+            // Show progress every 5 seconds
+            if (secondsElapsed % 5 === 0 && secondsElapsed > 0) {
+                console.log(`${colors.yellow}   Still waiting... (${secondsElapsed}/${maxWaitSeconds}s)${colors.reset}`);
+            }
+        }
+
+        if (result && result.success) {
             // Display big success banner
             console.log('\n' + '═'.repeat(80));
             console.log('║' + ' '.repeat(78) + '║');
@@ -950,8 +980,13 @@ async function main() {
             console.log('║' + ' '.repeat(78) + '║');
             console.log('║' + colors.bright + colors.red + ' '.repeat(28) + '⚠️  LAUNCH INCOMPLETE  ⚠️' + ' '.repeat(25) + colors.reset + '║');
             console.log('║' + ' '.repeat(78) + '║');
-            console.log('║' + colors.yellow + '  Some servers may not have started correctly.' + ' '.repeat(30) + colors.reset + '║');
+            if (secondsElapsed >= maxWaitSeconds) {
+                console.log('║' + colors.red + '  TIMEOUT: Servers did not become healthy within ' + maxWaitSeconds + ' seconds.' + ' '.repeat(Math.max(0, 20 - maxWaitSeconds.toString().length)) + colors.reset + '║');
+            } else {
+                console.log('║' + colors.yellow + '  Some servers may not have started correctly.' + ' '.repeat(30) + colors.reset + '║');
+            }
             console.log('║' + colors.yellow + '  Check the output above for details.' + ' '.repeat(39) + colors.reset + '║');
+            console.log('║' + colors.yellow + '  Check individual server tabs for error messages.' + ' '.repeat(26) + colors.reset + '║');
             console.log('║' + ' '.repeat(78) + '║');
             console.log('═'.repeat(80) + '\n');
         }
