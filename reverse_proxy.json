@@ -1,0 +1,41 @@
+{
+  proxy_port: 8999,
+  base_url: 'http://localhost:8999',
+  mode: 'proxy',
+  created_at: '2025-10-27T05:10:31.748Z',
+  created_by_pid: 7748,
+  routes: {
+    '/localhost_10000': {
+      local_port: 10000,
+      public_url: 'http://localhost:8999/localhost_10000',
+      mode: 'proxy',
+      type: 'backend',
+      app_type: 'hub',
+      tier: 'dev',
+    },
+    '/localhost_11000': {
+      local_port: 11000,
+      public_url: 'http://localhost:8999/localhost_11000',
+      mode: 'proxy',
+      type: 'frontend',
+      app_type: 'hub',
+      tier: 'dev-vite',
+    },
+    '/localhost_10001': {
+      local_port: 10001,
+      public_url: 'http://localhost:8999/localhost_10001',
+      mode: 'proxy',
+      type: 'backend',
+      app_type: 'app',
+      tier: 'dev',
+    },
+    '/localhost_11001': {
+      local_port: 11001,
+      public_url: 'http://localhost:8999/localhost_11001',
+      mode: 'proxy',
+      type: 'frontend',
+      app_type: 'app',
+      tier: 'dev-vite',
+    },
+  },
+}
