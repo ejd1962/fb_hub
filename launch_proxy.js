@@ -138,7 +138,7 @@ async function launchNgrok(port) {
         const result = JSON5.parse(outputBuffer);
         if (result.success && result.publicUrl) {
           console.log(`Ngrok URL established: ${result.publicUrl}`);
-          resolve({ url: result.publicUrl });
+          resolve({ url: result.publicUrl, password: null });
         } else {
           reject(new Error(result.error || 'Unknown error launching ngrok'));
         }
@@ -735,6 +735,7 @@ async function main() {
         })()
       ]);
       baseUrl = ngrokResult.url;
+      tunnelPassword = ngrokResult.password || null;
 
       console.log('\n' + '━'.repeat(80));
       console.log('');

@@ -984,15 +984,21 @@ async function main() {
             console.log(colors.bright + colors.cyan + 'Hub URL:' + colors.reset);
             console.log(result.hubUrl);
 
-            // Add tunnel password if present
+            // Add tunnel password if present (localtunnel only)
             if (result.tunnelPassword) {
                 console.log('');
                 console.log(colors.bright + colors.cyan + 'Tunnel Password:' + colors.reset);
                 console.log(result.tunnelPassword);
                 console.log('');
 
-                // Canned message for sharing with users
+                // Canned message for sharing with users (with password)
                 const cannedMessage = `Come try the app. Open a browser on your computer and enter ${result.hubUrl} into it. When you go there the first time, you will need to enter this password: ${result.tunnelPassword} (yes 4 numbers separated by dots. Include the digits and dots).`;
+                console.log(colors.bright + 'Message to share with users:' + colors.reset);
+                console.log(cannedMessage);
+            } else {
+                // No password required (ngrok, portforward, localproxy)
+                console.log('');
+                const cannedMessage = `Come try the app. Open a browser and enter ${result.hubUrl} into it.`;
                 console.log(colors.bright + 'Message to share with users:' + colors.reset);
                 console.log(cannedMessage);
             }
