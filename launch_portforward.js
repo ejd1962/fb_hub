@@ -45,15 +45,15 @@ function getLocalIP() {
 }
 
 /**
- * Update local IP in the config file
+ * Update internal IP in the config file
  */
-function updateLocalIP(residence, localIP) {
+function updateInternalIP(residence, internalIP) {
   const configPath = join(__dirname, 'portforward-config.json');
   const configContent = readFileSync(configPath, 'utf8');
   const config = JSON5.parse(configContent);
 
   if (config[residence]) {
-    config[residence].local_ip = localIP;
+    config[residence].internal_ip = internalIP;
     writeFileSync(configPath, JSON5.stringify(config, null, 2), 'utf8');
   }
 }
@@ -106,8 +106,8 @@ function loadPortforwardConfig(residence) {
 
   const residenceConfig = config[residence];
 
-  if (!residenceConfig.public_host) {
-    throw new Error(`Residence "${residence}" has no public_host configured. Run this script to auto-fetch it.`);
+  if (!residenceConfig.external_ip) {
+    throw new Error(`Residence "${residence}" has no external_ip configured. Run this script to auto-fetch it.`);
   }
 
   if (!residenceConfig.external_port) {
@@ -118,13 +118,13 @@ function loadPortforwardConfig(residence) {
     throw new Error(`Residence "${residence}" has no internal_port configured in portforward-config.json`);
   }
 
-  // Build public URL using external port (what users connect to)
-  const publicUrl = `http://${residenceConfig.public_host}:${residenceConfig.external_port}`;
+  // Build public URL using external IP and port (what users connect to)
+  const publicUrl = `http://${residenceConfig.external_ip}:${residenceConfig.external_port}`;
 
   return {
     publicUrl,
-    publicHost: residenceConfig.public_host,
-    localIP: residenceConfig.local_ip || null,
+    externalIP: residenceConfig.external_ip,
+    internalIP: residenceConfig.internal_ip || null,
     externalPort: residenceConfig.external_port,
     internalPort: residenceConfig.internal_port,
     lastUpdated: residenceConfig.last_updated,
@@ -166,12 +166,12 @@ async function main() {
   }
 
   try {
-    // Step 1: Detect and update local IP
-    const localIP = getLocalIP();
-    if (localIP) {
-      updateLocalIP(options.residence, localIP);
+    // Step 1: Detect and update internal IP
+    const internalIP = getLocalIP();
+    if (internalIP) {
+      updateInternalIP(options.residence, internalIP);
       if (!options.json) {
-        console.log(`\nDetected local IP: ${localIP}`);
+        console.log(`\nDetected internal IP: ${internalIP}`);
       }
     }
 
@@ -189,8 +189,8 @@ async function main() {
       const jsonOutput = {
         success: true,
         publicUrl: config.publicUrl,
-        publicHost: config.publicHost,
-        localIP: config.localIP,
+        externalIP: config.externalIP,
+        internalIP: config.internalIP,
         externalPort: config.externalPort,
         internalPort: config.internalPort,
         residence: options.residence,
@@ -206,9 +206,9 @@ async function main() {
       console.log('');
       console.log(`Residence: ${options.residence}`);
       console.log(`Public URL: ${config.publicUrl}`);
-      console.log(`Public Host: ${config.publicHost} (external IP)`);
-      if (config.localIP) {
-        console.log(`Local IP: ${config.localIP} (internal LAN)`);
+      console.log(`External IP: ${config.externalIP} (public internet)`);
+      if (config.internalIP) {
+        console.log(`Internal IP: ${config.internalIP} (local LAN)`);
       }
       console.log(`External Port: ${config.externalPort} (what users connect to)`);
       console.log(`Internal Port: ${config.internalPort} (where proxy listens)`);
@@ -220,10 +220,10 @@ async function main() {
       }
       console.log('');
       console.log('IMPORTANT: Configure port forwarding on your router:');
-      if (config.localIP) {
-        console.log(`  External ${config.externalPort} -> Internal ${config.localIP}:${config.internalPort}`);
+      if (config.internalIP) {
+        console.log(`  External ${config.externalPort} -> Internal ${config.internalIP}:${config.internalPort}`);
       } else {
-        console.log(`  External ${config.externalPort} -> Internal YOUR_LOCAL_IP:${config.internalPort}`);
+        console.log(`  External ${config.externalPort} -> Internal YOUR_INTERNAL_IP:${config.internalPort}`);
       }
       console.log('');
       console.log('━'.repeat(80) + '\n');

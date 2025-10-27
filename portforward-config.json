@@ -1,21 +1,10 @@
 {
-  // Port forwarding configuration for different residences
-  // Each residence defines the public-facing host and ports for accessing your proxy server
-
-  "erics_cottage": {
-    "public_host": null,      // Auto-filled by launch_portforward.js - your public IP address
-    "external_port": 8999,    // Port on your router's public IP that users connect to
-    "internal_port": 8999,    // Port on your local machine where proxy listens (typically same as external)
-    "last_updated": null,     // Timestamp of last IP fetch
-    "notes": "Eric's cottage - main residence. Router forwards external 8999 to internal 192.168.x.x:8999"
-  }
-
-  // Example of additional residences (add as needed):
-  // "erics_office": {
-  //   "public_host": null,
-  //   "external_port": 8999,
-  //   "internal_port": 8999,
-  //   "last_updated": null,
-  //   "notes": "Office location"
-  // }
+  erics_cottage: {
+    external_ip: null,
+    internal_ip: '192.168.219.3',
+    external_port: 8999,
+    internal_port: 8999,
+    last_updated: '2025-10-27T14:24:15.120Z',
+    notes: "Eric's cottage - main residence. Router forwards external_ip:8999 to internal_ip:8999",
+  },
 }

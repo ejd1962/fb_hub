@@ -64,7 +64,7 @@ function updateConfig(residence, publicIP) {
   }
 
   // Update the residence config
-  config[residence].public_host = publicIP;
+  config[residence].external_ip = publicIP;
   config[residence].last_updated = new Date().toISOString();
 
   // Write back to file (preserve comments by using JSON5)
@@ -109,8 +109,8 @@ async function main() {
 
       console.log('\nUpdated configuration:');
       console.log(`  Residence: ${options.residence}`);
-      console.log(`  Public Host: ${residenceConfig.public_host}`);
-      console.log(`  Public Port: ${residenceConfig.public_port}`);
+      console.log(`  External IP: ${residenceConfig.external_ip}`);
+      console.log(`  External Port: ${residenceConfig.external_port}`);
       console.log(`  Last Updated: ${residenceConfig.last_updated}`);
       console.log(`  Notes: ${residenceConfig.notes || 'N/A'}`);
       console.log('\nConfiguration saved to portforward-config.json');
