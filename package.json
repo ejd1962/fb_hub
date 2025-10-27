@@ -37,6 +37,7 @@
     "firebase": "^10.14.1",
     "firebaseui": "^6.1.0",
     "http-proxy": "^1.18.1",
+    "localtunnel": "^2.0.2",
     "ngrok": "^5.0.0-beta.2",
     "react": "^19.2.0",
     "react-color": "^2.19.3",
