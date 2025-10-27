@@ -570,28 +570,57 @@ async function main() {
     return;
   }
 
-  // Step 2: Get base URL based on deployment mode
+  // Step 1: Start localtunnel (if needed) and sleep for server initialization IN PARALLEL
   let baseUrl;
   let tunnelProcess = null;
 
   if (deployment === 'localtunnel') {
-    // Start localtunnel and get the public URL
+    // Start localtunnel AND sleep in parallel
     try {
-      const tunnelResult = await startLocaltunnel(PROXY_PORT, serverSetupDelay);
+      const [tunnelResult] = await Promise.all([
+        startLocaltunnel(PROXY_PORT, serverSetupDelay),
+        (async () => {
+          if (serverSetupDelay > 0) {
+            console.log(`Waiting ${serverSetupDelay} seconds for servers to initialize...`);
+            await new Promise(resolve => setTimeout(resolve, serverSetupDelay * 1000));
+            console.log('Server setup delay complete\n');
+          }
+        })()
+      ]);
       baseUrl = tunnelResult.url;
       tunnelProcess = tunnelResult.process;
     } catch (error) {
-      console.error('Failed to start localtunnel:', error.message);
-      console.log('Falling back to localhost mode');
-      baseUrl = `http://localhost:${PROXY_PORT}`;
+      // FATAL ERROR - localtunnel is required when deployment=localtunnel
+      console.error('\n' + '='.repeat(80));
+      console.error('FATAL ERROR: Failed to start localtunnel');
+      console.error('='.repeat(80));
+      console.error(`Error: ${error.message}`);
+      console.error(`Deployment mode: ${deployment}`);
+      console.error(`Timeout: ${serverSetupDelay} seconds`);
+      console.error('\nLocaltunnel is REQUIRED when --deployment=localtunnel is specified.');
+      console.error('This is a hard failure - cannot continue without tunnel.');
+      console.error('\nPossible causes:');
+      console.error('  - Internet connection issues');
+      console.error('  - Localtunnel service is down');
+      console.error('  - Timeout too short (increase --server_setup_delay)');
+      console.error('  - Port 8999 is not available');
+      console.error('='.repeat(80) + '\n');
+      process.exit(1);
     }
   } else {
     // Local mode - use localhost
     baseUrl = `http://localhost:${PROXY_PORT}`;
     console.log(`Using local mode: ${baseUrl}`);
+
+    // Still need to wait for servers in local mode
+    if (serverSetupDelay > 0) {
+      console.log(`Waiting ${serverSetupDelay} seconds for servers to initialize...`);
+      await new Promise(resolve => setTimeout(resolve, serverSetupDelay * 1000));
+      console.log('Server setup delay complete\n');
+    }
   }
 
-  // Step 3: Scan ports (after delay)
+  // Step 2: Scan ports (after delay and localtunnel are both complete)
   console.log(`[T+${((Date.now() - scriptStartTime) / 1000).toFixed(3)}s] Starting port scan...`);
   const scanStartTime = Date.now();
   const activeServices = await scanAllPorts();
