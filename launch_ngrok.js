@@ -250,7 +250,8 @@ async function startNgrokTunnel(port, managementPort, region, jsonMode, authtoke
 
   try {
     const connectOptions = {
-      addr: `http://localhost:${port}`,  // Try full URL format
+      addr: port,  // Use just the port number
+      proto: 'http',  // Explicitly specify protocol
       region: region
       // TODO: Re-enable when we figure out correct option name for management port
       // web_addr: `localhost:${managementPort}`
