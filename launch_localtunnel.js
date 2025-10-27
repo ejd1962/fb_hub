@@ -35,8 +35,6 @@ const __dirname = dirname(__filename);
 
 // Default configuration
 const DEFAULT_PORT = 8999;
-const DEFAULT_MANAGEMENT_PORT = 8998;
-const DEFAULT_REGION = 'us';
 const DEFAULT_WAIT_SECONDS = 30;
 
 // Parse command line arguments
