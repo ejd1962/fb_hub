@@ -25,10 +25,11 @@
  *                               Automatically launches setup-reverse-proxy.js on port 8999
  *                               Sets VITE_BASE_PATH for proper asset serving through proxy
  *
- *   --deployment=<local|ngrok>  Proxy deployment method (default: local)
+ *   --deployment=<local|ngrok|localtunnel>  Proxy deployment method (default: local)
  *                               Only used when --proxy=yes is specified
  *                               local: Proxy for local testing (http://localhost:8999)
  *                               ngrok: Proxy for external access via ngrok public URL
+ *                               localtunnel: Proxy for external access via localtunnel (FREE)
  *
  *   --build-only=<yes|no>       Only build frontend, don't launch servers (default: no)
  *   --restart=<auto|no>         Enable auto-restart on file changes (default: auto)
@@ -46,6 +47,9 @@
  *
  *   node launch_servers.js --proxy=yes --deployment=ngrok wordguess
  *     # Enables reverse proxy with ngrok for external access
+ *
+ *   node launch_servers.js --proxy=yes --deployment=localtunnel wordguess
+ *     # Enables reverse proxy with localtunnel for external access (FREE)
  *
  *   node launch_servers.js --mode=prod --purpose=customer_access wordguess
  *     # Production mode with customer-facing configuration
@@ -598,7 +602,7 @@ async function main() {
         console.log(`  --purpose=<designer_test|alpha_test|beta_test|customer_access>`);
         console.log(`                              Codebase purpose (default: designer_test)`);
         console.log(`  --proxy=<yes|no>            Enable reverse proxy (default: no)`);
-        console.log(`  --deployment=<local|ngrok>  Proxy method (default: local)`);
+        console.log(`  --deployment=<local|ngrok|localtunnel>  Proxy method (default: local)`);
         console.log(`  --build-only=<yes|no>       Only build frontend (default: no)`);
         console.log(`  --restart=<auto|no>         Auto-restart on changes (default: auto)`);
         console.log(`  --newtab=<yes|no>           Launch in new tabs (default: yes)`);
@@ -607,6 +611,7 @@ async function main() {
         console.log(`  node launch_servers.js --purpose=beta_test wordguess`);
         console.log(`  node launch_servers.js --proxy=yes wordguess`);
         console.log(`  node launch_servers.js --proxy=yes --deployment=ngrok wordguess`);
+        console.log(`  node launch_servers.js --proxy=yes --deployment=localtunnel wordguess`);
         console.log(`  node launch_servers.js --mode=prod --purpose=customer_access wordguess`);
         process.exit(1);
     }

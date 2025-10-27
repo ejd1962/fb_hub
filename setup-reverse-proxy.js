@@ -27,15 +27,15 @@ function parseArgs() {
   const deployment = args.find(arg => arg.startsWith('--deployment='))?.split('=')[1] || 'local';
   const proxy = args.find(arg => arg.startsWith('--proxy='))?.split('=')[1] || 'no';
 
-  if (!['local', 'ngrok'].includes(deployment)) {
-    console.error('Error: --deployment must be "local" or "ngrok"');
-    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|ngrok');
+  if (!['local', 'ngrok', 'localtunnel'].includes(deployment)) {
+    console.error('Error: --deployment must be "local", "ngrok", or "localtunnel"');
+    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|ngrok|localtunnel');
     process.exit(1);
   }
 
   if (!['yes', 'no'].includes(proxy)) {
     console.error('Error: --proxy must be "yes" or "no"');
-    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|ngrok');
+    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|ngrok|localtunnel');
     process.exit(1);
   }
 
