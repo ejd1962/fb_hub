@@ -832,7 +832,7 @@ async function main() {
                     PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json')
                 };
                 if (options.proxy === 'yes') {
-                    frontendEnv.VITE_BASE_PATH = `/localhost_${frontendPort}/`;
+                    frontendEnv.VITE_BASE_PATH = `/localhost_${frontendPort}`;
                 }
 
                 const frontendProc = await launchFunc(
