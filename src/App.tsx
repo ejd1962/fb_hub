@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { useEffect } from "react";
 import "./App.css";
 import Home from "./home";
 import Login from "./signin";
@@ -14,8 +15,14 @@ import ChangeEmailOrPassword from "./changeEmailOrPassword";
 import Welcome from "./welcome";
 import { DebugProvider } from "./DebugContext";
 import { NavigationHistoryProvider } from "./NavigationHistoryContext";
+import { displayEnvironment } from "@transverse/shared-components";
 
 function App() {
+    // Display environment info in console on mount
+    useEffect(() => {
+        displayEnvironment('Hub Frontend');
+    }, []);
+
     // Get base path from Vite's import.meta.env.BASE_URL (set by VITE_BASE_PATH)
     const basename = import.meta.env.BASE_URL;
 
