@@ -998,7 +998,19 @@ async function main() {
             } else {
                 // No password required (ngrok, portforward, localproxy)
                 console.log('');
-                const cannedMessage = `Come try the app. Open a browser and enter ${result.hubUrl} into it.`;
+
+                // Check if using ngrok (URL contains .ngrok-free.dev or .ngrok.io)
+                const isNgrok = result.hubUrl && (result.hubUrl.includes('.ngrok-free.dev') || result.hubUrl.includes('.ngrok.io'));
+
+                if (isNgrok) {
+                    console.log(colors.bright + colors.yellow + 'Note: First-time visitors will see an ngrok warning page.' + colors.reset);
+                    console.log(colors.yellow + '      Just click "Visit Site" to continue (shown once per 7 days per visitor).' + colors.reset);
+                    console.log('');
+                }
+
+                const cannedMessage = isNgrok
+                    ? `Come try the app. Open a browser and enter ${result.hubUrl} into it. You'll see an ngrok warning page - just click "Visit Site" to continue.`
+                    : `Come try the app. Open a browser and enter ${result.hubUrl} into it.`;
                 console.log(colors.bright + 'Message to share with users:' + colors.reset);
                 console.log(cannedMessage);
             }
