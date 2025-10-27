@@ -920,7 +920,6 @@ async function main() {
 }
 
 // Run if executed directly
-const __filename = fileURLToPath(import.meta.url);
 const isMainModule = process.argv[1] === __filename;
 
 if (isMainModule) {
