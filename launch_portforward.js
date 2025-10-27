@@ -14,14 +14,49 @@
  *   node launch_portforward.js --residence=erics_cottage --json
  */
 
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { spawn } from 'child_process';
+import { networkInterfaces } from 'os';
 import JSON5 from 'json5';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+/**
+ * Detect local IP address on the LAN
+ * Returns the first non-internal IPv4 address found
+ */
+function getLocalIP() {
+  const nets = networkInterfaces();
+
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      // Skip internal (loopback) and non-IPv4 addresses
+      const familyV4Value = typeof net.family === 'string' ? 'IPv4' : 4;
+      if (net.family === familyV4Value && !net.internal) {
+        return net.address;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Update local IP in the config file
+ */
+function updateLocalIP(residence, localIP) {
+  const configPath = join(__dirname, 'portforward-config.json');
+  const configContent = readFileSync(configPath, 'utf8');
+  const config = JSON5.parse(configContent);
+
+  if (config[residence]) {
+    config[residence].local_ip = localIP;
+    writeFileSync(configPath, JSON5.stringify(config, null, 2), 'utf8');
+  }
+}
 
 /**
  * Update public IP for a residence by calling get-public-ip.js
@@ -72,20 +107,26 @@ function loadPortforwardConfig(residence) {
   const residenceConfig = config[residence];
 
   if (!residenceConfig.public_host) {
-    throw new Error(`Residence "${residence}" has no public_host configured. Run: node get-public-ip.js --residence=${residence}`);
+    throw new Error(`Residence "${residence}" has no public_host configured. Run this script to auto-fetch it.`);
   }
 
-  if (!residenceConfig.public_port) {
-    throw new Error(`Residence "${residence}" has no public_port configured in portforward-config.json`);
+  if (!residenceConfig.external_port) {
+    throw new Error(`Residence "${residence}" has no external_port configured in portforward-config.json`);
   }
 
-  // Build public URL
-  const publicUrl = `http://${residenceConfig.public_host}:${residenceConfig.public_port}`;
+  if (!residenceConfig.internal_port) {
+    throw new Error(`Residence "${residence}" has no internal_port configured in portforward-config.json`);
+  }
+
+  // Build public URL using external port (what users connect to)
+  const publicUrl = `http://${residenceConfig.public_host}:${residenceConfig.external_port}`;
 
   return {
     publicUrl,
     publicHost: residenceConfig.public_host,
-    publicPort: residenceConfig.public_port,
+    localIP: residenceConfig.local_ip || null,
+    externalPort: residenceConfig.external_port,
+    internalPort: residenceConfig.internal_port,
     lastUpdated: residenceConfig.last_updated,
     notes: residenceConfig.notes
   };
@@ -125,13 +166,22 @@ async function main() {
   }
 
   try {
-    // Step 1: Automatically update public IP
+    // Step 1: Detect and update local IP
+    const localIP = getLocalIP();
+    if (localIP) {
+      updateLocalIP(options.residence, localIP);
+      if (!options.json) {
+        console.log(`\nDetected local IP: ${localIP}`);
+      }
+    }
+
+    // Step 2: Automatically update public IP
     if (!options.json) {
-      console.log(`\nFetching current public IP for residence: ${options.residence}...`);
+      console.log(`Fetching current public IP for residence: ${options.residence}...`);
     }
     await updatePublicIP(options.residence);
 
-    // Step 2: Load the updated configuration
+    // Step 3: Load the updated configuration
     const config = loadPortforwardConfig(options.residence);
 
     if (options.json) {
@@ -140,7 +190,9 @@ async function main() {
         success: true,
         publicUrl: config.publicUrl,
         publicHost: config.publicHost,
-        publicPort: config.publicPort,
+        localIP: config.localIP,
+        externalPort: config.externalPort,
+        internalPort: config.internalPort,
         residence: options.residence,
         lastUpdated: config.lastUpdated,
         notes: config.notes
@@ -154,8 +206,12 @@ async function main() {
       console.log('');
       console.log(`Residence: ${options.residence}`);
       console.log(`Public URL: ${config.publicUrl}`);
-      console.log(`Public Host: ${config.publicHost}`);
-      console.log(`Public Port: ${config.publicPort}`);
+      console.log(`Public Host: ${config.publicHost} (external IP)`);
+      if (config.localIP) {
+        console.log(`Local IP: ${config.localIP} (internal LAN)`);
+      }
+      console.log(`External Port: ${config.externalPort} (what users connect to)`);
+      console.log(`Internal Port: ${config.internalPort} (where proxy listens)`);
       if (config.lastUpdated) {
         console.log(`Last Updated: ${config.lastUpdated}`);
       }
@@ -163,8 +219,12 @@ async function main() {
         console.log(`Notes: ${config.notes}`);
       }
       console.log('');
-      console.log('IMPORTANT: Ensure port forwarding is configured on your router:');
-      console.log(`  External Port: ${config.publicPort} -> Internal: YOUR_LOCAL_IP:${config.publicPort}`);
+      console.log('IMPORTANT: Configure port forwarding on your router:');
+      if (config.localIP) {
+        console.log(`  External ${config.externalPort} -> Internal ${config.localIP}:${config.internalPort}`);
+      } else {
+        console.log(`  External ${config.externalPort} -> Internal YOUR_LOCAL_IP:${config.internalPort}`);
+      }
       console.log('');
       console.log('━'.repeat(80) + '\n');
     }
