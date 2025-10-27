@@ -26,20 +26,27 @@ function parseArgs() {
   const args = process.argv.slice(2);
   const deployment = args.find(arg => arg.startsWith('--deployment='))?.split('=')[1] || 'local';
   const proxy = args.find(arg => arg.startsWith('--proxy='))?.split('=')[1] || 'no';
+  const serverSetupDelayArg = args.find(arg => arg.startsWith('--server_setup_delay='))?.split('=')[1];
+  const serverSetupDelay = serverSetupDelayArg ? parseInt(serverSetupDelayArg, 10) : 10;
 
   if (!['local', 'localtunnel'].includes(deployment)) {
     console.error('Error: --deployment must be "local" or "localtunnel"');
-    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|localtunnel');
+    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|localtunnel --server_setup_delay=NN');
     process.exit(1);
   }
 
   if (!['yes', 'no'].includes(proxy)) {
     console.error('Error: --proxy must be "yes" or "no"');
-    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|localtunnel');
+    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|localtunnel --server_setup_delay=NN');
     process.exit(1);
   }
 
-  return { deployment, proxy };
+  if (isNaN(serverSetupDelay) || serverSetupDelay < 0) {
+    console.error('Error: --server_setup_delay must be a non-negative number');
+    process.exit(1);
+  }
+
+  return { deployment, proxy, serverSetupDelay };
 }
 
 
@@ -416,15 +423,23 @@ async function main() {
   console.log('=================================\n');
 
   // Parse command-line arguments
-  const { deployment, proxy } = parseArgs();
+  const { deployment, proxy, serverSetupDelay } = parseArgs();
   console.log(`Proxy mode: ${proxy}`);
-  console.log(`Deployment mode: ${deployment}\n`);
+  console.log(`Deployment mode: ${deployment}`);
+  console.log(`Server setup delay: ${serverSetupDelay} seconds\n`);
+
+  // Step 1: Wait for servers to initialize (applies to all modes)
+  if (serverSetupDelay > 0) {
+    console.log(`Waiting ${serverSetupDelay} seconds for servers to initialize...`);
+    await new Promise(resolve => setTimeout(resolve, serverSetupDelay * 1000));
+    console.log('Server setup delay complete\n');
+  }
 
   // If proxy=no, scan ports and create direct mode config file
   if (proxy === 'no') {
     console.log('Proxy disabled - scanning ports and creating direct mode configuration...\n');
 
-    // Step 1: Scan ports (same as proxy mode)
+    // Step 2: Scan ports (after delay)
     console.log(`[T+${((Date.now() - scriptStartTime) / 1000).toFixed(3)}s] Starting port scan...`);
     const scanStartTime = Date.now();
     const activeServices = await scanAllPorts();
@@ -554,26 +569,6 @@ async function main() {
     return;
   }
 
-  // Step 1: Scan ports
-  console.log(`[T+${((Date.now() - scriptStartTime) / 1000).toFixed(3)}s] Starting port scan...`);
-  const scanStartTime = Date.now();
-  const activeServices = await scanAllPorts();
-  const scanEndTime = Date.now();
-  const scanElapsed = ((scanEndTime - scanStartTime) / 1000).toFixed(3);
-
-  const totalActive = activeServices.hub.length +
-                     activeServices.production.length +
-                     activeServices.dev.length +
-                     activeServices.devVite.length;
-
-  console.log(`[T+${((Date.now() - scriptStartTime) / 1000).toFixed(3)}s | ${new Date(scanEndTime).toISOString()}] Port scan complete (took ${scanElapsed}s)`);
-  console.log(`\nFound ${totalActive} active services`);
-
-  if (totalActive === 0) {
-    console.log('No active services found. Start your servers first!');
-    return;
-  }
-
   // Step 2: Get base URL based on deployment mode
   let baseUrl;
   let tunnelProcess = null;
@@ -594,7 +589,27 @@ async function main() {
     baseUrl = `http://localhost:${PROXY_PORT}`;
     console.log(`Using local mode: ${baseUrl}`);
   }
-  
+
+  // Step 3: Scan ports (after delay)
+  console.log(`[T+${((Date.now() - scriptStartTime) / 1000).toFixed(3)}s] Starting port scan...`);
+  const scanStartTime = Date.now();
+  const activeServices = await scanAllPorts();
+  const scanEndTime = Date.now();
+  const scanElapsed = ((scanEndTime - scanStartTime) / 1000).toFixed(3);
+
+  const totalActive = activeServices.hub.length +
+                     activeServices.production.length +
+                     activeServices.dev.length +
+                     activeServices.devVite.length;
+
+  console.log(`[T+${((Date.now() - scriptStartTime) / 1000).toFixed(3)}s | ${new Date(scanEndTime).toISOString()}] Port scan complete (took ${scanElapsed}s)`);
+  console.log(`\nFound ${totalActive} active services`);
+
+  if (totalActive === 0) {
+    console.log('No active services found. Start your servers first!');
+    return;
+  }
+
   // Step 3: Generate mappings
   const mappingsStartTime = Date.now();
   const mappings = generateMappings(activeServices, baseUrl);
