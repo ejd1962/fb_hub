@@ -801,7 +801,8 @@ async function main() {
                     PORT: backendPort.toString(),
                     TRUE_URL,
                     PROXY_ENABLED: options.proxy === 'yes' ? 'true' : 'false',
-                    PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json')
+                    PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json'),
+                    SERVER_SETUP_DELAY: '10'  // Servers will wait this + 10 seconds for proxy config
                 };
                 if (options.proxy === 'yes') {
                     backendEnv.VITE_BASE_PATH = `/localhost_${backendPort}`;
@@ -834,7 +835,8 @@ async function main() {
                     ...process.env,
                     PORT: frontendPort.toString(),
                     PROXY_ENABLED: options.proxy === 'yes' ? 'true' : 'false',
-                    PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json')
+                    PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json'),
+                    SERVER_SETUP_DELAY: '10'  // Servers will wait this + 10 seconds for proxy config
                 };
                 if (options.proxy === 'yes') {
                     frontendEnv.VITE_BASE_PATH = `/localhost_${frontendPort}`;
@@ -880,14 +882,12 @@ async function main() {
     // Launch reverse proxy AFTER all game servers are running
     if (options.proxy === 'yes') {
         console.log(`\n${colors.bright}${colors.yellow}Launching reverse proxy...${colors.reset}`);
-        console.log(`${colors.yellow}Waiting 10 seconds for game servers to fully initialize and bind to ports...${colors.reset}`);
+        console.log(`${colors.yellow}Proxy will wait 10 seconds for game servers to fully initialize...${colors.reset}\n`);
 
-        // Wait for servers to start listening (they need time to bind to ports)
-        await new Promise(resolve => setTimeout(resolve, 10000));
-
+        // Launch reverse proxy immediately - it will handle the server setup delay internally
         const proxyLabel = 'reverse-proxy:8999';
         const proxyCmd = 'node';
-        const proxyArgs = ['setup-reverse-proxy.js', `--proxy=yes`, `--deployment=${options.deployment}`];
+        const proxyArgs = ['setup-reverse-proxy.js', `--proxy=yes`, `--deployment=${options.deployment}`, `--server_setup_delay=10`];
 
         console.log(`${colors.cyan}Starting reverse proxy server...${colors.reset}\n`);
 
