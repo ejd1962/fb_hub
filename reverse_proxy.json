@@ -1,8 +1,8 @@
 {
   "proxy_port": 8999,
   "base_url": "http://localhost:8999",
-  "created_at": "2025-10-27T02:44:26.080Z",
-  "created_by_pid": 18128,
+  "created_at": "2025-10-27T03:08:42.420Z",
+  "created_by_pid": 11016,
   "routes": {
     "/localhost_10000": {
       "local_port": 10000,
@@ -13,6 +13,11 @@
       "local_port": 11000,
       "public_url": "http://localhost:8999/localhost_11000",
       "type": "hub"
+    },
+    "/localhost_10001": {
+      "local_port": 10001,
+      "public_url": "http://localhost:8999/localhost_10001",
+      "type": "dev"
     },
     "/localhost_11001": {
       "local_port": 11001,
