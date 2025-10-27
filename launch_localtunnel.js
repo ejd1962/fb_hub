@@ -13,6 +13,13 @@
  *
  * Options:
  *   --port=<number>             Local port to tunnel to (default: 8999)
+ *   --subdomain=<name>          Request specific subdomain (may not be available)
+ *                               Use NNNN in name for random 4-digit number
+ *                               Examples: --subdomain=transverse
+ *                                        --subdomain=transverse-NNNN
+ *   --subdomain_retry=<name>    Fallback subdomain if first request fails
+ *                               Use NNNN for random 4-digit number
+ *                               Example: --subdomain_retry=transverse-NNNN
  *   --wait=<seconds>            Max seconds to wait for tunnel (default: 30)
  *   --help                      Show this help message
  *   --json                      Output only JSON (no human-readable text)
@@ -43,6 +50,7 @@ function parseArgs(args) {
     port: DEFAULT_PORT,
     waitSeconds: DEFAULT_WAIT_SECONDS,
     subdomain: null,  // null means random subdomain
+    subdomainRetry: null,  // null means no retry
     help: false,
     json: false
   };
@@ -65,12 +73,16 @@ function parseArgs(args) {
         console.error(`ERROR: Subdomain cannot be empty`);
         process.exit(3);
       }
-      // Replace NNNN with a random 4-digit number
-      if (subdomain.includes('NNNN')) {
-        const randomNum = Math.floor(1000 + Math.random() * 9000); // 1000-9999
-        subdomain = subdomain.replace(/NNNN/g, randomNum.toString());
-      }
+      // Store pattern, don't replace NNNN yet (we may need to retry)
       options.subdomain = subdomain;
+    } else if (arg.startsWith('--subdomain_retry=')) {
+      let subdomainRetry = arg.split('=')[1];
+      if (!subdomainRetry || subdomainRetry.trim() === '') {
+        console.error(`ERROR: Subdomain retry cannot be empty`);
+        process.exit(3);
+      }
+      // Store pattern, don't replace NNNN yet
+      options.subdomainRetry = subdomainRetry;
     } else if (arg.startsWith('--wait=')) {
       const wait = parseInt(arg.split('=')[1]);
       if (isNaN(wait) || wait < 1) {
@@ -86,6 +98,15 @@ function parseArgs(args) {
   }
 
   return options;
+}
+
+// Replace NNNN pattern with random 4-digit number
+function replaceNNNN(pattern) {
+  if (pattern && pattern.includes('NNNN')) {
+    const randomNum = Math.floor(1000 + Math.random() * 9000); // 1000-9999
+    return pattern.replace(/NNNN/g, randomNum.toString());
+  }
+  return pattern;
 }
 
 // Show help message
@@ -111,6 +132,16 @@ OPTIONS:
   --port=<number>             Local port to tunnel to (default: 8999)
                               This should be your reverse proxy manager port
 
+  --subdomain=<name>          Request specific subdomain (may not be available)
+                              Omit for random subdomain
+                              Use NNNN pattern for random 4-digit number
+                              Examples: transverse, transverse-NNNN, my-app-NNNN
+
+  --subdomain_retry=<name>    If first subdomain fails, retry with this name
+                              Use NNNN pattern for random 4-digit number
+                              Example: transverse-NNNN
+                              If this also fails, script will error out
+
   --wait=<seconds>            Maximum seconds to wait for tunnel (default: 30)
                               Script will fail if tunnel not ready in time
 
@@ -120,11 +151,20 @@ OPTIONS:
   --help                      Show this help message and exit
 
 EXAMPLES:
-  # Basic usage (tunnel localhost:8999)
+  # Basic usage (tunnel localhost:8999 with random subdomain)
   node launch_localtunnel.js
 
-  # Tunnel different port
-  node launch_localtunnel.js --port=3000
+  # Request specific subdomain
+  node launch_localtunnel.js --subdomain=transverse
+
+  # Request subdomain with random 4-digit suffix
+  node launch_localtunnel.js --subdomain=transverse-NNNN
+
+  # Request subdomain with fallback retry
+  node launch_localtunnel.js --subdomain=transverse --subdomain_retry=transverse-NNNN
+
+  # Tunnel different port with custom subdomain
+  node launch_localtunnel.js --port=3000 --subdomain=my-app
 
   # JSON output only (for scripts)
   node launch_localtunnel.js --json
@@ -181,25 +221,52 @@ async function checkLocaltunnelInstalled() {
 }
 
 // Start localtunnel tunnel using Node.js API
-async function startLocaltunnelTunnel(port, jsonMode) {
+async function startLocaltunnelTunnel(port, subdomain, jsonMode) {
   if (!jsonMode) {
     console.log(`\n🚇 Starting localtunnel tunnel...`);
     console.log(`   Local port: ${port}`);
+    if (subdomain) {
+      console.log(`   Requested subdomain: ${subdomain}`);
+    } else {
+      console.log(`   Subdomain: Random (not specified)`);
+    }
   }
 
   try {
-    const tunnel = await localtunnel({ port: port });
+    const options = { port: port };
+
+    // Add subdomain if specified
+    if (subdomain) {
+      options.subdomain = subdomain;
+    }
+
+    const tunnel = await localtunnel(options);
+
+    // Extract actual subdomain from URL
+    const actualSubdomain = tunnel.url.replace('https://', '').split('.')[0];
+    const subdomainGranted = subdomain ? (actualSubdomain === subdomain) : true;
 
     if (!jsonMode) {
       console.log(`\n✅ Localtunnel tunnel established!`);
       console.log(`   Public URL: ${tunnel.url}`);
       console.log(`   Protocol: HTTPS`);
+      if (subdomain) {
+        if (subdomainGranted) {
+          console.log(`   ✅ Got requested subdomain: ${subdomain}`);
+        } else {
+          console.log(`   ⚠️  Requested subdomain '${subdomain}' NOT granted`);
+          console.log(`   ℹ️  Server assigned: ${actualSubdomain}`);
+        }
+      }
     }
 
     return {
       success: true,
       publicUrl: tunnel.url,
       localPort: port,
+      requestedSubdomain: subdomain,
+      actualSubdomain: actualSubdomain,
+      subdomainGranted: subdomainGranted,
       tunnel: tunnel  // Keep reference to tunnel object
     };
   } catch (error) {
@@ -286,7 +353,7 @@ async function main() {
   // Start localtunnel tunnel (this will wait until tunnel is established)
   let result;
   try {
-    result = await startLocaltunnelTunnel(options.port, options.json);
+    result = await startLocaltunnelTunnel(options.port, options.subdomain, options.json);
   } catch (error) {
     if (options.json) {
       console.log(JSON5.stringify({
