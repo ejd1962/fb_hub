@@ -109,6 +109,48 @@ function replaceNNNN(pattern) {
   return pattern;
 }
 
+// Try to establish tunnel with requested subdomain
+// If pattern contains NNNN, will try up to maxAttempts times with different random numbers
+// Returns: { result, subdomainGranted, attemptsUsed }
+async function attemptTunnel(port, subdomainPattern, jsonMode, maxAttempts = 3) {
+  // If no subdomain pattern, just try once
+  if (!subdomainPattern) {
+    const result = await startLocaltunnelTunnel(port, null, jsonMode);
+    return { result, subdomainGranted: true, attemptsUsed: 1 };
+  }
+
+  // If pattern has NNNN, try up to maxAttempts times with different random numbers
+  const hasNNNN = subdomainPattern.includes('NNNN');
+  const attempts = hasNNNN ? maxAttempts : 1;
+
+  let lastResult = null;
+
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    const subdomain = replaceNNNN(subdomainPattern);
+
+    if (!jsonMode && hasNNNN && attempt > 1) {
+      console.log(`   🔄 Attempt ${attempt}/${attempts} with new random number...`);
+    }
+
+    const result = await startLocaltunnelTunnel(port, subdomain, jsonMode);
+
+    if (result.subdomainGranted) {
+      // Success! Got the subdomain we wanted
+      return { result, subdomainGranted: true, attemptsUsed: attempt };
+    }
+
+    // Not granted, close this tunnel and try again (if we have attempts left)
+    if (attempt < attempts) {
+      result.tunnel.close();
+    }
+
+    lastResult = result;
+  }
+
+  // All attempts failed
+  return { result: lastResult, subdomainGranted: false, attemptsUsed: attempts };
+}
+
 // Show help message
 function showHelp() {
   console.log(`
@@ -135,10 +177,12 @@ OPTIONS:
   --subdomain=<name>          Request specific subdomain (may not be available)
                               Omit for random subdomain
                               Use NNNN pattern for random 4-digit number
+                              NNNN patterns will retry up to 3 times automatically
                               Examples: transverse, transverse-NNNN, my-app-NNNN
 
   --subdomain_retry=<name>    If first subdomain fails, retry with this name
                               Use NNNN pattern for random 4-digit number
+                              NNNN patterns will retry up to 3 times automatically
                               Example: transverse-NNNN
                               If this also fails, script will error out
 
@@ -352,8 +396,72 @@ async function main() {
 
   // Start localtunnel tunnel (this will wait until tunnel is established)
   let result;
+
   try {
-    result = await startLocaltunnelTunnel(options.port, options.subdomain, options.json);
+    // First attempt
+    const firstAttempt = await attemptTunnel(options.port, options.subdomain, options.json);
+
+    if (firstAttempt.subdomainGranted) {
+      // Happy path - got what we wanted (or didn't request specific subdomain)
+      result = firstAttempt.result;
+    } else {
+      // Subdomain requested but NOT granted
+      if (options.subdomainRetry) {
+        // Try with retry subdomain
+        if (!options.json) {
+          console.log(`\n🔄 Retrying with fallback subdomain...`);
+        }
+
+        firstAttempt.result.tunnel.close();
+
+        const retryAttempt = await attemptTunnel(options.port, options.subdomainRetry, options.json);
+
+        if (retryAttempt.subdomainGranted) {
+          // Happy path - retry succeeded
+          result = retryAttempt.result;
+        } else {
+          // ERROR - all attempts failed (first pattern + retry pattern)
+          const totalAttempts = firstAttempt.attemptsUsed + retryAttempt.attemptsUsed;
+          if (!options.json) {
+            console.error(`\n❌ ERROR: No subdomain granted after ${totalAttempts} attempts`);
+            console.error(`   First pattern: '${options.subdomain}' (${firstAttempt.attemptsUsed} attempts) - NOT granted`);
+            console.error(`   Retry pattern: '${options.subdomainRetry}' (${retryAttempt.attemptsUsed} attempts) - NOT granted`);
+            console.error(`   Last server assignment: '${retryAttempt.result.actualSubdomain}'`);
+          } else {
+            console.log(JSON5.stringify({
+              success: false,
+              error: 'No subdomain granted after all attempts',
+              totalAttempts: totalAttempts,
+              firstPattern: options.subdomain,
+              firstAttempts: firstAttempt.attemptsUsed,
+              retryPattern: options.subdomainRetry,
+              retryAttempts: retryAttempt.attemptsUsed,
+              lastAssignedSubdomain: retryAttempt.result.actualSubdomain
+            }, null, 2));
+          }
+          retryAttempt.result.tunnel.close();
+          process.exit(1);
+        }
+      } else {
+        // ERROR - no retry option, subdomain not granted after all attempts
+        if (!options.json) {
+          console.error(`\n❌ ERROR: Requested subdomain not granted after ${firstAttempt.attemptsUsed} attempts`);
+          console.error(`   Pattern: '${options.subdomain}'`);
+          console.error(`   Last server assignment: '${firstAttempt.result.actualSubdomain}'`);
+          console.error(`   Tip: Use --subdomain_retry=transverse-NNNN for a fallback option`);
+        } else {
+          console.log(JSON5.stringify({
+            success: false,
+            error: 'Requested subdomain not available after all attempts',
+            pattern: options.subdomain,
+            attemptsUsed: firstAttempt.attemptsUsed,
+            lastAssignedSubdomain: firstAttempt.result.actualSubdomain
+          }, null, 2));
+        }
+        firstAttempt.result.tunnel.close();
+        process.exit(1);
+      }
+    }
   } catch (error) {
     if (options.json) {
       console.log(JSON5.stringify({
