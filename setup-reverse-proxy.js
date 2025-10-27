@@ -19,7 +19,7 @@ const PORT_RANGES = {
   devVite: Array.from({length: num_ports}, (_, i) => 11001 + i)     // 11001-11005
 };
 
-const PROXY_PORT = 8999; // The single port we'll expose via ngrok
+const PROXY_PORT = 8999; // The single port we'll expose externally (via localtunnel or localhost)
 
 // Parse command-line arguments
 function parseArgs() {
@@ -27,62 +27,76 @@ function parseArgs() {
   const deployment = args.find(arg => arg.startsWith('--deployment='))?.split('=')[1] || 'local';
   const proxy = args.find(arg => arg.startsWith('--proxy='))?.split('=')[1] || 'no';
 
-  if (!['local', 'ngrok', 'localtunnel'].includes(deployment)) {
-    console.error('Error: --deployment must be "local", "ngrok", or "localtunnel"');
-    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|ngrok|localtunnel');
+  if (!['local', 'localtunnel'].includes(deployment)) {
+    console.error('Error: --deployment must be "local" or "localtunnel"');
+    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|localtunnel');
     process.exit(1);
   }
 
   if (!['yes', 'no'].includes(proxy)) {
     console.error('Error: --proxy must be "yes" or "no"');
-    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|ngrok|localtunnel');
+    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|localtunnel');
     process.exit(1);
   }
 
   return { deployment, proxy };
 }
 
-// Spawn ngrok and extract the public URL
-async function startNgrok(port) {
-  console.log(`\nStarting ngrok on port ${port}...`);
+
+// Spawn localtunnel via launch_localtunnel.js and extract the public URL
+async function startLocaltunnel(port) {
+  console.log(`\nStarting localtunnel on port ${port}...`);
 
   return new Promise((resolve, reject) => {
-    // Spawn ngrok process
-    const ngrok = spawn('ngrok', ['http', port.toString(), '--log=stdout']);
+    // Spawn launch_localtunnel.js process with JSON output
+    const lt = spawn('node', [
+      'launch_localtunnel.js',
+      `--port=${port}`,
+      '--subdomain=transverse',
+      '--subdomain_retry=transverse-NNNN',
+      '--json'
+    ]);
 
-    let ngrokUrl = null;
+    let ltUrl = null;
+    let outputBuffer = '';
     let timeout = setTimeout(() => {
-      if (!ngrokUrl) {
-        ngrok.kill();
-        reject(new Error('Timeout waiting for ngrok URL'));
+      if (!ltUrl) {
+        lt.kill();
+        reject(new Error('Timeout waiting for localtunnel URL'));
       }
-    }, 10000); // 10 second timeout
+    }, 60000); // 60 second timeout (to allow for retries)
 
-    // Parse ngrok output to find the public URL
-    ngrok.stdout.on('data', (data) => {
-      const output = data.toString();
-      console.log('[NGROK]', output.trim());
+    // Parse localtunnel output to find the public URL
+    lt.stdout.on('data', (data) => {
+      outputBuffer += data.toString();
 
-      // Look for the forwarding URL in ngrok output
-      // Example: "Forwarding https://abc123.ngrok.io -> http://localhost:8080"
-      const urlMatch = output.match(/https:\/\/[a-z0-9-]+\.ngrok\.io/);
-      if (urlMatch && !ngrokUrl) {
-        ngrokUrl = urlMatch[0];
-        clearTimeout(timeout);
-        console.log(`\n✓ ngrok URL obtained: ${ngrokUrl}\n`);
-        resolve({ url: ngrokUrl, process: ngrok });
+      // Try to parse complete JSON object
+      try {
+        const result = JSON.parse(outputBuffer);
+        if (result.success && result.publicUrl && !ltUrl) {
+          ltUrl = result.publicUrl;
+          clearTimeout(timeout);
+          console.log(`\n✓ localtunnel URL obtained: ${ltUrl}\n`);
+          resolve({ url: ltUrl, process: lt });
+        } else if (!result.success) {
+          clearTimeout(timeout);
+          lt.kill();
+          reject(new Error(`Localtunnel failed: ${result.error}`));
+        }
+      } catch (e) {
+        // Not complete JSON yet, keep buffering
       }
     });
 
-    ngrok.stderr.on('data', (data) => {
-      console.error('[NGROK ERROR]', data.toString());
+    lt.stderr.on('data', (data) => {
+      console.error('[LOCALTUNNEL ERROR]', data.toString());
     });
 
-    ngrok.on('close', (code) => {
-      console.log(`ngrok process exited with code ${code}`);
+    lt.on('close', (code) => {
+      console.log(`localtunnel process exited with code ${code}`);
     });
 
-    ngrok.on('error', (err) => {
+    lt.on('error', (err) => {
       clearTimeout(timeout);
       reject(err);
     });
@@ -562,16 +576,16 @@ async function main() {
 
   // Step 2: Get base URL based on deployment mode
   let baseUrl;
-  let ngrokProcess = null;
+  let tunnelProcess = null;
 
-  if (deployment === 'ngrok') {
-    // Start ngrok and get the public URL
+  if (deployment === 'localtunnel') {
+    // Start localtunnel and get the public URL
     try {
-      const ngrokResult = await startNgrok(PROXY_PORT);
-      baseUrl = ngrokResult.url;
-      ngrokProcess = ngrokResult.process;
+      const tunnelResult = await startLocaltunnel(PROXY_PORT);
+      baseUrl = tunnelResult.url;
+      tunnelProcess = tunnelResult.process;
     } catch (error) {
-      console.error('Failed to start ngrok:', error.message);
+      console.error('Failed to start localtunnel:', error.message);
       console.log('Falling back to localhost mode');
       baseUrl = `http://localhost:${PROXY_PORT}`;
     }
@@ -628,10 +642,10 @@ async function main() {
   process.on('SIGINT', () => {
     console.log('\n\nShutting down reverse proxy...');
 
-    // Kill ngrok if it's running
-    if (ngrokProcess) {
-      console.log('Stopping ngrok...');
-      ngrokProcess.kill();
+    // Kill tunnel process if it's running
+    if (tunnelProcess) {
+      console.log('Stopping localtunnel...');
+      tunnelProcess.kill();
     }
 
     // Remove proxy info files
