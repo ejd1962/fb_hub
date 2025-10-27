@@ -802,7 +802,7 @@ async function main() {
                     TRUE_URL,
                     PROXY_ENABLED: options.proxy === 'yes' ? 'true' : 'false',
                     PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json'),
-                    SERVER_SETUP_DELAY: '10'  // Servers will wait this + 10 seconds for proxy config
+                    MAX_PROXY_SETUP_SECONDS: '20'  // Maximum time to wait for proxy config (server_setup_delay + 10)
                 };
                 if (options.proxy === 'yes') {
                     backendEnv.VITE_BASE_PATH = `/localhost_${backendPort}`;
@@ -836,7 +836,7 @@ async function main() {
                     PORT: frontendPort.toString(),
                     PROXY_ENABLED: options.proxy === 'yes' ? 'true' : 'false',
                     PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json'),
-                    SERVER_SETUP_DELAY: '10'  // Servers will wait this + 10 seconds for proxy config
+                    MAX_PROXY_SETUP_SECONDS: '20'  // Maximum time to wait for proxy config (server_setup_delay + 10)
                 };
                 if (options.proxy === 'yes') {
                     frontendEnv.VITE_BASE_PATH = `/localhost_${frontendPort}`;
