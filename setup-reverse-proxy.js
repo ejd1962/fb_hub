@@ -380,7 +380,8 @@ async function saveMappings(mappings) {
   report += '-------\n';
 
   for (const [path, config] of Object.entries(mappings.routes)) {
-    const details = `${config.type} -- ${config.app_type} -- ${config.tier}`;
+    const serverType = config.type.padEnd(8); // "backend " or "frontend"
+    const details = `${serverType} -- ${config.app_type} -- ${config.tier}`;
     report += `[PROXY ] ${config.public_url.padEnd(50)} → localhost:${config.local_port} (${details})\n`;
   }
 
@@ -507,7 +508,8 @@ async function main() {
     console.log('Active services (DIRECT mode - no proxy):');
     console.log('==========================================');
     for (const [path, config] of Object.entries(directConfig.routes)) {
-      const details = `${config.type} -- ${config.app_type} -- ${config.tier}`;
+      const serverType = config.type.padEnd(8); // "backend " or "frontend"
+      const details = `${serverType} -- ${config.app_type} -- ${config.tier}`;
       console.log(`  ${config.public_url.padEnd(30)} (${details})`);
     }
     console.log('');
@@ -522,7 +524,8 @@ async function main() {
     report += '---------------------------------------------------\n';
 
     for (const [path, config] of Object.entries(directConfig.routes)) {
-      const details = `${config.type} -- ${config.app_type} -- ${config.tier}`;
+      const serverType = config.type.padEnd(8); // "backend " or "frontend"
+      const details = `${serverType} -- ${config.app_type} -- ${config.tier}`;
       report += `[DIRECT] ${config.public_url.padEnd(30)} (${details})\n`;
     }
 
