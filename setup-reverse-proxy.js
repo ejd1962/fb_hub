@@ -47,15 +47,15 @@ function parseArgs() {
     }
   }
 
-  if (!['local', 'localhost', 'localtunnel', 'portforward'].includes(deployment)) {
-    console.error('Error: --deployment must be "local", "localhost", "localtunnel", or "portforward:RESIDENCE"');
-    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|localhost|localtunnel|portforward:RESIDENCE --server_setup_delay=NN');
+  if (!['direct', 'localproxy', 'ngrok', 'localtunnel', 'portforward'].includes(deployment)) {
+    console.error('Error: --deployment must be "direct", "localproxy", "ngrok", "localtunnel", or "portforward:RESIDENCE"');
+    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=direct|localproxy|ngrok|localtunnel|portforward:RESIDENCE --server_setup_delay=NN');
     process.exit(1);
   }
 
   if (!['yes', 'no'].includes(proxy)) {
     console.error('Error: --proxy must be "yes" or "no"');
-    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|localhost|localtunnel|portforward:RESIDENCE --server_setup_delay=NN');
+    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=direct|localproxy|ngrok|localtunnel|portforward:RESIDENCE --server_setup_delay=NN');
     process.exit(1);
   }
 
@@ -729,6 +729,51 @@ async function main() {
       console.error('='.repeat(80) + '\n');
       process.exit(1);
     }
+  } else if (deployment === 'ngrok') {
+    // Start ngrok AND sleep in parallel
+    try {
+      const [ngrokResult] = await Promise.all([
+        launchNgrok(PROXY_PORT),
+        (async () => {
+          if (serverSetupDelay > 0) {
+            console.log(`Waiting ${serverSetupDelay} seconds for servers to initialize...`);
+            await new Promise(resolve => setTimeout(resolve, serverSetupDelay * 1000));
+            console.log('Server setup delay complete\n');
+          }
+        })()
+      ]);
+      baseUrl = ngrokResult.url;
+
+      console.log('\n' + '━'.repeat(80));
+      console.log('');
+      console.log('NGROK TUNNEL ACTIVE');
+      console.log('');
+      console.log(`Public URL: ${baseUrl}`);
+      console.log('');
+      console.log('━'.repeat(80) + '\n');
+
+    } catch (error) {
+      // FATAL ERROR - ngrok is required when deployment=ngrok
+      console.error('\n' + '='.repeat(80));
+      console.error('FATAL ERROR: Failed to start ngrok tunnel');
+      console.error('='.repeat(80));
+      console.error(`Error: ${error.message}`);
+      console.error(`Deployment mode: ${deployment}`);
+      console.error('\nNgrok tunnel is REQUIRED when --deployment=ngrok is specified.');
+      console.error('This is a hard failure - cannot continue without tunnel.');
+      console.error('\nPossible causes:');
+      console.error('  - Ngrok authtoken not configured (check ngrok_authtoken.txt)');
+      console.error('  - Internet connection issues');
+      console.error('  - Port 8999 is not available');
+      console.error('  - Existing ngrok tunnel already running');
+      console.error('\nTo fix:');
+      console.error('  1. Get authtoken from: https://dashboard.ngrok.com/get-started/your-authtoken');
+      console.error('  2. Save it to ngrok_authtoken.txt in this directory');
+      console.error('  3. Kill any existing ngrok processes');
+      console.error('  4. Try again');
+      console.error('='.repeat(80) + '\n');
+      process.exit(1);
+    }
   } else if (deployment === 'portforward') {
     // Load port forwarding configuration
     try {
@@ -768,17 +813,32 @@ async function main() {
       console.error('='.repeat(80) + '\n');
       process.exit(1);
     }
-  } else {
-    // Local mode - use localhost
+  } else if (deployment === 'localproxy') {
+    // Local proxy mode - use localhost proxy
     baseUrl = `http://localhost:${PROXY_PORT}`;
-    console.log(`Using local mode: ${baseUrl}`);
+    console.log(`Using local proxy mode: ${baseUrl}`);
 
-    // Still need to wait for servers in local mode
+    // Still need to wait for servers in local proxy mode
     if (serverSetupDelay > 0) {
       console.log(`Waiting ${serverSetupDelay} seconds for servers to initialize...`);
       await new Promise(resolve => setTimeout(resolve, serverSetupDelay * 1000));
       console.log('Server setup delay complete\n');
     }
+  } else if (deployment === 'direct') {
+    // Direct mode - no proxy, servers accessed directly
+    baseUrl = null; // No proxy URL in direct mode
+    console.log('Using direct mode: servers accessed directly at their own ports');
+
+    // Still need to wait for servers in direct mode
+    if (serverSetupDelay > 0) {
+      console.log(`Waiting ${serverSetupDelay} seconds for servers to initialize...`);
+      await new Promise(resolve => setTimeout(resolve, serverSetupDelay * 1000));
+      console.log('Server setup delay complete\n');
+    }
+  } else {
+    // Fallback error (should never reach here due to validation)
+    console.error(`ERROR: Unknown deployment mode: ${deployment}`);
+    process.exit(1);
   }
 
   // Step 2: Scan ports (after delay and localtunnel are both complete)

@@ -25,11 +25,10 @@
  *                               Automatically launches setup-reverse-proxy.js on port 8999
  *                               Sets VITE_BASE_PATH for proper asset serving through proxy
  *
- *   --deployment=<local|localhost|ngrok|localtunnel|portforward:RESIDENCE>
- *                               Proxy deployment method (default: local)
- *                               Only used when --proxy=yes is specified
- *                               local: Proxy for local testing (http://localhost:8999)
- *                               localhost: Same as local
+ *   --deployment=<direct|localproxy|ngrok|localtunnel|portforward:RESIDENCE>
+ *                               Proxy deployment method (default: localproxy)
+ *                               direct: No proxy - servers accessed directly at localhost:PORT
+ *                               localproxy: Proxy for local testing (http://localhost:8999)
  *                               ngrok: Proxy for external access via ngrok (FAST, requires account)
  *                               localtunnel: Proxy for external access via localtunnel (FREE, but slow)
  *                               portforward:RESIDENCE: Use port forwarding with configured residence
@@ -223,7 +222,7 @@ function parseArgs(args) {
         restart: 'auto',
         newtab: 'yes',
         purpose: 'designer_test',  // designer_test, alpha_test, beta_test, or customer_access
-        deployment: 'local',  // local, localhost, ngrok, localtunnel, portforward:<residence> - proxy deployment method
+        deployment: 'localproxy',  // direct, localproxy, ngrok, localtunnel, portforward:<residence> - proxy deployment method
         residence: null,   // Extracted from deployment=portforward:<residence>
         proxy: 'no',       // yes or no - use reverse proxy mode
         games: []
@@ -620,8 +619,8 @@ async function main() {
         console.log(`  --purpose=<designer_test|alpha_test|beta_test|customer_access>`);
         console.log(`                              Codebase purpose (default: designer_test)`);
         console.log(`  --proxy=<yes|no>            Enable reverse proxy (default: no)`);
-        console.log(`  --deployment=<local|ngrok|localtunnel|portforward:RESIDENCE>`);
-        console.log(`                              Proxy method (default: local)`);
+        console.log(`  --deployment=<direct|localproxy|ngrok|localtunnel|portforward:RESIDENCE>`);
+        console.log(`                              Proxy method (default: localproxy)`);
         console.log(`  --build-only=<yes|no>       Only build frontend (default: no)`);
         console.log(`  --restart=<auto|no>         Auto-restart on changes (default: auto)`);
         console.log(`  --newtab=<yes|no>           Launch in new tabs (default: yes)`);
