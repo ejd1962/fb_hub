@@ -487,7 +487,22 @@ async function main() {
 
   // Output result
   if (options.json) {
-    console.log(JSON5.stringify(result, null, 2));
+    // Create JSON-safe output (exclude tunnel object which can't be serialized)
+    const jsonOutput = {
+      success: result.success,
+      publicUrl: result.publicUrl,
+      localPort: result.localPort,
+      requestedSubdomain: result.requestedSubdomain,
+      actualSubdomain: result.actualSubdomain,
+      subdomainGranted: result.subdomainGranted
+    };
+    const jsonString = JSON.stringify(jsonOutput, null, 2);
+    process.stdout.write(jsonString + '\n');
+    // Force flush to ensure parent process receives the output immediately
+    if (process.stdout.isTTY === false) {
+      // In pipe mode, we need to ensure the data is flushed
+      process.stdout.uncork();
+    }
   } else {
     console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
     console.log(`  ✅ Localtunnel tunnel is ready!`);

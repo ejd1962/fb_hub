@@ -51,8 +51,9 @@ function parseArgs() {
 
 
 // Spawn localtunnel via launch_localtunnel.js and extract the public URL
-async function startLocaltunnel(port) {
+async function startLocaltunnel(port, timeoutSeconds = 10) {
   console.log(`\nStarting localtunnel on port ${port}...`);
+  console.log(`   Timeout: ${timeoutSeconds} seconds`);
 
   return new Promise((resolve, reject) => {
     // Spawn launch_localtunnel.js process with JSON output
@@ -69,9 +70,9 @@ async function startLocaltunnel(port) {
     let timeout = setTimeout(() => {
       if (!ltUrl) {
         lt.kill();
-        reject(new Error('Timeout waiting for localtunnel URL'));
+        reject(new Error(`Timeout waiting for localtunnel URL (${timeoutSeconds}s)`));
       }
-    }, 60000); // 60 second timeout (to allow for retries)
+    }, timeoutSeconds * 1000); // Convert seconds to milliseconds
 
     // Parse localtunnel output to find the public URL
     lt.stdout.on('data', (data) => {
@@ -428,15 +429,15 @@ async function main() {
   console.log(`Deployment mode: ${deployment}`);
   console.log(`Server setup delay: ${serverSetupDelay} seconds\n`);
 
-  // Step 1: Wait for servers to initialize (applies to all modes)
-  if (serverSetupDelay > 0) {
-    console.log(`Waiting ${serverSetupDelay} seconds for servers to initialize...`);
-    await new Promise(resolve => setTimeout(resolve, serverSetupDelay * 1000));
-    console.log('Server setup delay complete\n');
-  }
-
   // If proxy=no, scan ports and create direct mode config file
   if (proxy === 'no') {
+    // Step 1: Wait for servers to initialize
+    if (serverSetupDelay > 0) {
+      console.log(`Waiting ${serverSetupDelay} seconds for servers to initialize...`);
+      await new Promise(resolve => setTimeout(resolve, serverSetupDelay * 1000));
+      console.log('Server setup delay complete\n');
+    }
+
     console.log('Proxy disabled - scanning ports and creating direct mode configuration...\n');
 
     // Step 2: Scan ports (after delay)
@@ -576,7 +577,7 @@ async function main() {
   if (deployment === 'localtunnel') {
     // Start localtunnel and get the public URL
     try {
-      const tunnelResult = await startLocaltunnel(PROXY_PORT);
+      const tunnelResult = await startLocaltunnel(PROXY_PORT, serverSetupDelay);
       baseUrl = tunnelResult.url;
       tunnelProcess = tunnelResult.process;
     } catch (error) {
