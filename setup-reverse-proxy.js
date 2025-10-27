@@ -86,12 +86,14 @@ async function startLocaltunnel(port, timeoutSeconds = 10) {
           clearTimeout(timeout);
           console.log(`\n✓ localtunnel URL obtained: ${ltUrl}`);
           if (result.tunnelPassword) {
-            console.log(`✓ Tunnel password obtained: ${result.tunnelPassword}`);
+            console.log(`Tunnel password obtained: ${result.tunnelPassword}`);
             console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-            console.log(`🔑 SHARE WITH USERS:`);
-            console.log(`   URL:      ${ltUrl}`);
-            console.log(`   Password: ${result.tunnelPassword}`);
-            console.log(`   (First-time visitors need password - once per IP per 7 days)`);
+            console.log(``);
+            console.log(`SHARE WITH USERS:`);
+            console.log(`URL:      ${ltUrl}`);
+            console.log(`Password: ${result.tunnelPassword}`);
+            console.log(`(First-time visitors need password - once per IP per 7 days)`);
+            console.log(``);
             console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
           } else {
             console.log();

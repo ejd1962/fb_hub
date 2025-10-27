@@ -967,39 +967,42 @@ async function main() {
         if (result && result.success) {
             // Display big success banner
             console.log('\n' + '═'.repeat(80));
-            console.log('║' + ' '.repeat(78) + '║');
-            console.log('║' + colors.bright + colors.green + ' '.repeat(25) + '🚀  LAUNCH SUCCESSFUL!  🚀' + ' '.repeat(24) + colors.reset + '║');
-            console.log('║' + ' '.repeat(78) + '║');
-            console.log('║' + colors.bright + colors.cyan + '  All ' + result.expectedPorts + ' servers started correctly!' + ' '.repeat(Math.max(0, 40 - result.expectedPorts.toString().length)) + colors.reset + '║');
-            console.log('║' + ' '.repeat(78) + '║');
-            console.log('║' + colors.bright + colors.cyan + '  Open this URL in your browser to access the Hub:' + ' '.repeat(27) + colors.reset + '║');
-            console.log('║' + ' '.repeat(78) + '║');
-            console.log('║' + colors.bright + colors.yellow + '  👉  ' + result.hubUrl + ' '.repeat(Math.max(0, 68 - result.hubUrl.length)) + colors.reset + '║');
+            console.log('');
+            console.log(colors.bright + colors.green + 'LAUNCH SUCCESSFUL!' + colors.reset);
+            console.log('');
+            console.log('All ' + result.expectedPorts + ' servers started correctly!');
+            console.log('');
+            console.log(colors.bright + colors.cyan + 'Hub URL:' + colors.reset);
+            console.log(result.hubUrl);
 
             // Add tunnel password if present
             if (result.tunnelPassword) {
-                console.log('║' + ' '.repeat(78) + '║');
-                console.log('║' + colors.bright + colors.cyan + '  🔑 Tunnel Password (share with users):' + ' '.repeat(36) + colors.reset + '║');
-                console.log('║' + ' '.repeat(78) + '║');
-                console.log('║' + colors.bright + colors.yellow + '  👉  ' + result.tunnelPassword + ' '.repeat(Math.max(0, 68 - result.tunnelPassword.length)) + colors.reset + '║');
-                console.log('║' + colors.dim + '     (First-time visitors need this - once per IP per 7 days)' + ' '.repeat(16) + colors.reset + '║');
+                console.log('');
+                console.log(colors.bright + colors.cyan + 'Tunnel Password:' + colors.reset);
+                console.log(result.tunnelPassword);
+                console.log('');
+
+                // Canned message for sharing with users
+                const cannedMessage = `Come try the app. Open a browser on your computer and enter ${result.hubUrl} into it. When you go there the first time, you will need to enter this password: ${result.tunnelPassword} (yes 4 numbers separated by dots. Include the digits and dots).`;
+                console.log(colors.bright + 'Message to share with users:' + colors.reset);
+                console.log(cannedMessage);
             }
 
-            console.log('║' + ' '.repeat(78) + '║');
+            console.log('');
             console.log('═'.repeat(80) + '\n');
         } else {
             console.log('\n' + '═'.repeat(80));
-            console.log('║' + ' '.repeat(78) + '║');
-            console.log('║' + colors.bright + colors.red + ' '.repeat(28) + '⚠️  LAUNCH INCOMPLETE  ⚠️' + ' '.repeat(25) + colors.reset + '║');
-            console.log('║' + ' '.repeat(78) + '║');
+            console.log('');
+            console.log(colors.bright + colors.red + 'LAUNCH INCOMPLETE' + colors.reset);
+            console.log('');
             if (secondsElapsed >= maxWaitSeconds) {
-                console.log('║' + colors.red + '  TIMEOUT: Servers did not become healthy within ' + maxWaitSeconds + ' seconds.' + ' '.repeat(Math.max(0, 20 - maxWaitSeconds.toString().length)) + colors.reset + '║');
+                console.log(colors.red + 'TIMEOUT: Servers did not become healthy within ' + maxWaitSeconds + ' seconds.' + colors.reset);
             } else {
-                console.log('║' + colors.yellow + '  Some servers may not have started correctly.' + ' '.repeat(30) + colors.reset + '║');
+                console.log(colors.yellow + 'Some servers may not have started correctly.' + colors.reset);
             }
-            console.log('║' + colors.yellow + '  Check the output above for details.' + ' '.repeat(39) + colors.reset + '║');
-            console.log('║' + colors.yellow + '  Check individual server tabs for error messages.' + ' '.repeat(26) + colors.reset + '║');
-            console.log('║' + ' '.repeat(78) + '║');
+            console.log(colors.yellow + 'Check the output above for details.' + colors.reset);
+            console.log(colors.yellow + 'Check individual server tabs for error messages.' + colors.reset);
+            console.log('');
             console.log('═'.repeat(80) + '\n');
         }
     }

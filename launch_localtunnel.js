@@ -374,9 +374,11 @@ async function main() {
   // Check if localtunnel is installed
   if (!options.json) {
     console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-    console.log(`  TransVerse Localtunnel Launcher`);
+    console.log(``);
+    console.log(`TransVerse Localtunnel Launcher`);
+    console.log(``);
     console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-    console.log(`\n🔍 Checking for localtunnel installation...`);
+    console.log(`\nChecking for localtunnel installation...`);
   }
 
   const localtunnelInstalled = await checkLocaltunnelInstalled();
@@ -518,17 +520,22 @@ async function main() {
     }
   } else {
     console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-    console.log(`  ✅ Localtunnel tunnel is ready!`);
-    console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-    console.log(`\n  Use this URL to access your system from anywhere:`);
-    console.log(`  👉 ${result.publicUrl}`);
+    console.log(``);
+    console.log(`Localtunnel tunnel is ready!`);
+    console.log(``);
+    console.log(`Use this URL to access your system from anywhere:`);
+    console.log(`${result.publicUrl}`);
     if (tunnelPassword) {
-      console.log(`\n  🔑 TUNNEL PASSWORD (share this with users):`);
-      console.log(`  👉 ${tunnelPassword}`);
-      console.log(`\n  ℹ️  First-time visitors need this password (once per IP per 7 days)`);
+      console.log(``);
+      console.log(`TUNNEL PASSWORD (share this with users):`);
+      console.log(`${tunnelPassword}`);
+      console.log(``);
+      console.log(`First-time visitors need this password (once per IP per 7 days)`);
     }
-    console.log(`\n  Press Ctrl+C to stop the tunnel when done.`);
-    console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
+    console.log(``);
+    console.log(`Press Ctrl+C to stop the tunnel when done.`);
+    console.log(``);
+    console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
   }
 
   // Keep process alive and listen for tunnel close events
