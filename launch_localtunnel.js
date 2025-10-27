@@ -198,14 +198,19 @@ EXAMPLES:
   # Basic usage (tunnel localhost:8999 with random subdomain)
   node launch_localtunnel.js
 
-  # Request specific subdomain
+  # Recommended: Request specific subdomain with fallback to random suffix
+  node launch_localtunnel.js --subdomain=transverse --subdomain_retry=transverse-NNNN
+  # This tries "transverse" once, then "transverse-XXXX" up to 3 times
+
+  # Request specific subdomain only (no fallback)
   node launch_localtunnel.js --subdomain=transverse
 
-  # Request subdomain with random 4-digit suffix
+  # Request subdomain with random suffix and retries (up to 3 attempts)
   node launch_localtunnel.js --subdomain=transverse-NNNN
 
-  # Request subdomain with fallback retry
-  node launch_localtunnel.js --subdomain=transverse --subdomain_retry=transverse-NNNN
+  # Use only subdomain_retry (no primary subdomain)
+  node launch_localtunnel.js --subdomain_retry=transverse-NNNN
+  # This tries "transverse-XXXX" up to 3 times
 
   # Tunnel different port with custom subdomain
   node launch_localtunnel.js --port=3000 --subdomain=my-app
@@ -343,14 +348,14 @@ async function healthCheckTunnel(publicUrl, jsonMode) {
 
     if (!jsonMode) {
       console.log(`   Status: ${response.status} ${response.statusText}`);
-      console.log(`   ✅ Tunnel is healthy and responding`);
+      console.log(`   ✅ Tunnel is healthy and reverse proxy is responding`);
     }
 
     return true;
   } catch (error) {
     if (!jsonMode) {
-      console.warn(`   ⚠️  Health check failed: ${error.message}`);
-      console.warn(`   (This may be normal if reverse proxy is not running yet)`);
+      console.log(`   ℹ️  Reverse proxy manager not responding yet (this is normal)`);
+      console.log(`   ℹ️  Start your proxy manager to complete the connection`);
     }
     return false;
   }
@@ -398,44 +403,49 @@ async function main() {
   let result;
 
   try {
-    // First attempt
-    const firstAttempt = await attemptTunnel(options.port, options.subdomain, options.json);
+    // Determine primary and fallback patterns
+    // If no subdomain but subdomain_retry is defined, use retry as primary
+    const primaryPattern = options.subdomain || options.subdomainRetry;
+    const fallbackPattern = options.subdomain ? options.subdomainRetry : null;
+
+    // First attempt (primary pattern)
+    const firstAttempt = await attemptTunnel(options.port, primaryPattern, options.json);
 
     if (firstAttempt.subdomainGranted) {
       // Happy path - got what we wanted (or didn't request specific subdomain)
       result = firstAttempt.result;
     } else {
       // Subdomain requested but NOT granted
-      if (options.subdomainRetry) {
-        // Try with retry subdomain
+      if (fallbackPattern) {
+        // Try with fallback subdomain
         if (!options.json) {
           console.log(`\n🔄 Retrying with fallback subdomain...`);
         }
 
         firstAttempt.result.tunnel.close();
 
-        const retryAttempt = await attemptTunnel(options.port, options.subdomainRetry, options.json);
+        const retryAttempt = await attemptTunnel(options.port, fallbackPattern, options.json);
 
         if (retryAttempt.subdomainGranted) {
           // Happy path - retry succeeded
           result = retryAttempt.result;
         } else {
-          // ERROR - all attempts failed (first pattern + retry pattern)
+          // ERROR - all attempts failed (primary pattern + fallback pattern)
           const totalAttempts = firstAttempt.attemptsUsed + retryAttempt.attemptsUsed;
           if (!options.json) {
             console.error(`\n❌ ERROR: No subdomain granted after ${totalAttempts} attempts`);
-            console.error(`   First pattern: '${options.subdomain}' (${firstAttempt.attemptsUsed} attempts) - NOT granted`);
-            console.error(`   Retry pattern: '${options.subdomainRetry}' (${retryAttempt.attemptsUsed} attempts) - NOT granted`);
+            console.error(`   Primary pattern: '${primaryPattern}' (${firstAttempt.attemptsUsed} attempts) - NOT granted`);
+            console.error(`   Fallback pattern: '${fallbackPattern}' (${retryAttempt.attemptsUsed} attempts) - NOT granted`);
             console.error(`   Last server assignment: '${retryAttempt.result.actualSubdomain}'`);
           } else {
             console.log(JSON5.stringify({
               success: false,
               error: 'No subdomain granted after all attempts',
               totalAttempts: totalAttempts,
-              firstPattern: options.subdomain,
-              firstAttempts: firstAttempt.attemptsUsed,
-              retryPattern: options.subdomainRetry,
-              retryAttempts: retryAttempt.attemptsUsed,
+              primaryPattern: primaryPattern,
+              primaryAttempts: firstAttempt.attemptsUsed,
+              fallbackPattern: fallbackPattern,
+              fallbackAttempts: retryAttempt.attemptsUsed,
               lastAssignedSubdomain: retryAttempt.result.actualSubdomain
             }, null, 2));
           }
@@ -443,17 +453,17 @@ async function main() {
           process.exit(1);
         }
       } else {
-        // ERROR - no retry option, subdomain not granted after all attempts
+        // ERROR - no fallback option, subdomain not granted after all attempts
         if (!options.json) {
           console.error(`\n❌ ERROR: Requested subdomain not granted after ${firstAttempt.attemptsUsed} attempts`);
-          console.error(`   Pattern: '${options.subdomain}'`);
+          console.error(`   Pattern: '${primaryPattern}'`);
           console.error(`   Last server assignment: '${firstAttempt.result.actualSubdomain}'`);
           console.error(`   Tip: Use --subdomain_retry=transverse-NNNN for a fallback option`);
         } else {
           console.log(JSON5.stringify({
             success: false,
             error: 'Requested subdomain not available after all attempts',
-            pattern: options.subdomain,
+            pattern: primaryPattern,
             attemptsUsed: firstAttempt.attemptsUsed,
             lastAssignedSubdomain: firstAttempt.result.actualSubdomain
           }, null, 2));
