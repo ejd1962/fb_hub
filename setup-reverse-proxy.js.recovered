@@ -1,15 +1,11 @@
 import http from 'http';
 import httpProxy from 'http-proxy';
 import net from 'net';
-import { promises as fs, existsSync, unlinkSync, readFileSync } from 'fs';
+import { promises as fs, existsSync, unlinkSync } from 'fs';
 import { createInterface } from 'readline';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
 import { spawn } from 'child_process';
 import JSON5 from 'json5';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 const num_ports = 5;  // number of ports in each range that might need proxies
 
@@ -23,207 +19,70 @@ const PORT_RANGES = {
   devVite: Array.from({length: num_ports}, (_, i) => 11001 + i)     // 11001-11005
 };
 
-const PROXY_PORT = 8999; // The single port we'll expose externally (via localtunnel or localhost)
+const PROXY_PORT = 8999; // The single port we'll expose via ngrok
 
 // Parse command-line arguments
 function parseArgs() {
   const args = process.argv.slice(2);
-  const deploymentArg = args.find(arg => arg.startsWith('--deployment='))?.split('=')[1] || 'local';
+  const deployment = args.find(arg => arg.startsWith('--deployment='))?.split('=')[1] || 'local';
   const proxy = args.find(arg => arg.startsWith('--proxy='))?.split('=')[1] || 'no';
-  const serverSetupDelayArg = args.find(arg => arg.startsWith('--server_setup_delay='))?.split('=')[1];
-  const serverSetupDelay = serverSetupDelayArg ? parseInt(serverSetupDelayArg, 10) : 10;
 
-  // Parse deployment and extract residence if portforward:RESIDENCE format
-  let deployment = deploymentArg;
-  let residence = null;
-
-  if (deploymentArg.startsWith('portforward:')) {
-    deployment = 'portforward';
-    residence = deploymentArg.split(':')[1];
-    if (!residence) {
-      console.error('Error: --deployment=portforward:RESIDENCE requires a residence name');
-      console.error('Example: --deployment=portforward:erics_cottage');
-      process.exit(1);
-    }
-  }
-
-  if (!['local', 'localhost', 'localtunnel', 'portforward'].includes(deployment)) {
-    console.error('Error: --deployment must be "local", "localhost", "localtunnel", or "portforward:RESIDENCE"');
-    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|localhost|localtunnel|portforward:RESIDENCE --server_setup_delay=NN');
+  if (!['local', 'ngrok'].includes(deployment)) {
+    console.error('Error: --deployment must be "local" or "ngrok"');
+    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|ngrok');
     process.exit(1);
   }
 
   if (!['yes', 'no'].includes(proxy)) {
     console.error('Error: --proxy must be "yes" or "no"');
-    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|localhost|localtunnel|portforward:RESIDENCE --server_setup_delay=NN');
+    console.error('Usage: node setup-reverse-proxy.js --proxy=yes|no --deployment=local|ngrok');
     process.exit(1);
   }
 
-  if (isNaN(serverSetupDelay) || serverSetupDelay < 0) {
-    console.error('Error: --server_setup_delay must be a non-negative number');
-    process.exit(1);
-  }
-
-  return { deployment, proxy, residence, serverSetupDelay };
+  return { deployment, proxy };
 }
 
-
-/**
- * Load portforward configuration via launch_portforward.js
- */
-async function loadPortforwardConfig(residence) {
-  console.log(`\nLoading port forwarding configuration for residence: ${residence}...`);
+// Spawn ngrok and extract the public URL
+async function startNgrok(port) {
+  console.log(`\nStarting ngrok on port ${port}...`);
 
   return new Promise((resolve, reject) => {
-    const pf = spawn('node', [
-      'launch_portforward.js',
-      `--residence=${residence}`,
-      '--json'
-    ]);
+    // Spawn ngrok process
+    const ngrok = spawn('ngrok', ['http', port.toString(), '--log=stdout']);
 
-    let outputBuffer = '';
-
-    pf.stdout.on('data', (data) => {
-      outputBuffer += data.toString();
-    });
-
-    pf.stderr.on('data', (data) => {
-      console.error(`Port forward error: ${data.toString()}`);
-    });
-
-    pf.on('close', (code) => {
-      if (code !== 0) {
-        reject(new Error(`Failed to load port forward config (exit code: ${code})`));
-        return;
+    let ngrokUrl = null;
+    let timeout = setTimeout(() => {
+      if (!ngrokUrl) {
+        ngrok.kill();
+        reject(new Error('Timeout waiting for ngrok URL'));
       }
+    }, 10000); // 10 second timeout
 
-      try {
-        const result = JSON.parse(outputBuffer);
-        if (result.success && result.publicUrl) {
-          console.log(`Port forward URL loaded: ${result.publicUrl}`);
-          resolve({ url: result.publicUrl });
-        } else {
-          reject(new Error(result.error || 'Unknown error loading port forward config'));
-        }
-      } catch (e) {
-        reject(new Error(`Failed to parse port forward config: ${e.message}`));
-      }
-    });
-  });
-}
-
-/**
- * Launch ngrok tunnel by calling launch_ngrok.js
- */
-async function launchNgrok(port) {
-  console.log(`\nLaunching ngrok tunnel for port ${port}...`);
-
-  return new Promise((resolve, reject) => {
-    const ngrok = spawn('node', [
-      'launch_ngrok.js',
-      `--port=${port}`,
-      '--json'
-    ]);
-
-    let outputBuffer = '';
-
+    // Parse ngrok output to find the public URL
     ngrok.stdout.on('data', (data) => {
-      outputBuffer += data.toString();
+      const output = data.toString();
+      console.log('[NGROK]', output.trim());
+
+      // Look for the forwarding URL in ngrok output
+      // Example: "Forwarding https://abc123.ngrok.io -> http://localhost:8080"
+      const urlMatch = output.match(/https:\/\/[a-z0-9-]+\.ngrok\.io/);
+      if (urlMatch && !ngrokUrl) {
+        ngrokUrl = urlMatch[0];
+        clearTimeout(timeout);
+        console.log(`\n✓ ngrok URL obtained: ${ngrokUrl}\n`);
+        resolve({ url: ngrokUrl, process: ngrok });
+      }
     });
 
     ngrok.stderr.on('data', (data) => {
-      console.error(`Ngrok error: ${data.toString()}`);
+      console.error('[NGROK ERROR]', data.toString());
     });
 
     ngrok.on('close', (code) => {
-      if (code !== 0) {
-        reject(new Error(`Failed to launch ngrok (exit code: ${code})`));
-        return;
-      }
-
-      try {
-        const result = JSON.parse(outputBuffer);
-        if (result.success && result.publicUrl) {
-          console.log(`Ngrok URL established: ${result.publicUrl}`);
-          resolve({ url: result.publicUrl });
-        } else {
-          reject(new Error(result.error || 'Unknown error launching ngrok'));
-        }
-      } catch (e) {
-        reject(new Error(`Failed to parse ngrok output: ${e.message}`));
-      }
-    });
-  });
-}
-
-// Spawn localtunnel via launch_localtunnel.js and extract the public URL
-async function startLocaltunnel(port, timeoutSeconds = 10) {
-  console.log(`\nStarting localtunnel on port ${port}...`);
-  console.log(`   Timeout: ${timeoutSeconds} seconds`);
-
-  return new Promise((resolve, reject) => {
-    // Spawn launch_localtunnel.js process with JSON output
-    const lt = spawn('node', [
-      'launch_localtunnel.js',
-      `--port=${port}`,
-      '--subdomain=transverse',
-      '--subdomain_retry=transverse-NNNN',
-      '--json'
-    ]);
-
-    let ltUrl = null;
-    let outputBuffer = '';
-    let timeout = setTimeout(() => {
-      if (!ltUrl) {
-        lt.kill();
-        reject(new Error(`Timeout waiting for localtunnel URL (${timeoutSeconds}s)`));
-      }
-    }, timeoutSeconds * 1000); // Convert seconds to milliseconds
-
-    // Parse localtunnel output to find the public URL
-    lt.stdout.on('data', (data) => {
-      outputBuffer += data.toString();
-
-      // Try to parse complete JSON object
-      try {
-        const result = JSON.parse(outputBuffer);
-        if (result.success && result.publicUrl && !ltUrl) {
-          ltUrl = result.publicUrl;
-          clearTimeout(timeout);
-          console.log(`\n✓ localtunnel URL obtained: ${ltUrl}`);
-          if (result.tunnelPassword) {
-            console.log(`Tunnel password obtained: ${result.tunnelPassword}`);
-            console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-            console.log(``);
-            console.log(`SHARE WITH USERS:`);
-            console.log(`URL:      ${ltUrl}`);
-            console.log(`Password: ${result.tunnelPassword}`);
-            console.log(`(First-time visitors need password - once per IP per 7 days)`);
-            console.log(``);
-            console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
-          } else {
-            console.log();
-          }
-          resolve({ url: ltUrl, password: result.tunnelPassword, process: lt });
-        } else if (!result.success) {
-          clearTimeout(timeout);
-          lt.kill();
-          reject(new Error(`Localtunnel failed: ${result.error}`));
-        }
-      } catch (e) {
-        // Not complete JSON yet, keep buffering
-      }
+      console.log(`ngrok process exited with code ${code}`);
     });
 
-    lt.stderr.on('data', (data) => {
-      console.error('[LOCALTUNNEL ERROR]', data.toString());
-    });
-
-    lt.on('close', (code) => {
-      console.log(`localtunnel process exited with code ${code}`);
-    });
-
-    lt.on('error', (err) => {
+    ngrok.on('error', (err) => {
       clearTimeout(timeout);
       reject(err);
     });
@@ -336,14 +195,13 @@ function getPortContext(port) {
 }
 
 // Generate path mappings
-function generateMappings(activeServices, baseUrl, tunnelPassword = null) {
+function generateMappings(activeServices, baseUrl) {
   const mappings = {
     proxy_port: PROXY_PORT,
     base_url: baseUrl,
     mode: 'proxy',
     created_at: new Date().toISOString(),
     created_by_pid: process.pid,
-    tunnel_password: tunnelPassword,  // Add tunnel password if using localtunnel
     routes: {}
   };
 
@@ -544,23 +402,15 @@ async function main() {
   console.log('=================================\n');
 
   // Parse command-line arguments
-  const { deployment, proxy, serverSetupDelay } = parseArgs();
+  const { deployment, proxy } = parseArgs();
   console.log(`Proxy mode: ${proxy}`);
-  console.log(`Deployment mode: ${deployment}`);
-  console.log(`Server setup delay: ${serverSetupDelay} seconds\n`);
+  console.log(`Deployment mode: ${deployment}\n`);
 
   // If proxy=no, scan ports and create direct mode config file
   if (proxy === 'no') {
-    // Step 1: Wait for servers to initialize
-    if (serverSetupDelay > 0) {
-      console.log(`Waiting ${serverSetupDelay} seconds for servers to initialize...`);
-      await new Promise(resolve => setTimeout(resolve, serverSetupDelay * 1000));
-      console.log('Server setup delay complete\n');
-    }
-
     console.log('Proxy disabled - scanning ports and creating direct mode configuration...\n');
 
-    // Step 2: Scan ports (after delay)
+    // Step 1: Scan ports (same as proxy mode)
     console.log(`[T+${((Date.now() - scriptStartTime) / 1000).toFixed(3)}s] Starting port scan...`);
     const scanStartTime = Date.now();
     const activeServices = await scanAllPorts();
@@ -690,98 +540,7 @@ async function main() {
     return;
   }
 
-  // Step 1: Start tunnel/load config (if needed) and sleep for server initialization IN PARALLEL
-  let baseUrl;
-  let tunnelProcess = null;
-  let tunnelPassword = null;
-
-  if (deployment === 'localtunnel') {
-    // Start localtunnel AND sleep in parallel
-    try {
-      const [tunnelResult] = await Promise.all([
-        startLocaltunnel(PROXY_PORT, serverSetupDelay),
-        (async () => {
-          if (serverSetupDelay > 0) {
-            console.log(`Waiting ${serverSetupDelay} seconds for servers to initialize...`);
-            await new Promise(resolve => setTimeout(resolve, serverSetupDelay * 1000));
-            console.log('Server setup delay complete\n');
-          }
-        })()
-      ]);
-      baseUrl = tunnelResult.url;
-      tunnelProcess = tunnelResult.process;
-      tunnelPassword = tunnelResult.password;
-    } catch (error) {
-      // FATAL ERROR - localtunnel is required when deployment=localtunnel
-      console.error('\n' + '='.repeat(80));
-      console.error('FATAL ERROR: Failed to start localtunnel');
-      console.error('='.repeat(80));
-      console.error(`Error: ${error.message}`);
-      console.error(`Deployment mode: ${deployment}`);
-      console.error(`Timeout: ${serverSetupDelay} seconds`);
-      console.error('\nLocaltunnel is REQUIRED when --deployment=localtunnel is specified.');
-      console.error('This is a hard failure - cannot continue without tunnel.');
-      console.error('\nPossible causes:');
-      console.error('  - Internet connection issues');
-      console.error('  - Localtunnel service is down');
-      console.error('  - Timeout too short (increase --server_setup_delay)');
-      console.error('  - Port 8999 is not available');
-      console.error('='.repeat(80) + '\n');
-      process.exit(1);
-    }
-  } else if (deployment === 'portforward') {
-    // Load port forwarding configuration
-    try {
-      const pfResult = await loadPortforwardConfig(residence);
-      baseUrl = pfResult.url;
-
-      console.log('\n' + '━'.repeat(80));
-      console.log('');
-      console.log('PORT FORWARDING MODE ACTIVE');
-      console.log('');
-      console.log(`Public URL: ${baseUrl}`);
-      console.log(`Residence: ${residence}`);
-      console.log('');
-      console.log('IMPORTANT: Ensure your router has port forwarding configured:');
-      console.log(`  External Port ${PROXY_PORT} -> Your local machine port ${PROXY_PORT}`);
-      console.log('');
-      console.log('━'.repeat(80) + '\n');
-
-      // Still need to wait for servers
-      if (serverSetupDelay > 0) {
-        console.log(`Waiting ${serverSetupDelay} seconds for servers to initialize...`);
-        await new Promise(resolve => setTimeout(resolve, serverSetupDelay * 1000));
-        console.log('Server setup delay complete\n');
-      }
-    } catch (error) {
-      // FATAL ERROR - port forward config is required
-      console.error('\n' + '='.repeat(80));
-      console.error('FATAL ERROR: Failed to load port forward configuration');
-      console.error('='.repeat(80));
-      console.error(`Error: ${error.message}`);
-      console.error(`Residence: ${residence}`);
-      console.error('\nPort forwarding configuration is REQUIRED when --deployment=portforward:RESIDENCE is specified.');
-      console.error('\nTo fix:');
-      console.error(`  1. Run: node get-public-ip.js --residence=${residence}`);
-      console.error(`  2. Configure port forwarding on your router`);
-      console.error(`  3. Try again`);
-      console.error('='.repeat(80) + '\n');
-      process.exit(1);
-    }
-  } else {
-    // Local mode - use localhost
-    baseUrl = `http://localhost:${PROXY_PORT}`;
-    console.log(`Using local mode: ${baseUrl}`);
-
-    // Still need to wait for servers in local mode
-    if (serverSetupDelay > 0) {
-      console.log(`Waiting ${serverSetupDelay} seconds for servers to initialize...`);
-      await new Promise(resolve => setTimeout(resolve, serverSetupDelay * 1000));
-      console.log('Server setup delay complete\n');
-    }
-  }
-
-  // Step 2: Scan ports (after delay and localtunnel are both complete)
+  // Step 1: Scan ports
   console.log(`[T+${((Date.now() - scriptStartTime) / 1000).toFixed(3)}s] Starting port scan...`);
   const scanStartTime = Date.now();
   const activeServices = await scanAllPorts();
@@ -801,14 +560,35 @@ async function main() {
     return;
   }
 
-  // Step 4: Generate mappings
+  // Step 2: Get base URL based on deployment mode
+  let baseUrl;
+  let ngrokProcess = null;
+
+  if (deployment === 'ngrok') {
+    // Start ngrok and get the public URL
+    try {
+      const ngrokResult = await startNgrok(PROXY_PORT);
+      baseUrl = ngrokResult.url;
+      ngrokProcess = ngrokResult.process;
+    } catch (error) {
+      console.error('Failed to start ngrok:', error.message);
+      console.log('Falling back to localhost mode');
+      baseUrl = `http://localhost:${PROXY_PORT}`;
+    }
+  } else {
+    // Local mode - use localhost
+    baseUrl = `http://localhost:${PROXY_PORT}`;
+    console.log(`Using local mode: ${baseUrl}`);
+  }
+  
+  // Step 3: Generate mappings
   const mappingsStartTime = Date.now();
-  const mappings = generateMappings(activeServices, baseUrl, tunnelPassword);
+  const mappings = generateMappings(activeServices, baseUrl);
   await saveMappings(mappings);
   const mappingsEndTime = Date.now();
   console.log(`[T+${((mappingsEndTime - scriptStartTime) / 1000).toFixed(3)}s | ${new Date(mappingsEndTime).toISOString()}] Mappings generated and saved to reverse_proxy.json`);
-
-  // Step 5: Start reverse proxy
+  
+  // Step 4: Start reverse proxy
   console.log('Starting reverse proxy server...');
   const server = createReverseProxy(mappings);
   
@@ -848,10 +628,10 @@ async function main() {
   process.on('SIGINT', () => {
     console.log('\n\nShutting down reverse proxy...');
 
-    // Kill tunnel process if it's running
-    if (tunnelProcess) {
-      console.log('Stopping localtunnel...');
-      tunnelProcess.kill();
+    // Kill ngrok if it's running
+    if (ngrokProcess) {
+      console.log('Stopping ngrok...');
+      ngrokProcess.kill();
     }
 
     // Remove proxy info files

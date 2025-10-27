@@ -25,15 +25,10 @@
  *                               Automatically launches setup-reverse-proxy.js on port 8999
  *                               Sets VITE_BASE_PATH for proper asset serving through proxy
  *
- *   --deployment=<local|localhost|ngrok|localtunnel|portforward:RESIDENCE>
- *                               Proxy deployment method (default: local)
+ *   --deployment=<local|ngrok>  Proxy deployment method (default: local)
  *                               Only used when --proxy=yes is specified
  *                               local: Proxy for local testing (http://localhost:8999)
- *                               localhost: Same as local
- *                               ngrok: Proxy for external access via ngrok (FAST, requires account)
- *                               localtunnel: Proxy for external access via localtunnel (FREE, but slow)
- *                               portforward:RESIDENCE: Use port forwarding with configured residence
- *                                 Example: --deployment=portforward:erics_cottage
+ *                               ngrok: Proxy for external access via ngrok public URL
  *
  *   --build-only=<yes|no>       Only build frontend, don't launch servers (default: no)
  *   --restart=<auto|no>         Enable auto-restart on file changes (default: auto)
@@ -51,9 +46,6 @@
  *
  *   node launch_servers.js --proxy=yes --deployment=ngrok wordguess
  *     # Enables reverse proxy with ngrok for external access
- *
- *   node launch_servers.js --proxy=yes --deployment=localtunnel wordguess
- *     # Enables reverse proxy with localtunnel for external access (FREE)
  *
  *   node launch_servers.js --mode=prod --purpose=customer_access wordguess
  *     # Production mode with customer-facing configuration
@@ -206,7 +198,6 @@ function killProcessOnPort(port) {
 const colors = {
     reset: '\x1b[0m',
     bright: '\x1b[1m',
-    dim: '\x1b[2m',
     red: '\x1b[31m',
     green: '\x1b[32m',
     yellow: '\x1b[33m',
@@ -223,8 +214,7 @@ function parseArgs(args) {
         restart: 'auto',
         newtab: 'yes',
         purpose: 'designer_test',  // designer_test, alpha_test, beta_test, or customer_access
-        deployment: 'local',  // local, localhost, ngrok, localtunnel, portforward:<residence> - proxy deployment method
-        residence: null,   // Extracted from deployment=portforward:<residence>
+        deployment: 'local',  // local or ngrok - proxy deployment method
         proxy: 'no',       // yes or no - use reverse proxy mode
         games: []
     };
@@ -244,14 +234,7 @@ function parseArgs(args) {
         } else if (arg.startsWith('--purpose=')) {
             options.purpose = arg.split('=')[1];
         } else if (arg.startsWith('--deployment=')) {
-            const deploymentValue = arg.split('=')[1];
-            // Check if it's portforward:<residence> format
-            if (deploymentValue.startsWith('portforward:')) {
-                options.deployment = 'portforward';
-                options.residence = deploymentValue.split(':')[1];
-            } else {
-                options.deployment = deploymentValue;
-            }
+            options.deployment = arg.split('=')[1];
         } else if (arg.startsWith('--proxy=')) {
             options.proxy = arg.split('=')[1];
         } else if (arg.startsWith('--games=')) {
@@ -460,10 +443,8 @@ function launchProcess(command, args, options, label, color) {
 // Main function
 // Post-launch verification: check that proxy table has expected number of servers
 // and perform health checks on each server
-async function postLaunchCheck(options, gameNames, silent = false) {
-    if (!silent) {
-        console.log(`${colors.cyan}Performing post-launch verification...${colors.reset}\n`);
-    }
+async function postLaunchCheck(options, gameNames) {
+    console.log(`${colors.cyan}Performing post-launch verification...${colors.reset}\n`);
 
     try {
         const proxyConfigPath = path.join(__dirname, 'reverse_proxy.json');
@@ -567,13 +548,10 @@ async function postLaunchCheck(options, gameNames, silent = false) {
         }
 
         const hubUrl = hubRoute.public_url;
-        const tunnelPassword = proxyConfig.tunnel_password || null;
-        return { success: true, hubUrl, actualPorts, expectedPorts, tunnelPassword };
+        return { success: true, hubUrl, actualPorts, expectedPorts };
 
     } catch (error) {
-        if (!silent) {
-            console.log(`${colors.red}ERROR: Could not read proxy config: ${error.message}${colors.reset}\n`);
-        }
+        console.log(`${colors.red}ERROR: Could not read proxy config: ${error.message}${colors.reset}\n`);
         return { success: false, hubUrl: null };
     }
 }
@@ -620,8 +598,7 @@ async function main() {
         console.log(`  --purpose=<designer_test|alpha_test|beta_test|customer_access>`);
         console.log(`                              Codebase purpose (default: designer_test)`);
         console.log(`  --proxy=<yes|no>            Enable reverse proxy (default: no)`);
-        console.log(`  --deployment=<local|ngrok|localtunnel|portforward:RESIDENCE>`);
-        console.log(`                              Proxy method (default: local)`);
+        console.log(`  --deployment=<local|ngrok>  Proxy method (default: local)`);
         console.log(`  --build-only=<yes|no>       Only build frontend (default: no)`);
         console.log(`  --restart=<auto|no>         Auto-restart on changes (default: auto)`);
         console.log(`  --newtab=<yes|no>           Launch in new tabs (default: yes)`);
@@ -630,8 +607,6 @@ async function main() {
         console.log(`  node launch_servers.js --purpose=beta_test wordguess`);
         console.log(`  node launch_servers.js --proxy=yes wordguess`);
         console.log(`  node launch_servers.js --proxy=yes --deployment=ngrok wordguess`);
-        console.log(`  node launch_servers.js --proxy=yes --deployment=localtunnel wordguess`);
-        console.log(`  node launch_servers.js --proxy=yes --deployment=portforward:erics_cottage wordguess`);
         console.log(`  node launch_servers.js --mode=prod --purpose=customer_access wordguess`);
         process.exit(1);
     }
@@ -821,8 +796,7 @@ async function main() {
                     PORT: backendPort.toString(),
                     TRUE_URL,
                     PROXY_ENABLED: options.proxy === 'yes' ? 'true' : 'false',
-                    PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json'),
-                    MAX_PROXY_SETUP_SECONDS: '20'  // Maximum time to wait for proxy config (server_setup_delay + 10)
+                    PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json')
                 };
                 if (options.proxy === 'yes') {
                     backendEnv.VITE_BASE_PATH = `/localhost_${backendPort}`;
@@ -855,8 +829,7 @@ async function main() {
                     ...process.env,
                     PORT: frontendPort.toString(),
                     PROXY_ENABLED: options.proxy === 'yes' ? 'true' : 'false',
-                    PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json'),
-                    MAX_PROXY_SETUP_SECONDS: '20'  // Maximum time to wait for proxy config (server_setup_delay + 10)
+                    PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json')
                 };
                 if (options.proxy === 'yes') {
                     frontendEnv.VITE_BASE_PATH = `/localhost_${frontendPort}`;
@@ -902,19 +875,14 @@ async function main() {
     // Launch reverse proxy AFTER all game servers are running
     if (options.proxy === 'yes') {
         console.log(`\n${colors.bright}${colors.yellow}Launching reverse proxy...${colors.reset}`);
-        console.log(`${colors.yellow}Proxy will wait 10 seconds for game servers to fully initialize...${colors.reset}\n`);
+        console.log(`${colors.yellow}Waiting 10 seconds for game servers to fully initialize and bind to ports...${colors.reset}`);
 
-        // Launch reverse proxy immediately - it will handle the server setup delay internally
+        // Wait for servers to start listening (they need time to bind to ports)
+        await new Promise(resolve => setTimeout(resolve, 10000));
+
         const proxyLabel = 'reverse-proxy:8999';
         const proxyCmd = 'node';
-
-        // Build deployment string - if portforward, include residence
-        let deploymentString = options.deployment;
-        if (options.deployment === 'portforward' && options.residence) {
-            deploymentString = `portforward:${options.residence}`;
-        }
-
-        const proxyArgs = ['setup-reverse-proxy.js', `--proxy=yes`, `--deployment=${deploymentString}`, `--server_setup_delay=10`];
+        const proxyArgs = ['setup-reverse-proxy.js', `--proxy=yes`, `--deployment=${options.deployment}`];
 
         console.log(`${colors.cyan}Starting reverse proxy server...${colors.reset}\n`);
 
@@ -953,77 +921,33 @@ async function main() {
         console.log(`${colors.green}Reverse proxy launched on port 8999${colors.reset}\n`);
 
         // Wait for proxy to fully initialize and servers to register
-        // MAX_PROXY_SETUP_SECONDS is server_setup_delay (10) + 10 = 20
-        // Add 5 second buffer for file creation and final setup
-        const MAX_PROXY_SETUP_SECONDS = 20;
-        const maxWaitSeconds = MAX_PROXY_SETUP_SECONDS + 5;
-        console.log(`${colors.cyan}Polling for up to ${maxWaitSeconds} seconds until all servers are healthy...${colors.reset}\n`);
+        console.log(`${colors.cyan}Waiting 5 more seconds for proxy routes to be established...${colors.reset}\n`);
+        await new Promise(resolve => setTimeout(resolve, 5000));
 
-        let result = null;
-        let secondsElapsed = 0;
-        const startTime = Date.now();
+        // Perform post-launch verification
+        const result = await postLaunchCheck(options, options.games);
 
-        // Poll once per second until success or timeout
-        while (secondsElapsed < maxWaitSeconds) {
-            // Use silent mode during polling to avoid spamming error messages
-            result = await postLaunchCheck(options, options.games, true);
-
-            if (result.success) {
-                // Do one final verbose check to show the details
-                console.log(`${colors.green}✓ All servers detected as healthy after ${secondsElapsed} seconds!${colors.reset}\n`);
-                result = await postLaunchCheck(options, options.games, false);
-                break;
-            }
-
-            // Wait 1 second before next check
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            secondsElapsed = Math.floor((Date.now() - startTime) / 1000);
-
-            // Show progress every 5 seconds
-            if (secondsElapsed % 5 === 0 && secondsElapsed > 0) {
-                console.log(`${colors.yellow}   Still waiting... (${secondsElapsed}/${maxWaitSeconds}s)${colors.reset}`);
-            }
-        }
-
-        if (result && result.success) {
+        if (result.success) {
             // Display big success banner
             console.log('\n' + '═'.repeat(80));
-            console.log('');
-            console.log(colors.bright + colors.green + 'LAUNCH SUCCESSFUL!' + colors.reset);
-            console.log('');
-            console.log('All ' + result.expectedPorts + ' servers started correctly!');
-            console.log('');
-            console.log(colors.bright + colors.cyan + 'Hub URL:' + colors.reset);
-            console.log(result.hubUrl);
-
-            // Add tunnel password if present
-            if (result.tunnelPassword) {
-                console.log('');
-                console.log(colors.bright + colors.cyan + 'Tunnel Password:' + colors.reset);
-                console.log(result.tunnelPassword);
-                console.log('');
-
-                // Canned message for sharing with users
-                const cannedMessage = `Come try the app. Open a browser on your computer and enter ${result.hubUrl} into it. When you go there the first time, you will need to enter this password: ${result.tunnelPassword} (yes 4 numbers separated by dots. Include the digits and dots).`;
-                console.log(colors.bright + 'Message to share with users:' + colors.reset);
-                console.log(cannedMessage);
-            }
-
-            console.log('');
+            console.log('║' + ' '.repeat(78) + '║');
+            console.log('║' + colors.bright + colors.green + ' '.repeat(25) + '🚀  LAUNCH SUCCESSFUL!  🚀' + ' '.repeat(24) + colors.reset + '║');
+            console.log('║' + ' '.repeat(78) + '║');
+            console.log('║' + colors.bright + colors.cyan + '  All ' + result.expectedPorts + ' servers started correctly!' + ' '.repeat(Math.max(0, 40 - result.expectedPorts.toString().length)) + colors.reset + '║');
+            console.log('║' + ' '.repeat(78) + '║');
+            console.log('║' + colors.bright + colors.cyan + '  Open this URL in your browser to access the Hub:' + ' '.repeat(27) + colors.reset + '║');
+            console.log('║' + ' '.repeat(78) + '║');
+            console.log('║' + colors.bright + colors.yellow + '  👉  ' + result.hubUrl + ' '.repeat(Math.max(0, 68 - result.hubUrl.length)) + colors.reset + '║');
+            console.log('║' + ' '.repeat(78) + '║');
             console.log('═'.repeat(80) + '\n');
         } else {
             console.log('\n' + '═'.repeat(80));
-            console.log('');
-            console.log(colors.bright + colors.red + 'LAUNCH INCOMPLETE' + colors.reset);
-            console.log('');
-            if (secondsElapsed >= maxWaitSeconds) {
-                console.log(colors.red + 'TIMEOUT: Servers did not become healthy within ' + maxWaitSeconds + ' seconds.' + colors.reset);
-            } else {
-                console.log(colors.yellow + 'Some servers may not have started correctly.' + colors.reset);
-            }
-            console.log(colors.yellow + 'Check the output above for details.' + colors.reset);
-            console.log(colors.yellow + 'Check individual server tabs for error messages.' + colors.reset);
-            console.log('');
+            console.log('║' + ' '.repeat(78) + '║');
+            console.log('║' + colors.bright + colors.red + ' '.repeat(28) + '⚠️  LAUNCH INCOMPLETE  ⚠️' + ' '.repeat(25) + colors.reset + '║');
+            console.log('║' + ' '.repeat(78) + '║');
+            console.log('║' + colors.yellow + '  Some servers may not have started correctly.' + ' '.repeat(30) + colors.reset + '║');
+            console.log('║' + colors.yellow + '  Check the output above for details.' + ' '.repeat(39) + colors.reset + '║');
+            console.log('║' + ' '.repeat(78) + '║');
             console.log('═'.repeat(80) + '\n');
         }
     }
