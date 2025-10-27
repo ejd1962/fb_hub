@@ -252,7 +252,9 @@ async function startNgrokTunnel(port, managementPort, region, jsonMode, authtoke
     const connectOptions = {
       addr: port,  // Use just the port number
       proto: 'http',  // Explicitly specify protocol
-      region: region
+      region: region,
+      // Use a custom name to avoid UUID collisions (cousin Claude's fix #2)
+      name: `transverse-proxy-${port}`
       // TODO: Re-enable when we figure out correct option name for management port
       // web_addr: `localhost:${managementPort}`
     };
@@ -260,6 +262,10 @@ async function startNgrokTunnel(port, managementPort, region, jsonMode, authtoke
     // Add authtoken if available
     if (authtoken) {
       connectOptions.authtoken = authtoken;
+    }
+
+    if (!jsonMode) {
+      console.log(`\n🔍 Debug: Connect options:`, JSON.stringify(connectOptions, null, 2));
     }
 
     const url = await ngrok.connect(connectOptions);
@@ -371,17 +377,37 @@ async function main() {
     console.warn(`   Get your token from: https://dashboard.ngrok.com/get-started/your-authtoken`);
   }
 
-  // Disconnect any existing tunnels first
+  // Disconnect any existing tunnels first (cousin Claude's fix #1)
   if (!options.json) {
     console.log(`\n🔌 Disconnecting any existing ngrok tunnels...`);
   }
   try {
+    // First, try to kill any ngrok processes system-wide
+    const { exec } = await import('child_process');
+    const { promisify } = await import('util');
+    const execAsync = promisify(exec);
+
+    try {
+      // Windows: taskkill
+      await execAsync('taskkill /F /IM ngrok.exe 2>nul');
+      if (!options.json) {
+        console.log(`   Killed any running ngrok.exe processes`);
+      }
+    } catch (e) {
+      // Process might not exist, that's fine
+    }
+
+    // Then use SDK cleanup
     await ngrok.disconnect();
     await ngrok.kill();
+
     // Wait a moment for cleanup
     await new Promise(resolve => setTimeout(resolve, 2000));
   } catch (error) {
     // Ignore errors if no tunnels exist
+    if (!options.json) {
+      console.log(`   Cleanup completed (some operations may have failed, this is normal)`);
+    }
   }
 
   // Start ngrok tunnel (this will wait until tunnel is established)

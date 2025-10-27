@@ -1,6 +1,6 @@
 #!/bin/bash
 cd "C:/_projects/p23_fb_hub/fb_hub"
-node launch_proxy.js --deployment=localproxy --server_setup_delay=10
+node launch_proxy.js --deployment=ngrok --server_setup_delay=10
 EXIT_CODE=$?
 echo ""
 echo "Server exited with code $EXIT_CODE"
