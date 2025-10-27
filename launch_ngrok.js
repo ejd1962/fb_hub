@@ -216,22 +216,27 @@ async function startNgrokTunnel(port, managementPort, region, jsonMode) {
   if (!jsonMode) {
     console.log(`\n🚇 Starting ngrok tunnel...`);
     console.log(`   Local port: ${port}`);
-    console.log(`   Management port: ${managementPort}`);
+    // TODO: Re-enable when we figure out how to configure management port with ngrok npm package
+    // console.log(`   Management port: ${managementPort}`);
     console.log(`   Region: ${region}`);
   }
 
   try {
     const url = await ngrok.connect({
       addr: port,
-      region: region,
-      web_addr: `localhost:${managementPort}`
+      region: region
+      // TODO: Re-enable when we figure out correct option name for management port
+      // web_addr: `localhost:${managementPort}`
     });
+
+    // TODO: Get actual ngrok API URL when management port is configurable
+    const ngrokManagementUrl = `http://127.0.0.1:4040`; // ngrok default
 
     if (!jsonMode) {
       console.log(`\n✅ Ngrok tunnel established!`);
       console.log(`   Public URL: ${url}`);
       console.log(`   Protocol: HTTPS`);
-      console.log(`   Management: http://localhost:${managementPort}`);
+      console.log(`   Management: ${ngrokManagementUrl}`);
     }
 
     return {
@@ -239,7 +244,7 @@ async function startNgrokTunnel(port, managementPort, region, jsonMode) {
       publicUrl: url,
       localPort: port,
       region: region,
-      ngrokManagementUrl: `http://localhost:${managementPort}`
+      ngrokManagementUrl: ngrokManagementUrl
     };
   } catch (error) {
     if (!jsonMode) {
