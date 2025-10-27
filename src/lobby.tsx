@@ -8,7 +8,7 @@ import { useDebug } from "./DebugContext";
 import Footer from "./footer";
 import { getOrCreateGuestUUID } from "./guestUtils";
 import { getUrlForPort, isReverseProxyMode } from "@transverse/shared-components";
-import { PUBLIC_DIR } from "./constants";
+import { PUBLIC_DIR, SERVER_MODE } from "./constants";
 
 // TypeScript interface for game_info.json
 interface GameInfo {
@@ -236,7 +236,7 @@ export default function Lobby() {
         if (!user) {
             showAlert("Please sign in to play games!");
             navigate("/signin");
-        } else if (!DEBUG && !user.emailVerified) {
+        } else if (SERVER_MODE === 'prod' && !user.emailVerified) {
             showAlert("Please verify your email address before playing games. Check your inbox for the verification email.");
             return;
         } else {
@@ -518,8 +518,38 @@ export default function Lobby() {
                                     >
                                         Sign In to Play
                                     </button>
-                                ) : DEBUG ? (
-                                    // Debug mode: Show both buttons with dimming
+                                ) : SERVER_MODE === 'prod' ? (
+                                    // PROD mode: Show only single PROD button
+                                    (() => {
+                                        const status = serverStatuses.get(game.game_number);
+                                        const prodAlive = status?.prod ?? false;
+
+                                        return (
+                                            <button
+                                                onClick={() => prodAlive && handleGameClick(game, 'prod')}
+                                                style={{
+                                                    width: "100%",
+                                                    padding: "10px",
+                                                    backgroundColor: prodAlive ? "#e67e22" : "#999",
+                                                    color: "white",
+                                                    border: "none",
+                                                    borderRadius: "4px",
+                                                    fontSize: "16px",
+                                                    fontWeight: "bold",
+                                                    cursor: prodAlive ? "pointer" : "not-allowed",
+                                                    opacity: prodAlive ? 1 : 0.5,
+                                                    transition: "background-color 0.2s"
+                                                }}
+                                                onMouseEnter={(e) => prodAlive && (e.currentTarget.style.backgroundColor = "#c0611f")}
+                                                onMouseLeave={(e) => prodAlive && (e.currentTarget.style.backgroundColor = "#e67e22")}
+                                                disabled={!prodAlive}
+                                            >
+                                                PLAY NOW
+                                            </button>
+                                        );
+                                    })()
+                                ) : (
+                                    // DEV/DEV-VITE mode: Show both PROD and DEV buttons
                                     (() => {
                                         const status = serverStatuses.get(game.game_number);
                                         const prodAlive = status?.prod ?? false;
@@ -574,27 +604,6 @@ export default function Lobby() {
                                             </div>
                                         );
                                     })()
-                                ) : (
-                                    // Non-debug mode: Show only production button
-                                    <button
-                                        onClick={() => handleGameClick(game, 'prod')}
-                                        style={{
-                                            width: "100%",
-                                            padding: "10px",
-                                            backgroundColor: "#e67e22",
-                                            color: "white",
-                                            border: "none",
-                                            borderRadius: "4px",
-                                            fontSize: "16px",
-                                            fontWeight: "bold",
-                                            cursor: "pointer",
-                                            transition: "background-color 0.2s"
-                                        }}
-                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#c0611f"}
-                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#e67e22"}
-                                    >
-                                        PLAY NOW
-                                    </button>
                                 )}
                             </div>
                         </div>

@@ -1,5 +1,10 @@
 // Web App Constants
 
+// Server Mode (prod, dev, dev-vite)
+// Determines which server ports to use and whether email verification is required
+// For now, hardcoded to 'dev-vite' (TODO: pass via environment variable)
+export const SERVER_MODE: 'prod' | 'dev' | 'dev-vite' = 'dev-vite';
+
 // Debug Control
 // Set to true to show debug slider in banner and allow debug mode toggling
 // Set to false to hide debug slider and force debug mode off (for production)
