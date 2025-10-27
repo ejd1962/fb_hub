@@ -610,14 +610,14 @@ async function main() {
     return;
   }
 
-  // Step 3: Generate mappings
+  // Step 4: Generate mappings
   const mappingsStartTime = Date.now();
   const mappings = generateMappings(activeServices, baseUrl);
   await saveMappings(mappings);
   const mappingsEndTime = Date.now();
   console.log(`[T+${((mappingsEndTime - scriptStartTime) / 1000).toFixed(3)}s | ${new Date(mappingsEndTime).toISOString()}] Mappings generated and saved to reverse_proxy.json`);
-  
-  // Step 4: Start reverse proxy
+
+  // Step 5: Start reverse proxy
   console.log('Starting reverse proxy server...');
   const server = createReverseProxy(mappings);
   

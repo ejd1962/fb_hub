@@ -1,6 +1,6 @@
 #!/bin/bash
 cd "C:/_projects/p23_fb_hub/fb_hub"
-node setup-reverse-proxy.js --proxy=yes --deployment=local
+node setup-reverse-proxy.js --proxy=yes --deployment=localtunnel
 EXIT_CODE=$?
 echo ""
 echo "Server exited with code $EXIT_CODE"
