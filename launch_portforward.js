@@ -1,7 +1,12 @@
 /**
  * launch_portforward.js
  *
- * Loads port forwarding configuration for a specific residence and returns the public URL.
+ * Automatically fetches current public IP, updates configuration, and returns the public URL.
+ * This script handles all port forwarding logic internally:
+ *   1. Calls get-public-ip.js to fetch current IP
+ *   2. Updates portforward-config.json with new IP
+ *   3. Returns the public URL for use by the reverse proxy
+ *
  * This script assumes you have already configured port forwarding on your router.
  *
  * Usage:
@@ -12,10 +17,39 @@
 import { readFileSync, existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { spawn } from 'child_process';
 import JSON5 from 'json5';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+/**
+ * Update public IP for a residence by calling get-public-ip.js
+ */
+async function updatePublicIP(residence) {
+  return new Promise((resolve, reject) => {
+    const getIP = spawn('node', ['get-public-ip.js', `--residence=${residence}`]);
+
+    let output = '';
+    let errorOutput = '';
+
+    getIP.stdout.on('data', (data) => {
+      output += data.toString();
+    });
+
+    getIP.stderr.on('data', (data) => {
+      errorOutput += data.toString();
+    });
+
+    getIP.on('close', (code) => {
+      if (code !== 0) {
+        reject(new Error(`Failed to update public IP (exit code: ${code}): ${errorOutput}`));
+      } else {
+        resolve(output);
+      }
+    });
+  });
+}
 
 /**
  * Load portforward configuration for a specific residence
@@ -91,6 +125,13 @@ async function main() {
   }
 
   try {
+    // Step 1: Automatically update public IP
+    if (!options.json) {
+      console.log(`\nFetching current public IP for residence: ${options.residence}...`);
+    }
+    await updatePublicIP(options.residence);
+
+    // Step 2: Load the updated configuration
     const config = loadPortforwardConfig(options.residence);
 
     if (options.json) {
