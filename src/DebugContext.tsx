@@ -10,8 +10,8 @@ const DebugContext = createContext<DebugContextType | undefined>(undefined);
 
 export function DebugProvider({ children }: { children: ReactNode }) {
     // If ALLOW_DEBUG is false, DEBUG is always false
-    // If ALLOW_DEBUG is true, DEBUG defaults to true (can be toggled)
-    const [DEBUG, setDEBUG] = useState(ALLOW_DEBUG ? true : false);
+    // If ALLOW_DEBUG is true, DEBUG defaults to false (can be toggled)
+    const [DEBUG, setDEBUG] = useState(ALLOW_DEBUG ? false : false);
 
     return (
         <DebugContext.Provider value={{ DEBUG, setDEBUG }}>
