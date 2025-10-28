@@ -4,6 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
+### TransVerse System Launch
+- **Launch all servers and proxy**: `node launch_servers.js --mode=dev-vite --deployment=ngrok wordguess`
+  - Launches hub server (front and back), and wordguess game server (front and back) and proxy manager
+  - Uses ngrok for external access
+  - Runs in dev-vite mode with HMR
+
+### Individual Service Commands
 - **Start dev server**: `npm run dev` - Runs Vite dev server with HMR
 - **Build**: `npm run build` - Compiles TypeScript and builds production bundle with Vite
 - **Preview build**: `npm run preview` - Preview the production build locally
