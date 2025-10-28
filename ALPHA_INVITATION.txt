@@ -1,0 +1,81 @@
+
+Hello Friend or Family (or someone who is both, LOL) ... 
+
+As you know I have been working hard for 3 months creating a website platform 
+I intend to use to create several internet businesses.  This is called the 
+TransVerse Platform.   My first website is the "TransVerse Game System".  
+
+This game system is is intended to host many multi-player multi-language 
+games, to allow people from different countries who speak different languages 
+to play games online together.  
+
+So after many many hours of work, I am finally ready to present this Alpha Demo to 
+my close non-malicious and non-critical friends, LOL.
+
+Alpha means it is pretty new code, and missing many bells and whistles, but it is enough 
+to demonstrate the concept and be fun.   It might have bugs.  It might lack security 
+features.  It might only work for limited numbers of users at any one time for now.  
+
+Here is the purpose and the limitations of this Alpha Demo: 
+     
+1) The Transverse Game System is currently designed for a laptop or computer 
+   screen, not a phone.  It will work on a phone screen, but it is not optimized 
+   for a phone screen yet, so it may look really awkward on a small phone screen.
+   I have not tested it extensively on a mobile phone. I do intend to make all the  
+   games look great and run well on phone screens by the time I do the Beta Demo, in 
+   the future. 
+
+2) I am using a free tunnelling service (ngrok) to make it the TransVerse Game System 
+   which is currently running on my laptop visible outside my home, to anyone, anywhere 
+   in the world.   But in reality, the servers are just running on my laptop for the 
+   Alpha Demo.  My laptop is not a huge server like Amazon or Netflix has.  I can only 
+   support a few users at a time as they enjoy an Alpha Demo.
+   
+3) Ngrok, the free tunelling service that lets users reach my laptop from anywhere in the world    
+   makes up a random url each time I run it, so I have to give it to you to enter in 
+   your browser.   But once you do that once, you dont have to enter it again.
+   An example of the URL is something like:
+   https://postvertebral-unsceptically-kristel.ngrok-free.dev/localhost_11000  
+   Notice the part before ngrok is a random mishmash of words.  That is a deliberate 
+   choice made by the ngrok tunelling service. As a free ngrok user, I dont get to 
+   chose this string of words. It seems to be stable for about a week, but I expect it 
+   will change periodically. 
+
+4) The purpose of the alpha demo is just to show you what I am working on.   
+   Most of the real value is the foundation code and services that let's the server 
+   hosting and authentication and game flow work.   Thats where all my time was 
+   invested, and that codebase is very large, and very complicated.  I coded it from day 
+   one to be scalable, so someday I can support thousands or millioins of users if my 
+   web business ideas work out and attract many users.  But, this particular game in 
+   this Alpha Demo is fairly trivial.  But the first game is not the point. 
+   The infrastructure is the point, plus showing an example of how a multiplayer game 
+   can work.
+ 
+5) There is no multi-language support yet, no voice chat support yet, no camera support yet.  
+   All those features, and MANY MORE, will come later.  
+
+6) Currently there is only one game supported called WordGuess. It is just to show you the 
+   general idea of how a multi-person game works for one or more players.   This game is 
+   very simple, a word is shown, and you must click on the picture that matches the word.   
+   However this game was created specifically because it is actually helpful for people who do 
+   not speak English to learn English. 
+   
+7) The actual TransVerse Platform is hosted on my laptop for the Alpha Demo, and it needs to be 
+   running for any of this to work.  In general if I send you this invitation, its part of 
+   our discussion for you to try out the TransVerse Game System right away, so obviously I 
+   will have prepared the laptop at my end and it will already be running all the necessary
+   servers and the proxy manager, and I will have set up the ngrok tunnel.   But ou dont need 
+   to worry about any of that.  But if you later try to reuse the link below, it probably wont 
+   work if I have already terminated the server and proxy programs at my end, on my laptop. 
+
+***********
+
+Here is how you can see an Alpha Demo of the TransVerse Game System (with 1 game)... 
+
+On your laptop or computer (or Phone if that is all you have) open a browser and enter:  
+   https://postvertebral-unsceptically-kristel.ngrok-free.dev/localhost_11000  
+into the URL bar in the browser, then click enter or GO.
+ 
+The first time you do launch the game systme in any 7 day period, you will see an 
+ngrok warning page.   Just click the "Visit Site" button on that page to continue.  
+You only have to click the "Visit Site" button once a week.  
