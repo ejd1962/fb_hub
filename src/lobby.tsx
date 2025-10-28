@@ -227,7 +227,7 @@ export default function Lobby() {
 
         if (games.length > 0) {
             runHealthChecks(); // Run immediately
-            const interval = setInterval(runHealthChecks, 2500); // Then every 2.5 seconds
+            const interval = setInterval(runHealthChecks, 60000); // Then every 60 seconds
             return () => clearInterval(interval);
         }
     }, [games]);
