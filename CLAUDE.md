@@ -4,11 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
+### Repository Setup
+- **First time setup**: `source setup.source_bash`
+  - Adds command_line_scripts directory to your PATH
+  - Allows running TransVerse tools from any location
+  - Re-run after opening new terminal sessions
+
 ### TransVerse System Launch
-- **Launch all servers and proxy**: `node launch_servers.js --mode=dev-vite --deployment=ngrok wordguess`
+- **Launch all servers and proxy**: `launch_servers.js --mode=dev-vite --deployment=ngrok wordguess`
   - Launches hub server (front and back), and wordguess game server (front and back) and proxy manager
   - Uses ngrok for external access
   - Runs in dev-vite mode with HMR
+  - Note: Requires sourcing setup.source_bash first, or use `node command_line_scripts/launch_servers.js ...`
 
 ### Individual Service Commands
 - **Start dev server**: `npm run dev` - Runs Vite dev server with HMR

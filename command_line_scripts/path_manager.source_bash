@@ -1,0 +1,12 @@
+
+# Simple PATH Manager - remove duplicates on path and print out a nice version of path 
+# NOTE -- store this file in "path_manager.source_bash" somewhere on your existing PATH
+# NOTE -- it MUST be run by sourcing
+# Usage: source path_manager.source_bash
+
+# Remove duplicates from PATH using awk (keeps first occurrence)
+export PATH=$(echo "$PATH" | awk -v RS=':' '!seen[$0]++' | paste -sd:)
+
+echo "Made a new PATH after removing duplicates:"
+echo "Current PATH entries:"
+echo "$PATH" | tr ':' '\n' | nl -w2 -s'. '
