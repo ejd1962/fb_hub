@@ -11,7 +11,7 @@
   "first_port_in_dev_range": 10000,
   "first_port_in_dev_vite_range": 11000,
 
-  "status_report_interval_minutes": 1,
+  "status_report_interval_minutes": 0,
 
   "comments": {
     "server_setup_delay": "Seconds to wait before proxy scans for active servers (allows all servers to finish startup)",
