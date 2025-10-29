@@ -77,10 +77,4 @@ app.get('*', (req, res) => {
 
 app.listen(PORT, async () => {
   console.log(`[HUB SERVER] Running on http://localhost:${PORT}`);
-  console.log(`[HUB SERVER] API endpoints:`);
-  console.log(`  - GET /api/proxy-config`);
-  console.log(`  - GET /api/health`);
-
-  // Display all access URLs including proxy information
-  await displayServerUrls(PORT, 'FB Hub Backend', 'backend');
 });
