@@ -11,6 +11,8 @@
   "first_port_in_dev_range": 10000,
   "first_port_in_dev_vite_range": 11000,
 
+  "status_check_interval_minutes": 1,
+
   "comments": {
     "server_setup_delay": "Seconds to wait before proxy scans for active servers (allows all servers to finish startup)",
     "max_proxy_setup_buffer": "Additional seconds for proxy file creation and propagation",
@@ -18,6 +20,7 @@
     "max_ports_in_each_range": "Maximum number of ports to scan in each range. There are 3 ranges: PROD (backend+frontend prod), DEV (backend+maybe frontend dev), and DEV-VITE (frontend dev-vite)",
     "first_port_in_prod_range": "Starting port for PROD range (backend production)",
     "first_port_in_dev_range": "Starting port for DEV range (backend dev)",
-    "first_port_in_dev_vite_range": "Starting port for DEV-VITE range (frontend dev-vite)"
+    "first_port_in_dev_vite_range": "Starting port for DEV-VITE range (frontend dev-vite)",
+    "status_check_interval_minutes": "Interval in minutes for periodic status blurbs printed to console (0 = disabled, only show on startup)"
   }
 }

@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { readFile } from 'fs/promises';
+import { readFile, readFileSync } from 'fs/promises';
 import { displayServerUrls, waitForProxyInfo } from '@transverse/shared-components/server/display-server-urls';
 import { displayServerEnvironment } from '@transverse/shared-components/server/display-server-environment';
 import { BACKEND_PUBLIC_DIR } from './constants.js';
@@ -13,6 +13,19 @@ displayServerEnvironment('Hub Backend');
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+// Read package.json for server name
+const packageJson = JSON5.parse(readFileSync(join(__dirname, 'package.json'), 'utf8'));
+const SERVER_NAME = packageJson.name;
+
+// Load TransVerse platform configuration
+const configPath = join(__dirname, '..', 'transverse_configs.json');
+const transverseConfig = JSON5.parse(readFileSync(configPath, 'utf-8'));
+const STATUS_CHECK_INTERVAL_MINUTES = transverseConfig.status_check_interval_minutes;
+
+// Status check interval in seconds (0 = only on startup)
+// Convert minutes from config to seconds
+const STATUS_CHECK_INTERVAL_SECONDS = STATUS_CHECK_INTERVAL_MINUTES * 60;
 
 const app = express();
 // Hub uses game_number=0: port 10000 for dev backend, 9000 for production
