@@ -1,14 +1,23 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema#",
   "description": "TransVerse Platform Configuration - Single source of truth for all TransVerse servers and utilities",
-  
+
   "server_setup_delay": 15,
   "max_proxy_setup_buffer": 10,
   "proxy_port": 8999,
-  
+
+  "max_ports_in_each_range": 5,
+  "first_port_in_prod_range": 9000,
+  "first_port_in_dev_range": 10000,
+  "first_port_in_dev_vite_range": 11000,
+
   "comments": {
     "server_setup_delay": "Seconds to wait before proxy scans for active servers (allows all servers to finish startup)",
     "max_proxy_setup_buffer": "Additional seconds for proxy file creation and propagation",
-    "proxy_port": "Port where reverse proxy listens (must not conflict with game/hub ports)"
+    "proxy_port": "Port where reverse proxy listens (must not conflict with game/hub ports)",
+    "max_ports_in_each_range": "Maximum number of ports to scan in each range. There are 3 ranges: PROD (backend+frontend prod), DEV (backend+maybe frontend dev), and DEV-VITE (frontend dev-vite)",
+    "first_port_in_prod_range": "Starting port for PROD range (backend production)",
+    "first_port_in_dev_range": "Starting port for DEV range (backend dev)",
+    "first_port_in_dev_vite_range": "Starting port for DEV-VITE range (frontend dev-vite)"
   }
 }

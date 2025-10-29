@@ -16,17 +16,19 @@ const configPath = join(__dirname, '..', 'transverse_configs.json');
 const transverseConfig = JSON.parse(readFileSync(configPath, 'utf-8'));
 const DEFAULT_SERVER_SETUP_DELAY = transverseConfig.server_setup_delay;
 const PROXY_PORT_FROM_CONFIG = transverseConfig.proxy_port;
-
-const num_ports = 5;  // number of ports in each range that might need proxies
+const NUM_PORTS = transverseConfig.max_ports_in_each_range;
+const FIRST_PORT_PROD = transverseConfig.first_port_in_prod_range;
+const FIRST_PORT_DEV = transverseConfig.first_port_in_dev_range;
+const FIRST_PORT_DEV_VITE = transverseConfig.first_port_in_dev_vite_range;
 
 // Define your port ranges
-// Hub uses game_number=0: 9000 (prod), 10000 (dev), 11000 (dev-vite)
-// Games use game_number=1-5: 9001-9005 (prod), 10001-10005 (dev), 11001-11005 (dev-vite)
+// Hub uses game_number=0: port+0 for each range (prod, dev, dev-vite)
+// Games use game_number=1-N: port+1 to port+N for each range
 const PORT_RANGES = {
-  hub: [9000, 10000, 11000], // Hub only on these three ports
-  production: Array.from({length: num_ports}, (_, i) => 9001 + i), // 9001-9005
-  dev: Array.from({length: num_ports}, (_, i) => 10001 + i),        // 10001-10005
-  devVite: Array.from({length: num_ports}, (_, i) => 11001 + i)     // 11001-11005
+  hub: [FIRST_PORT_PROD, FIRST_PORT_DEV, FIRST_PORT_DEV_VITE], // Hub only on these three ports
+  production: Array.from({length: NUM_PORTS}, (_, i) => FIRST_PORT_PROD + 1 + i),    // e.g., 9001-9005
+  dev: Array.from({length: NUM_PORTS}, (_, i) => FIRST_PORT_DEV + 1 + i),            // e.g., 10001-10005
+  devVite: Array.from({length: NUM_PORTS}, (_, i) => FIRST_PORT_DEV_VITE + 1 + i)    // e.g., 11001-11005
 };
 
 const PROXY_PORT = PROXY_PORT_FROM_CONFIG; // The single port we'll expose externally (via localtunnel or localhost)
