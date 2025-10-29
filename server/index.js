@@ -93,8 +93,9 @@ app.listen(PORT, async () => {
   console.log('='.repeat(60));
   console.log(`[STATUS] Server: Hub Backend running on ${serverUrl}`);
   console.log('[STATUS] Active Endpoints:');
-  console.log(`  - GET  ${BACKEND_PUBLIC_DIR}/api/proxy-config`);
-  console.log(`  - GET  ${BACKEND_PUBLIC_DIR}/api/health`);
+  console.log('  HTTP:');
+  console.log(`    - GET  ${BACKEND_PUBLIC_DIR}/api/proxy-config`);
+  console.log(`    - GET  ${BACKEND_PUBLIC_DIR}/api/health`);
   console.log('='.repeat(60));
   console.log('');
 });

@@ -6,7 +6,29 @@ import { displayUrlsPlugin } from '@transverse/shared-components/vite/display-ur
 export default defineConfig({
     plugins: [
         react(),
-        displayUrlsPlugin('FB Hub')
+        displayUrlsPlugin('FB Hub', {
+            routes: [
+                '/ (redirects to /welcome)',
+                '/welcome',
+                '/lobby',
+                '/home',
+                '/signin',
+                '/profile',
+                '/about',
+                '/jobs',
+                '/contact',
+                '/help',
+                '/privacy',
+                '/terms',
+                '/change_email_or_pw'
+            ],
+            backendApis: [
+                'GET  {hub_backend}/api/proxy-config',
+                'GET  {hub_backend}/api/health',
+                'POST {game_backend}/api/verify-token',
+                'POST {game_backend}/api/game-session'
+            ]
+        })
     ],
     // Set base path for reverse proxy mode
     // Use VITE_BASE_PATH env var, or default to '/' for direct access
