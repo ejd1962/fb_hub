@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "description": "TransVerse Platform Configuration - Single source of truth for all TransVerse servers and utilities",
+  
+  "server_setup_delay": 15,
+  "max_proxy_setup_buffer": 10,
+  "proxy_port": 8999,
+  
+  "comments": {
+    "server_setup_delay": "Seconds to wait before proxy scans for active servers (allows all servers to finish startup)",
+    "max_proxy_setup_buffer": "Additional seconds for proxy file creation and propagation",
+    "proxy_port": "Port where reverse proxy listens (must not conflict with game/hub ports)"
+  }
+}

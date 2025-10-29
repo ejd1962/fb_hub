@@ -811,7 +811,7 @@ async function main() {
                     TRUE_URL,
                     PROXY_ENABLED: options.deployment !== 'direct' ? 'true' : 'false',
                     PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json'),
-                    MAX_PROXY_SETUP_SECONDS: '20'  // Maximum time to wait for proxy config (server_setup_delay + 10)
+                    MAX_PROXY_SETUP_SECONDS: '25'  // Maximum time to wait for proxy config (server_setup_delay + 10)
                 };
                 if (options.deployment !== 'direct') {
                     backendEnv.VITE_BASE_PATH = `/localhost_${backendPort}`;
@@ -847,7 +847,7 @@ async function main() {
                     PORT: frontendPort.toString(),
                     PROXY_ENABLED: options.deployment !== 'direct' ? 'true' : 'false',
                     PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json'),
-                    MAX_PROXY_SETUP_SECONDS: '20'  // Maximum time to wait for proxy config (server_setup_delay + 10)
+                    MAX_PROXY_SETUP_SECONDS: '25'  // Maximum time to wait for proxy config (server_setup_delay + 10)
                 };
                 if (options.deployment !== 'direct') {
                     frontendEnv.VITE_BASE_PATH = `/localhost_${frontendPort}`;
@@ -905,7 +905,7 @@ async function main() {
             deploymentString = `portforward:${options.residence}`;
         }
 
-        const proxyArgs = ['launch_proxy.js', `--deployment=${deploymentString}`, `--server_setup_delay=10`];
+        const proxyArgs = ['launch_proxy.js', `--deployment=${deploymentString}`, `--server_setup_delay=15`];
 
         console.log(`${colors.cyan}Starting reverse proxy server...${colors.reset}\n`);
 
@@ -944,9 +944,9 @@ async function main() {
         console.log(`${colors.green}Reverse proxy launched on port 8999${colors.reset}\n`);
 
         // Wait for proxy to fully initialize and servers to register
-        // MAX_PROXY_SETUP_SECONDS is server_setup_delay (10) + 10 = 20
+        // MAX_PROXY_SETUP_SECONDS is server_setup_delay (15) + 10 = 25
         // Add 5 second buffer for file creation and final setup
-        const MAX_PROXY_SETUP_SECONDS = 20;
+        const MAX_PROXY_SETUP_SECONDS = 25;
         const maxWaitSeconds = MAX_PROXY_SETUP_SECONDS + 5;
         console.log(`${colors.cyan}Polling for up to ${maxWaitSeconds} seconds until all servers are healthy...${colors.reset}\n`);
 
