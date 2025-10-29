@@ -4,6 +4,12 @@
 # NOTE -- it MUST be run by sourcing
 # Usage: source path_manager.source_bash
 
+# NOTE:
+# For now this source_bash script is very simple, it checks no command line params. 
+# But later it will check for --unique --print, and that will give the operation below 
+# For now call it with these 2 arguments anyway, and later when I really support them, 
+# your calling code will get the same behaviour. 
+
 # Remove duplicates from PATH using awk (keeps first occurrence)
 export PATH=$(echo "$PATH" | awk -v RS=':' '!seen[$0]++' | paste -sd:)
 

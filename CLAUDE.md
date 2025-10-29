@@ -72,3 +72,39 @@ The app uses FirebaseUI for authentication with a specific setup pattern:
 - `src/home.tsx` - Protected home page with sign-out functionality
 - `src/App.css` - Shared styles
 - `src/index.css` - Global styles
+- `command_line_scripts/` - TransVerse command line tools (see below)
+- `setup.source_bash` - Repository setup script to add tools to PATH
+
+## TransVerse Command Line Tools
+
+The `command_line_scripts/` directory contains all TransVerse command line utilities:
+
+### System Management
+- `launch_servers.js` - Launch hub and game servers with proxy
+- `launch_all_games.js` - Launch all registered games
+- `launch_ngrok.js` - Start ngrok tunnel
+- `launch_localtunnel.js` - Start localtunnel
+- `launch_portforward.js` - Port forwarding utility
+- `launch_proxy.js` - Proxy manager
+
+### Development Tools
+- `scan_api_inventory.cjs` - Scan codebase for socket messages and HTTP endpoints
+- `show-routes.js` - Display all routes in application
+- `show-doc-flow.js` - Show documentation flow
+- `doc-flow.js` - Documentation flow utility
+- `add-route-markers.js` - Add route markers to code
+
+### Project Management
+- `clone_project.js` - Clone project structure for new games
+- `copy-game-info-to-hub.js` - Sync game info to hub
+- `copy-hub-elements-to-game.js` - Sync hub elements to games
+- `sync-game-data.js` - Sync data between hub and games
+
+### Utilities
+- `increment-build.js` - Increment build version
+- `git-backup.js` - Git backup utility
+- `replace-in-files.js` - Bulk find/replace in files
+- `generate-snapshot-info.cjs` - Generate project snapshots
+- `get-public-ip.js` - Get public IP address
+
+**Usage**: enter "source setup.source_bash" first to add these tools to your PATH, then run them directly by name.

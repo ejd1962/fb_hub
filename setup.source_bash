@@ -11,5 +11,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Add command_line_scripts to the front of PATH
 export PATH="${SCRIPT_DIR}/command_line_scripts:${PATH}"
 
+source path_manager.source_bash --unique --print # remove duplicates and print out path, one entry per line
+
 echo "TransVerse fb_hub repository setup complete"
 echo "Added to PATH: ${SCRIPT_DIR}/command_line_scripts"
