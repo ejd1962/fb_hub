@@ -15,3 +15,4 @@ source path_manager.source_bash --unique --print # remove duplicates and print o
 
 echo "TransVerse fb_hub repository setup complete"
 echo "Added to PATH: ${SCRIPT_DIR}/command_line_scripts"
+
