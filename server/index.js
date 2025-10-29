@@ -3,7 +3,7 @@ import cors from 'cors';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { readFile } from 'fs/promises';
-import { displayServerUrls } from '@transverse/shared-components/server/display-server-urls';
+import { displayServerUrls, waitForProxyInfo } from '@transverse/shared-components/server/display-server-urls';
 import { displayServerEnvironment } from '@transverse/shared-components/server/display-server-environment';
 import { BACKEND_PUBLIC_DIR } from './constants.js';
 import JSON5 from 'json5';
@@ -76,5 +76,25 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, async () => {
-  console.log(`[HUB SERVER] Running on http://localhost:${PORT}`);
+  // Load proxy configuration NOW (after port is bound and listening)
+  // Wait up to 25 seconds for proxy file to be created (matches transverse_configs.json)
+  const MAX_PROXY_SETUP_SECONDS = parseInt(process.env.MAX_PROXY_SETUP_SECONDS || '25', 10);
+  const PROXY_INFO = await waitForProxyInfo(MAX_PROXY_SETUP_SECONDS * 1000);
+
+  // Compute final server URL
+  let serverUrl;
+  if (PROXY_INFO && PROXY_INFO.base_url) {
+    serverUrl = `${PROXY_INFO.base_url}/localhost_${PORT}`;
+  } else {
+    serverUrl = process.env.TRUE_URL || `http://localhost:${PORT}/`;
+  }
+
+  console.log('');
+  console.log('='.repeat(60));
+  console.log(`[STATUS] Server: Hub Backend running on ${serverUrl}`);
+  console.log('[STATUS] Active Endpoints:');
+  console.log(`  - GET  ${BACKEND_PUBLIC_DIR}/api/proxy-config`);
+  console.log(`  - GET  ${BACKEND_PUBLIC_DIR}/api/health`);
+  console.log('='.repeat(60));
+  console.log('');
 });
