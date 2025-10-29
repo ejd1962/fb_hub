@@ -28,6 +28,13 @@ const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Load TransVerse platform configuration
+const configPath = path.join(__dirname, '..', 'transverse_configs.json');
+const transverseConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+const FIRST_PORT_PROD = transverseConfig.first_port_in_prod_range;
+const FIRST_PORT_DEV = transverseConfig.first_port_in_dev_range;
+const FIRST_PORT_DEV_VITE = transverseConfig.first_port_in_dev_vite_range;
+
 const PROJECTS_DIR = 'C:\\_projects';
 
 // Utility: Convert string to Title Case
@@ -252,9 +259,9 @@ async function main() {
     console.log(`  Game folder: ${newName}`);
     console.log(`  Display name: ${newNameTitle}`);
     console.log(`  Game number: ${nextGameNumber}`);
-    console.log(`  Production port: ${9000 + nextGameNumber}`);
-    console.log(`  Dev backend port: ${10000 + nextGameNumber}`);
-    console.log(`  Dev frontend port: ${11000 + nextGameNumber}\n`);
+    console.log(`  Production port: ${FIRST_PORT_PROD + nextGameNumber}`);
+    console.log(`  Dev backend port: ${FIRST_PORT_DEV + nextGameNumber}`);
+    console.log(`  Dev frontend port: ${FIRST_PORT_DEV_VITE + nextGameNumber}\n`);
 
     const confirm = await askQuestion('Proceed with cloning? (yes/no): ');
     if (confirm.toLowerCase() !== 'yes' && confirm.toLowerCase() !== 'y') {
@@ -299,10 +306,10 @@ async function main() {
     pkgJson = pkgJson.replace(new RegExp(oldNameSnake, 'g'), newName);
 
     // Replace PORT=9xxx with new production port (tolerate 0+ spaces before &&)
-    pkgJson = pkgJson.replace(/PORT=9\d{3}\s*&&/g, `PORT=${9000 + nextGameNumber} &&`);
+    pkgJson = pkgJson.replace(/PORT=9\d{3}\s*&&/g, `PORT=${FIRST_PORT_PROD + nextGameNumber} &&`);
 
     // Replace PORT=10xxx with new dev port (tolerate 0+ spaces before &&)
-    pkgJson = pkgJson.replace(/PORT=10\d{3}\s*&&/g, `PORT=${10000 + nextGameNumber} &&`);
+    pkgJson = pkgJson.replace(/PORT=10\d{3}\s*&&/g, `PORT=${FIRST_PORT_DEV + nextGameNumber} &&`);
 
     fs.writeFileSync(packageJsonPath, pkgJson, 'utf8');
     console.log('  ✓ Updated package.json');
@@ -325,10 +332,10 @@ async function main() {
         let serverPkgString = JSON.stringify(serverPkg, null, 2);
 
         // Replace PORT=9xxx with new production port (tolerate 0+ spaces before &&)
-        serverPkgString = serverPkgString.replace(/PORT=9\d{3}\s*&&/g, `PORT=${9000 + nextGameNumber} &&`);
+        serverPkgString = serverPkgString.replace(/PORT=9\d{3}\s*&&/g, `PORT=${FIRST_PORT_PROD + nextGameNumber} &&`);
 
         // Replace PORT=10xxx with new dev port (tolerate 0+ spaces before &&)
-        serverPkgString = serverPkgString.replace(/PORT=10\d{3}\s*&&/g, `PORT=${10000 + nextGameNumber} &&`);
+        serverPkgString = serverPkgString.replace(/PORT=10\d{3}\s*&&/g, `PORT=${FIRST_PORT_DEV + nextGameNumber} &&`);
 
         fs.writeFileSync(serverPackageJsonPath, serverPkgString, 'utf8');
         console.log('  ✓ Updated server/package.json');
@@ -340,10 +347,10 @@ async function main() {
         let viteConfig = fs.readFileSync(viteConfigPath, 'utf8');
 
         // Replace port: 11xxx with new frontend dev port
-        viteConfig = viteConfig.replace(/port:\s*11\d{3},/, `port: ${11000 + nextGameNumber},`);
+        viteConfig = viteConfig.replace(/port:\s*11\d{3},/, `port: ${FIRST_PORT_DEV_VITE + nextGameNumber},`);
 
         // Also handle old 8080 port if it exists
-        viteConfig = viteConfig.replace(/port:\s*8080,/, `port: ${11000 + nextGameNumber},`);
+        viteConfig = viteConfig.replace(/port:\s*8080,/, `port: ${FIRST_PORT_DEV_VITE + nextGameNumber},`);
 
         fs.writeFileSync(viteConfigPath, viteConfig, 'utf8');
         console.log('  ✓ Updated vite.config.ts');
@@ -376,8 +383,8 @@ async function main() {
             return 1;
         })();
 
-        gameInfo = gameInfo.replace(new RegExp(`:${9000 + oldGameNumber}`, 'g'), `:${9000 + nextGameNumber}`);
-        gameInfo = gameInfo.replace(new RegExp(`:${10000 + oldGameNumber}`, 'g'), `:${10000 + nextGameNumber}`);
+        gameInfo = gameInfo.replace(new RegExp(`:${FIRST_PORT_PROD + oldGameNumber}`, 'g'), `:${FIRST_PORT_PROD + nextGameNumber}`);
+        gameInfo = gameInfo.replace(new RegExp(`:${FIRST_PORT_DEV + oldGameNumber}`, 'g'), `:${FIRST_PORT_DEV + nextGameNumber}`);
 
         fs.writeFileSync(gameInfoPath, gameInfo, 'utf8');
         console.log('  ✓ Updated public/fb_hub_data/game_info.json');
@@ -434,8 +441,8 @@ async function main() {
     console.log(`New project created at: ${newProjectPath}`);
     console.log(`\nYou can now run:`);
     console.log(`  1. cd ${newGamePath}`);
-    console.log(`  2. npm run dev (client on port ${11000 + nextGameNumber})`);
-    console.log(`  3. npm run server:dev (server on port ${10000 + nextGameNumber})`);
+    console.log(`  2. npm run dev (client on port ${FIRST_PORT_DEV_VITE + nextGameNumber})`);
+    console.log(`  3. npm run server:dev (server on port ${FIRST_PORT_DEV + nextGameNumber})`);
     console.log(`\nThe game has been added to the TransVerse Hub lobby.`);
 }
 

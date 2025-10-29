@@ -8,5 +8,4 @@ Routes:
 -------
 [PROXY ] https://postvertebral-unsceptically-kristel.ngrok-free.dev/localhost_10000 → localhost:10000 (backend  -- hub -- dev)
 [PROXY ] https://postvertebral-unsceptically-kristel.ngrok-free.dev/localhost_11000 → localhost:11000 (frontend -- hub -- dev-vite)
-[PROXY ] https://postvertebral-unsceptically-kristel.ngrok-free.dev/localhost_10001 → localhost:10001 (backend  -- app -- dev)
 [PROXY ] https://postvertebral-unsceptically-kristel.ngrok-free.dev/localhost_11001 → localhost:11001 (frontend -- app -- dev-vite)

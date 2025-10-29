@@ -96,6 +96,11 @@ const transverseConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 const SERVER_SETUP_DELAY = transverseConfig.server_setup_delay;
 const MAX_PROXY_SETUP_BUFFER = transverseConfig.max_proxy_setup_buffer;
 const MAX_PROXY_SETUP_SECONDS = SERVER_SETUP_DELAY + MAX_PROXY_SETUP_BUFFER;
+const NUM_PORTS = transverseConfig.max_ports_in_each_range;
+const FIRST_PORT_PROD = transverseConfig.first_port_in_prod_range;
+const FIRST_PORT_DEV = transverseConfig.first_port_in_dev_range;
+const FIRST_PORT_DEV_VITE = transverseConfig.first_port_in_dev_vite_range;
+const PROXY_PORT = transverseConfig.proxy_port;
 
 // Logging functionality
 const logFile = path.join(__dirname, 'launch_game.log');
@@ -636,11 +641,11 @@ async function main() {
 
     // Kill all ports in the hub/game range
     const allPorts = [
-        9000, 10000, 11000,  // Hub ports
-        ...Array.from({length: 5}, (_, i) => 9001 + i),   // Production game ports
-        ...Array.from({length: 5}, (_, i) => 10001 + i),  // Dev game ports
-        ...Array.from({length: 5}, (_, i) => 11001 + i),  // Dev-vite game ports
-        8999  // Reverse proxy port
+        FIRST_PORT_PROD, FIRST_PORT_DEV, FIRST_PORT_DEV_VITE,  // Hub ports
+        ...Array.from({length: NUM_PORTS}, (_, i) => FIRST_PORT_PROD + 1 + i),    // Production game ports
+        ...Array.from({length: NUM_PORTS}, (_, i) => FIRST_PORT_DEV + 1 + i),     // Dev game ports
+        ...Array.from({length: NUM_PORTS}, (_, i) => FIRST_PORT_DEV_VITE + 1 + i), // Dev-vite game ports
+        PROXY_PORT  // Reverse proxy port
     ];
 
     for (const port of allPorts) {
