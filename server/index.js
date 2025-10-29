@@ -2,7 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { readFile, readFileSync } from 'fs/promises';
+import { readFile } from 'fs/promises';
+import { readFileSync } from 'fs';
 import { displayServerUrls, waitForProxyInfo } from '@transverse/shared-components/server/display-server-urls';
 import { displayServerEnvironment } from '@transverse/shared-components/server/display-server-environment';
 import { BACKEND_PUBLIC_DIR } from './constants.js';
@@ -21,11 +22,7 @@ const SERVER_NAME = packageJson.name;
 // Load TransVerse platform configuration
 const configPath = join(__dirname, '..', 'transverse_configs.json');
 const transverseConfig = JSON5.parse(readFileSync(configPath, 'utf-8'));
-const STATUS_CHECK_INTERVAL_MINUTES = transverseConfig.status_check_interval_minutes;
-
-// Status check interval in seconds (0 = only on startup)
-// Convert minutes from config to seconds
-const STATUS_CHECK_INTERVAL_SECONDS = STATUS_CHECK_INTERVAL_MINUTES * 60;
+const STATUS_REPORT_INTERVAL_MINUTES = transverseConfig.status_report_interval_minutes;
 
 const app = express();
 // Hub uses game_number=0: port 10000 for dev backend, 9000 for production
@@ -149,4 +146,30 @@ app.listen(PORT, async () => {
   console.log(`✅ Hub Backend is ready for traffic!`);
   console.log(`   [T+${elapsed}s | ${new Date(endTime).toISOString()}] URL check complete`);
   console.log('='.repeat(80) + '\n');
+
+  // Schedule periodic status reports
+  // First report always at 1 minute mark (to avoid mixing with startup splash)
+  // If interval is 0: print one report at 1 minute and never again
+  // If interval > 0: repeat every N minutes after the first report
+  setTimeout(() => {
+    // Print first status report
+    console.log('');
+    console.log('='.repeat(60));
+    console.log(`[STATUS] Server: ${SERVER_NAME}`);
+    console.log(`[STATUS] Running on: ${serverUrl}`);
+    console.log('='.repeat(60));
+    console.log('');
+
+    // If interval > 0, set up recurring reports
+    if (STATUS_REPORT_INTERVAL_MINUTES > 0) {
+      setInterval(() => {
+        console.log('');
+        console.log('='.repeat(60));
+        console.log(`[STATUS] Server: ${SERVER_NAME}`);
+        console.log(`[STATUS] Running on: ${serverUrl}`);
+        console.log('='.repeat(60));
+        console.log('');
+      }, STATUS_REPORT_INTERVAL_MINUTES * 60 * 1000);
+    }
+  }, 60 * 1000); // First report at 1 minute mark
 });

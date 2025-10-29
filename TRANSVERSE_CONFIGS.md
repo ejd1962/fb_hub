@@ -41,14 +41,18 @@ Changing any of these values required editing multiple files, increasing the ris
   - `launch_servers.js` - Computes `MAX_PROXY_SETUP_SECONDS = server_setup_delay + max_proxy_setup_buffer`
 - **Impact**: Total wait time for proxy = `server_setup_delay` + `max_proxy_setup_buffer` = 25 seconds
 
-#### `status_check_interval_minutes`
+#### `status_report_interval_minutes`
 - **Type**: Integer (minutes)
 - **Default**: `1`
-- **Purpose**: Interval for periodic status blurbs printed to console showing server health (active sessions, rooms, etc.)
+- **Purpose**: Interval for periodic status reports printed to console showing server health (active sessions, rooms, etc.)
 - **Used by**:
-  - `wordguess/server/index.js` - STATUS_CHECK_INTERVAL_MINUTES (converted to seconds internally)
-- **Impact**: Set to `0` to disable periodic status printing (only show on startup)
-- **Example**: Value of `1` prints status every 60 seconds, `5` prints every 5 minutes
+  - `fb_hub/server/index.js` - STATUS_REPORT_INTERVAL_MINUTES
+  - `wordguess/server/index.js` - STATUS_REPORT_INTERVAL_MINUTES
+- **Behavior**:
+  - First report always appears at 1 minute mark (to avoid mixing with startup splash)
+  - If set to `0`: Prints one report at 1 minute mark and never again
+  - If set to `>0`: Repeats every N minutes after the first report
+- **Example**: Value of `1` = reports at 1min, 2min, 3min... | Value of `5` = reports at 1min, 6min, 11min... | Value of `0` = one report at 1min only
 
 ### Port Configuration
 
