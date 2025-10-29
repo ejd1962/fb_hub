@@ -20,7 +20,6 @@ const PORT = process.env.PORT || 10000;
 
 // BACKEND_PUBLIC_DIR is available for serving static files with proxy path prefix
 // Example usage: app.use(`${BACKEND_PUBLIC_DIR}/static`, express.static(...))
-console.log(`BACKEND_PUBLIC_DIR: '${BACKEND_PUBLIC_DIR}'`);
 
 // Enable CORS for all routes
 app.use(cors());
@@ -76,26 +75,65 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, async () => {
+  const startTime = Date.now();
+
+  console.log('');
+  console.log(`   [T+0.0s | ${new Date(startTime).toISOString()}] Starting URL check`);
+
+  // Direct access URL
+  const directUrl = `http://localhost:${PORT}`;
+  const proxyEnabled = process.env.PROXY_ENABLED !== 'false';
+
+  if (proxyEnabled) {
+    console.log(`\n📍 DIRECT ACCESS: (PROHIBITED in proxy mode)`);
+    console.log(`   ${directUrl}`);
+  } else {
+    console.log(`\n📍 DIRECT ACCESS:`);
+    console.log(`   ${directUrl}`);
+  }
+
+  // Check for proxy information
+  if (!proxyEnabled) {
+    console.log(`\n📌 Reverse proxy is disabled (PROXY_ENABLED=false)`);
+  } else {
+    console.log(`\n🔍 Checking for reverse proxy configuration...`);
+  }
+
   // Load proxy configuration NOW (after port is bound and listening)
-  // Wait up to 25 seconds for proxy file to be created (matches transverse_configs.json)
   const MAX_PROXY_SETUP_SECONDS = parseInt(process.env.MAX_PROXY_SETUP_SECONDS || '25', 10);
-  const PROXY_INFO = await waitForProxyInfo(MAX_PROXY_SETUP_SECONDS * 1000);
+  const PROXY_INFO = proxyEnabled ? await waitForProxyInfo(MAX_PROXY_SETUP_SECONDS * 1000) : null;
 
   // Compute final server URL
   let serverUrl;
   if (PROXY_INFO && PROXY_INFO.base_url) {
     serverUrl = `${PROXY_INFO.base_url}/localhost_${PORT}`;
+
+    console.log(`\n🌐 REVERSE PROXY ACCESS:`);
+    console.log(`   ${serverUrl}`);
+
+    if (PROXY_INFO.base_url.includes('ngrok')) {
+      console.log(`\n✨ This is an ngrok public URL - accessible from anywhere on the internet!`);
+    } else if (PROXY_INFO.base_url.includes('localhost')) {
+      console.log(`\n🏠 Local proxy running on ${PROXY_INFO.base_url}`);
+    }
   } else {
-    serverUrl = process.env.TRUE_URL || `http://localhost:${PORT}/`;
+    serverUrl = process.env.TRUE_URL || directUrl;
+    if (proxyEnabled) {
+      console.log(`\n📌 No reverse proxy detected (direct access only)`);
+    }
   }
 
-  console.log('');
-  console.log('='.repeat(60));
-  console.log(`[STATUS] Server: Hub Backend running on ${serverUrl}`);
-  console.log('[STATUS] Active Endpoints:');
+  // Display Active Endpoints
+  console.log(`\n📍 ACTIVE ENDPOINTS:`);
   console.log('  HTTP:');
   console.log(`    - GET  ${BACKEND_PUBLIC_DIR}/api/proxy-config`);
   console.log(`    - GET  ${BACKEND_PUBLIC_DIR}/api/health`);
-  console.log('='.repeat(60));
-  console.log('');
+
+  const endTime = Date.now();
+  const elapsed = ((endTime - startTime) / 1000).toFixed(3);
+
+  console.log('\n' + '='.repeat(80));
+  console.log(`✅ Hub Backend is ready for traffic!`);
+  console.log(`   [T+${elapsed}s | ${new Date(endTime).toISOString()}] URL check complete`);
+  console.log('='.repeat(80) + '\n');
 });
