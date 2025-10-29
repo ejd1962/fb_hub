@@ -90,6 +90,13 @@ import JSON5 from 'json5';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Load TransVerse platform configuration
+const configPath = path.join(__dirname, '..', 'transverse_configs.json');
+const transverseConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+const SERVER_SETUP_DELAY = transverseConfig.server_setup_delay;
+const MAX_PROXY_SETUP_BUFFER = transverseConfig.max_proxy_setup_buffer;
+const MAX_PROXY_SETUP_SECONDS = SERVER_SETUP_DELAY + MAX_PROXY_SETUP_BUFFER;
+
 // Logging functionality
 const logFile = path.join(__dirname, 'launch_game.log');
 function log(message) {
@@ -811,7 +818,7 @@ async function main() {
                     TRUE_URL,
                     PROXY_ENABLED: options.deployment !== 'direct' ? 'true' : 'false',
                     PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json'),
-                    MAX_PROXY_SETUP_SECONDS: '25'  // Maximum time to wait for proxy config (server_setup_delay + 10)
+                    MAX_PROXY_SETUP_SECONDS: `${MAX_PROXY_SETUP_SECONDS}`  // Maximum time to wait for proxy config (server_setup_delay + max_proxy_setup_buffer)
                 };
                 if (options.deployment !== 'direct') {
                     backendEnv.VITE_BASE_PATH = `/localhost_${backendPort}`;
@@ -847,7 +854,7 @@ async function main() {
                     PORT: frontendPort.toString(),
                     PROXY_ENABLED: options.deployment !== 'direct' ? 'true' : 'false',
                     PROXY_INFO_PATH: path.join(__dirname, 'reverse_proxy.json'),
-                    MAX_PROXY_SETUP_SECONDS: '25'  // Maximum time to wait for proxy config (server_setup_delay + 10)
+                    MAX_PROXY_SETUP_SECONDS: `${MAX_PROXY_SETUP_SECONDS}`  // Maximum time to wait for proxy config (server_setup_delay + max_proxy_setup_buffer)
                 };
                 if (options.deployment !== 'direct') {
                     frontendEnv.VITE_BASE_PATH = `/localhost_${frontendPort}`;
@@ -905,7 +912,7 @@ async function main() {
             deploymentString = `portforward:${options.residence}`;
         }
 
-        const proxyArgs = ['launch_proxy.js', `--deployment=${deploymentString}`, `--server_setup_delay=15`];
+        const proxyArgs = ['launch_proxy.js', `--deployment=${deploymentString}`, `--server_setup_delay=${SERVER_SETUP_DELAY}`];
 
         console.log(`${colors.cyan}Starting reverse proxy server...${colors.reset}\n`);
 
@@ -944,9 +951,8 @@ async function main() {
         console.log(`${colors.green}Reverse proxy launched on port 8999${colors.reset}\n`);
 
         // Wait for proxy to fully initialize and servers to register
-        // MAX_PROXY_SETUP_SECONDS is server_setup_delay (15) + 10 = 25
+        // MAX_PROXY_SETUP_SECONDS is computed from transverse_configs.json
         // Add 5 second buffer for file creation and final setup
-        const MAX_PROXY_SETUP_SECONDS = 25;
         const maxWaitSeconds = MAX_PROXY_SETUP_SECONDS + 5;
         console.log(`${colors.cyan}Polling for up to ${maxWaitSeconds} seconds until all servers are healthy...${colors.reset}\n`);
 

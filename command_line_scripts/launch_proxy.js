@@ -11,6 +11,12 @@ import JSON5 from 'json5';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Load TransVerse platform configuration
+const configPath = join(__dirname, '..', 'transverse_configs.json');
+const transverseConfig = JSON.parse(readFileSync(configPath, 'utf-8'));
+const DEFAULT_SERVER_SETUP_DELAY = transverseConfig.server_setup_delay;
+const PROXY_PORT_FROM_CONFIG = transverseConfig.proxy_port;
+
 const num_ports = 5;  // number of ports in each range that might need proxies
 
 // Define your port ranges
@@ -23,14 +29,14 @@ const PORT_RANGES = {
   devVite: Array.from({length: num_ports}, (_, i) => 11001 + i)     // 11001-11005
 };
 
-const PROXY_PORT = 8999; // The single port we'll expose externally (via localtunnel or localhost)
+const PROXY_PORT = PROXY_PORT_FROM_CONFIG; // The single port we'll expose externally (via localtunnel or localhost)
 
 // Parse command-line arguments
 function parseArgs() {
   const args = process.argv.slice(2);
   const deploymentArg = args.find(arg => arg.startsWith('--deployment='))?.split('=')[1] || 'direct';
   const serverSetupDelayArg = args.find(arg => arg.startsWith('--server_setup_delay='))?.split('=')[1];
-  const serverSetupDelay = serverSetupDelayArg ? parseInt(serverSetupDelayArg, 10) : 10;
+  const serverSetupDelay = serverSetupDelayArg ? parseInt(serverSetupDelayArg, 10) : DEFAULT_SERVER_SETUP_DELAY;
 
   // Parse deployment and extract residence if portforward:RESIDENCE format
   let deployment = deploymentArg;
