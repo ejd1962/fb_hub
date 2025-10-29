@@ -7,12 +7,65 @@
 # NOTE:
 # For now this source_bash script is very simple, it checks no command line params. 
 # But later it will check for --unique --print, and that will give the operation below 
-# For now call it with these 2 arguments anyway, and later when I really support them, 
-# your calling code will get the same behaviour. 
+# TransVerse Repository Setup Script
+# Source this file to add command_line_scripts to your PATH
+#
+# Usage: source setup.source_bash
 
-# Remove duplicates from PATH using awk (keeps first occurrence)
-export PATH=$(echo "$PATH" | awk -v RS=':' '!seen[$0]++' | paste -sd:)
+# Simple PATH Manager - remove duplicates on path and print out a nice version of path 
 
-echo "Made a new PATH after removing duplicates:"
-echo "Current PATH entries:"
-echo "$PATH" | tr ':' '\n' | nl -w2 -s'. '
+# NOTE -- store this file in "path_manager.source_bash" somewhere on your existing PATH
+# NOTE -- it MUST be run by sourcing
+# Usage: source path_manager.source_bash [--unique] [--print]
+#
+# Arguments:
+#   --unique   Remove duplicate entries from PATH (keeps first occurrence)
+#   --print    Display current PATH entries in a numbered, readable format
+#   (no args)  Same as --unique --print (default behavior)
+#
+# Examples:
+#   source path_manager.source_bash                   # Remove duplicates and print
+#   source path_manager.source_bash --unique          # Only remove duplicates
+#   source path_manager.source_bash --print           # Only print current PATH
+#   source path_manager.source_bash --unique --print  # Both operations
+
+# Parse command-line arguments
+do_unique=false
+do_print=false
+
+# If no arguments provided, default to both operations
+if [ $# -eq 0 ]; then
+  do_unique=true
+  do_print=true
+else
+  # Parse provided arguments
+  for arg in "$@"; do
+    case "$arg" in
+      --unique)
+        do_unique=true
+        ;;
+      --print)
+        do_print=true
+        ;;
+      *)
+        echo "ERROR: Unknown argument '$arg'" >&2
+        echo "Usage: source path_manager.source_bash [--unique] [--print]" >&2
+        return 1
+        ;;
+    esac
+  done
+fi
+
+# Perform --unique operation if requested
+if [ "$do_unique" = true ]; then
+  # Remove duplicates from PATH using awk (keeps first occurrence)
+  export PATH=$(echo "$PATH" | awk -v RS=':' '!seen[$0]++' | paste -sd:)
+  echo "Made a new PATH after removing duplicates"
+fi
+
+# Perform --print operation if requested
+if [ "$do_print" = true ]; then
+  echo "Current PATH entries:"
+  echo "$PATH" | tr ':' '\n' | nl -w2 -s'. '
+fi
+
