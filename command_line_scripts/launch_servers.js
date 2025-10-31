@@ -5,7 +5,7 @@
  *
  * Launches hub and game servers with configurable options.
  *
- * Usage: node launch_servers.js [options] [game1] [game2] ...
+ * Usage: launch_servers.js [options] [game1] [game2] ...
  *
  * Options:
  *   --mode=<prod|dev|dev-vite>  Launch mode (default: dev-vite)
@@ -615,7 +615,8 @@ async function main() {
 
     if (options.games.length === 0) {
         console.log(`${colors.red}Error: No games specified${colors.reset}`);
-        console.log(`\nUsage: node launch_servers.js [options] <game1> <game2> ...`);
+        console.log(`
+Usage: launch_servers.js [options] <game1> <game2> ...`);
         console.log(`\nOptions:`);
         console.log(`  --mode=<prod|dev|dev-vite>  Launch mode (default: dev-vite)`);
         console.log(`  --purpose=<designer_test|alpha_test|beta_test|customer_access>`);
