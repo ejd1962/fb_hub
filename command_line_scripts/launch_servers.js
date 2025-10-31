@@ -132,10 +132,41 @@ const lockFile = path.join(__dirname, '.launch_servers.lock');
 function checkAndCreateLockfile() {
     if (fs.existsSync(lockFile)) {
         const lockPid = fs.readFileSync(lockFile, 'utf8').trim();
-        log(`${colors.red}ERROR: Another instance is already running (PID: ${lockPid})${colors.reset}`);
-        log(`${colors.yellow}Lock file: ${lockFile}${colors.reset}`);
-        log(`${colors.yellow}If this is an error, delete the lock file and try again.${colors.reset}`);
-        process.exit(1);
+        log(`${colors.yellow}[CLEANUP] Found existing lock file with PID: ${lockPid}${colors.reset}`);
+        
+        // Check if the process is actually running
+        let processExists = false;
+        try {
+            // On Windows, process.kill(pid, 0) checks if process exists without killing it
+            process.kill(parseInt(lockPid), 0);
+            processExists = true;
+        } catch (e) {
+            // Process doesn't exist - this is a stale lock file
+            processExists = false;
+        }
+        
+        if (processExists) {
+            log(`${colors.yellow}[CLEANUP] Process ${lockPid} is still running. Killing it...${colors.reset}`);
+            try {
+                process.kill(parseInt(lockPid), 'SIGTERM');
+                log(`${colors.green}[CLEANUP] Successfully killed process ${lockPid}${colors.reset}`);
+            } catch (e) {
+                log(`${colors.yellow}[CLEANUP] Could not kill process ${lockPid}: ${e.message}${colors.reset}`);
+                log(`${colors.yellow}[CLEANUP] Attempting forceful kill...${colors.reset}`);
+                try {
+                    process.kill(parseInt(lockPid), 'SIGKILL');
+                    log(`${colors.green}[CLEANUP] Successfully force-killed process ${lockPid}${colors.reset}`);
+                } catch (e2) {
+                    log(`${colors.red}[CLEANUP] Could not force-kill process ${lockPid}: ${e2.message}${colors.reset}`);
+                }
+            }
+        } else {
+            log(`${colors.yellow}[CLEANUP] Process ${lockPid} is not running - removing stale lock file${colors.reset}`);
+        }
+        
+        // Remove the old lock file
+        fs.unlinkSync(lockFile);
+        log(`${colors.green}[CLEANUP] Removed old lock file${colors.reset}`);
     }
 
     fs.writeFileSync(lockFile, process.pid.toString());
