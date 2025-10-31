@@ -1,3 +1,4 @@
+# NOTE -- THERE IS NO SHEBANG HERE 
 
 # Simple PATH Manager - remove duplicates on path and print out a nice version of path 
 # NOTE -- store this file in "path_manager.source_bash" somewhere on your existing PATH
