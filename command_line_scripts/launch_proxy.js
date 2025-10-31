@@ -424,7 +424,11 @@ function createReverseProxy(mappings) {
   
   // Handle proxy errors
   proxy.on('error', (err, req, res) => {
-    console.error('Proxy error:', err.message);
+    console.error('Proxy error:', err.message || err);
+    console.error('  Request URL:', req.url);
+    console.error('  Request method:', req.method);
+    console.error('  Error code:', err.code);
+    console.error('  Full error:', err);
     // Check if res is an HTTP response (not a Socket for WebSocket upgrades)
     if (res && typeof res.writeHead === 'function' && !res.headersSent) {
       res.writeHead(502, { 'Content-Type': 'text/plain' });
