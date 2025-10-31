@@ -6,7 +6,7 @@
  * Copies game information FROM a game project TO the TransVerse Hub.
  * This allows the hub lobby to display the game's information and panel image.
  *
- * Usage: node copy-game-info-to-hub.js <game_name>
+ * Usage: copy-game-info-to-hub.js <game_name>
  * Where game_name can be: p21_testgame, testgame, p21, or 21
  */
 

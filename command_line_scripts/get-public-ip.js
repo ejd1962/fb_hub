@@ -5,8 +5,8 @@
  * Utility to fetch your current public IP address and optionally update portforward-config.json
  *
  * Usage:
- *   node get-public-ip.js                    // Just display current public IP
- *   node get-public-ip.js --residence=erics_cottage  // Update config for residence
+ *   get-public-ip.js                    // Just display current public IP
+ *   get-public-ip.js --residence=erics_cottage  // Update config for residence
  */
 
 import { readFileSync, writeFileSync } from 'fs';
@@ -117,7 +117,7 @@ async function main() {
       console.log('\nConfiguration saved to portforward-config.json');
     } else {
       console.log('\nTo update a residence configuration, use:');
-      console.log('  node get-public-ip.js --residence=erics_cottage');
+      console.log('  get-public-ip.js --residence=erics_cottage');
     }
 
   } catch (error) {

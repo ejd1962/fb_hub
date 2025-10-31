@@ -6,7 +6,7 @@
  * Before copying, backs up existing game files to old_hub_elements/yyyymmdd-hhmmss/
  * subdirectory where yyyymmdd-hhmmss is the timestamp in 24-hour format.
  *
- * Usage: node copy-hub-elements-to-game.js <game_name>
+ * Usage: copy-hub-elements-to-game.js <game_name>
  * Where game_name can be: p21_testgame, testgame, p21, or 21
  */
 

@@ -5,7 +5,7 @@
  *
  * Clones an existing game project to create a new one with a fresh identity.
  *
- * Usage: node clone_project.js
+ * Usage: clone_project.js
  *
  * The script will:
  * 1. Prompt for source project and new project name

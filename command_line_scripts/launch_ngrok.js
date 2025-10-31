@@ -7,7 +7,7 @@
  * and returns the public URL by querying ngrok's API.
  *
  * Usage:
- *   node launch_ngrok.js [options]
+ *   launch_ngrok.js [options]
  *
  * Options:
  *   --port=<number>     Local port to tunnel to (default: 8999)
@@ -88,7 +88,7 @@ function parseArgs(args) {
 // Show help message
 function showHelp() {
   console.log(`
-Usage: node launch_ngrok.js [options]
+Usage: launch_ngrok.js [options]
 
 Options:
   --port=<number>     Local port to tunnel to (default: ${DEFAULT_PORT})
@@ -98,8 +98,8 @@ Options:
   --help              Show this help message
 
 Examples:
-  node launch_ngrok.js --port=8999
-  node launch_ngrok.js --port=8999 --region=us --json
+  launch_ngrok.js --port=8999
+  launch_ngrok.js --port=8999 --region=us --json
 `);
 }
 

@@ -35,25 +35,25 @@
  *   --newtab=<yes|no>           Launch each server in a new Windows Terminal tab (default: yes)
  *
  * Examples:
- *   node launch_servers.js wordguess
+ *   launch_servers.js wordguess
  *     # Launches hub + wordguess in dev-vite mode with designer_test purpose
  *
- *   node launch_servers.js --purpose=beta_test wordguess
+ *   launch_servers.js --purpose=beta_test wordguess
  *     # Uses beta_test server URLs from game_info.json
  *
- *   node launch_servers.js --proxy=yes wordguess
+ *   launch_servers.js --proxy=yes wordguess
  *     # Enables local reverse proxy on port 8999 for testing
  *
- *   node launch_servers.js --proxy=yes --deployment=ngrok wordguess
+ *   launch_servers.js --proxy=yes --deployment=ngrok wordguess
  *     # Enables reverse proxy with ngrok for external access
  *
- *   node launch_servers.js --proxy=yes --deployment=localtunnel wordguess
+ *   launch_servers.js --proxy=yes --deployment=localtunnel wordguess
  *     # Enables reverse proxy with localtunnel for external access (FREE)
  *
- *   node launch_servers.js --mode=prod --purpose=customer_access wordguess
+ *   launch_servers.js --mode=prod --purpose=customer_access wordguess
  *     # Production mode with customer-facing configuration
  *
- *   node launch_servers.js --build-only=yes wordguess
+ *   launch_servers.js --build-only=yes wordguess
  *     # Only builds frontend, doesn't launch servers
  *
  * The script will ALWAYS:
@@ -743,13 +743,13 @@ Usage: launch_servers.js [options] <game1> <game2> ...`);
         console.log(`  --restart=<auto|no>         Auto-restart on changes (default: auto)`);
         console.log(`  --newtab=<yes|no>           Launch in new tabs (default: yes)`);
         console.log(`\nExamples:`);
-        console.log(`  node launch_servers.js wordguess`);
-        console.log(`  node launch_servers.js --purpose=beta_test wordguess`);
-        console.log(`  node launch_servers.js --deployment=localproxy wordguess`);
-        console.log(`  node launch_servers.js --deployment=ngrok wordguess`);
-        console.log(`  node launch_servers.js --deployment=localtunnel wordguess`);
-        console.log(`  node launch_servers.js --deployment=portforward:erics_cottage wordguess`);
-        console.log(`  node launch_servers.js --mode=prod --purpose=customer_access wordguess`);
+        console.log(`  launch_servers.js wordguess`);
+        console.log(`  launch_servers.js --purpose=beta_test wordguess`);
+        console.log(`  launch_servers.js --deployment=localproxy wordguess`);
+        console.log(`  launch_servers.js --deployment=ngrok wordguess`);
+        console.log(`  launch_servers.js --deployment=localtunnel wordguess`);
+        console.log(`  launch_servers.js --deployment=portforward:erics_cottage wordguess`);
+        console.log(`  launch_servers.js --mode=prod --purpose=customer_access wordguess`);
         process.exit(1);
     }
 

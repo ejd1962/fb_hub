@@ -1,5 +1,5 @@
 #\!/usr/bin/env node
-// git-backup.js  (run example:   node git-backup.js --help ) 
+// git-backup.js  (run example:   git-backup.js --help ) 
 
 import fs from 'fs';
 import path from 'path';

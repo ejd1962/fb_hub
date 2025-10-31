@@ -9,7 +9,7 @@
  * Localtunnel is FREE and requires NO account or authentication!
  *
  * Usage:
- *   node launch_localtunnel.js [options]
+ *   launch_localtunnel.js [options]
  *
  * Options:
  *   --port=<number>             Local port to tunnel to (default: 8999)
@@ -168,7 +168,7 @@ DESCRIPTION:
   Localtunnel is FREE and requires NO account or authentication!
 
 USAGE:
-  node launch_localtunnel.js [options]
+  launch_localtunnel.js [options]
 
 OPTIONS:
   --port=<number>             Local port to tunnel to (default: 8999)
@@ -196,30 +196,30 @@ OPTIONS:
 
 EXAMPLES:
   # Basic usage (tunnel localhost:8999 with random subdomain)
-  node launch_localtunnel.js
+  launch_localtunnel.js
 
   # Recommended: Request specific subdomain with fallback to random suffix
-  node launch_localtunnel.js --subdomain=transverse --subdomain_retry=transverse-NNNN
+  launch_localtunnel.js --subdomain=transverse --subdomain_retry=transverse-NNNN
   # This tries "transverse" once, then "transverse-XXXX" up to 3 times
 
   # Request specific subdomain only (no fallback)
-  node launch_localtunnel.js --subdomain=transverse
+  launch_localtunnel.js --subdomain=transverse
 
   # Request subdomain with random suffix and retries (up to 3 attempts)
-  node launch_localtunnel.js --subdomain=transverse-NNNN
+  launch_localtunnel.js --subdomain=transverse-NNNN
 
   # Use only subdomain_retry (no primary subdomain)
-  node launch_localtunnel.js --subdomain_retry=transverse-NNNN
+  launch_localtunnel.js --subdomain_retry=transverse-NNNN
   # This tries "transverse-XXXX" up to 3 times
 
   # Tunnel different port with custom subdomain
-  node launch_localtunnel.js --port=3000 --subdomain=my-app
+  launch_localtunnel.js --port=3000 --subdomain=my-app
 
   # JSON output only (for scripts)
-  node launch_localtunnel.js --json
+  launch_localtunnel.js --json
 
   # Custom port with longer timeout
-  node launch_localtunnel.js --port=8999 --wait=60
+  launch_localtunnel.js --port=8999 --wait=60
 
 EXIT CODES:
   0 - Success, tunnel established and healthy

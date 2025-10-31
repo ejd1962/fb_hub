@@ -7,17 +7,17 @@
  * This script reads the lobby.tsx to extract the game list and then
  * calls launch_game.js with all games.
  *
- * Usage: node launch_all_games.js [options]
+ * Usage: launch_all_games.js [options]
  *
  * Options:
  *   --restart <auto|no>    Enable auto-restart on file changes (default: auto)
  *   --prod <yes|no>        Launch production servers (default: no)
  *
  * Examples:
- *   node launch_all_games.js
- *   node launch_all_games.js --prod yes
- *   node launch_all_games.js --restart no
- *   node launch_all_games.js --prod no --restart auto
+ *   launch_all_games.js
+ *   launch_all_games.js --prod yes
+ *   launch_all_games.js --restart no
+ *   launch_all_games.js --prod no --restart auto
  */
 
 import { spawn } from 'child_process';
@@ -91,7 +91,7 @@ async function main() {
         const launchGameScript = path.join(__dirname, 'launch_game.js');
         const allArgs = [...passThruArgs, ...games];
 
-        console.log(`${colors.bright}Launching: node launch_game.js ${allArgs.join(' ')}${colors.reset}\n`);
+        console.log(`${colors.bright}Launching: launch_game.js ${allArgs.join(' ')}${colors.reset}\n`);
 
         // Spawn launch_game.js with all arguments
         const proc = spawn('node', [launchGameScript, ...allArgs], {

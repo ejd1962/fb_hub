@@ -11,8 +11,8 @@
  * This script assumes you have already configured port forwarding on your router.
  *
  * Usage:
- *   node launch_portforward.js --residence=erics_cottage
- *   node launch_portforward.js --residence=erics_cottage --json
+ *   launch_portforward.js --residence=erics_cottage
+ *   launch_portforward.js --residence=erics_cottage --json
  */
 
 import { readFileSync, existsSync, writeFileSync } from 'fs';
@@ -161,8 +161,8 @@ async function main() {
 
   if (!options.residence) {
     console.error('ERROR: --residence parameter is required');
-    console.error('Usage: node launch_portforward.js --residence=RESIDENCE_NAME [--json]');
-    console.error('Example: node launch_portforward.js --residence=erics_cottage');
+    console.error('Usage: launch_portforward.js --residence=RESIDENCE_NAME [--json]');
+    console.error('Example: launch_portforward.js --residence=erics_cottage');
     process.exit(1);
   }
 
