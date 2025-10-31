@@ -133,3 +133,47 @@ const audio = createAudioWithGain(musicPath, attributes.gain);
 
 ---
 
+
+## Fixed: Sound Effects Map Memory Leak
+
+**Fixed Date:** 2025-10-31
+**Fixed By:** Same audio player reuse architecture that fixed accumulation bug
+
+**What Was Fixed:**
+The `roomState.soundEffects` Map was accumulating audio elements over time as a cache. While intentional for performance, paused elements were never destroyed, causing minor memory leaks.
+
+**Solution:**
+The new three-player architecture eliminates the need for the soundEffects Map entirely:
+- `choiceFeedbackAudioRef` handles all choice feedback sounds (hmm, sad trombone, cheering)
+- `spokenPhraseAudioRef` handles all word pronunciations
+- No Map needed = no memory leak possible
+
+**Result:** Memory footprint remains constant regardless of game session length.
+
+---
+
+**Original Bug Report:**
+
+### 🟢 MEDIUM - Sound Effects Map Memory Leak
+**Component:** wordguess - game-room.tsx
+**Discovered:** 2025-10-31
+**Status:** PATCHED (kludge)
+
+**Description:**
+`roomState.soundEffects` Map accumulates audio elements over time. Intentional caching for performance, but paused elements never destroyed.
+
+**Impact:**
+- Minor memory leak
+- Not serious, but wastes memory over long sessions
+
+**Current Workaround:**
+`killAllAudio()` clears the Map when leaving celebrate (server-controlled).
+
+**Proper Fix (TODO):**
+Implement LRU cache or periodic cleanup:
+- Keep frequently used effects
+- Destroy effects unused for >5 minutes
+- Or destroy all on room change
+
+---
+

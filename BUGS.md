@@ -244,28 +244,6 @@ Unknown - need to examine the shuffling algorithm used to arrange choices
 2. Verify it uses proper Fisher-Yates shuffle or equivalent
 3. Test distribution over 1000+ samples to verify uniform randomness
 4. Consider seeding with crypto.randomBytes() for better entropy
-
----
-
-### 🟢 MEDIUM - Sound Effects Map Memory Leak
-**Component:** wordguess - game-room.tsx
-**Discovered:** 2025-10-31
-**Status:** PATCHED (kludge)
-
-**Description:**
-`roomState.soundEffects` Map accumulates audio elements over time. Intentional caching for performance, but paused elements never destroyed.
-
-**Impact:**
-- Minor memory leak
-- Not serious, but wastes memory over long sessions
-
-**Current Workaround:**
-`killAllAudio()` clears the Map when leaving celebrate (server-controlled).
-
-**Proper Fix (TODO):**
-Implement LRU cache or periodic cleanup:
-- Keep frequently used effects
-- Destroy effects unused for >5 minutes
 - Or destroy all on room change
 
 ---
