@@ -248,3 +248,40 @@ Unknown - need to examine the shuffling algorithm used to arrange choices
 
 ---
 
+
+### 🟡 HIGH - Wrong Image Highlighted as Correct on Decay Bar Timeout
+**Component:** wordguess - game-room.tsx
+**Discovered:** 2025-10-31
+**Status:** Open
+
+**Description:**
+When active player makes no choice and the decay bar times out, the thin green box (correct answer indicator) is displayed on the wrong image instead of the actual correct answer.
+
+**Impact:**
+- Misleading visual feedback
+- Player sees incorrect answer marked as correct
+- Affects learning/educational value of game
+- Only occurs on timeout with no choices made
+
+**Location:** `/c/_projects/p27_wordguess/wordguess/src/components/game-room.tsx` (decay bar timeout handler)
+
+**Root Cause:**
+Unknown - need to examine:
+- Decay bar timeout handler (`handleDecayBarExpired()`)
+- How `correctIndex` is determined/tracked when timeout occurs
+- How green highlight is applied on timeout vs normal selection
+
+**Reproduction Steps:**
+1. Start game and enter guessing phase as active player
+2. Do not click any image
+3. Wait for decay bar to fully expire
+4. Observe: Wrong image shows thin green box
+
+**Recommended Fix:**
+1. Locate decay bar timeout handler
+2. Verify `correctIndex` is being used to apply green highlight
+3. Check if index calculation is off by one or using wrong variable
+4. Test with multiple themes and word positions
+
+---
+

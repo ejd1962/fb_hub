@@ -279,8 +279,11 @@ When discussing files in any communication (chat, code comments, commit messages
 - `/c/_projects/p23_fb_hub/fb_hub/CLAUDE/CLAUDE_CHAT.md` - Chat-specific preferences
 - `/c/_projects/p23_fb_hub/fb_hub/CLAUDE/CLAUDE_CODE.md` - Code-specific preferences
 - `/c/_projects/p23_fb_hub/fb_hub/CLAUDE/CLAUDE_API.md` - API-specific preferences
-- `CLAUDE/CLAUDE_CHAT.md` - Chat-specific preferences
----
+
+### Local Claude Code Configuration
+- Claude Code also maintains a local `CLAUDE.md` file at project level
+- The local CLAUDE.md contains project-specific rules and technical details
+- This CLAUDE_COMMON.md provides the broader context and personal preferences
 
 ## Meta-Guidelines
 
