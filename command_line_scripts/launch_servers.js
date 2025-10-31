@@ -253,6 +253,85 @@ const colors = {
     cyan: '\x1b[36m'
 };
 
+function showHelp() {
+    console.log(`
+${colors.bright}╔════════════════════════════════════════════════════════════════════════════════╗
+║                    TransVerse Server Launcher (launch_servers.js)             ║
+╚════════════════════════════════════════════════════════════════════════════════╝${colors.reset}
+
+${colors.bright}STANDARD LAUNCH COMMAND (Most Common):${colors.reset}
+  ${colors.green}cd /c/_projects/p23_fb_hub/fb_hub
+  launch_servers.js --mode=dev-vite --deployment=ngrok wordguess${colors.reset}
+
+  This launches hub + wordguess with live Vite frontends and ngrok for external access.
+
+${colors.bright}USAGE:${colors.reset}
+  launch_servers.js [options] [game1] [game2] ...
+
+${colors.bright}OPTIONS:${colors.reset}
+  --mode=<prod|dev|dev-vite>
+      Launch mode (default: dev-vite)
+      • prod: Production (port 9000+game#, backend only)
+      • dev: Dev backend only (port 10000+game#, serves built frontend)
+      • dev-vite: Dev with live Vite (backend 10000+game#, frontend 11000+game#)
+
+  --purpose=<designer_test|alpha_test|beta_test|customer_access>
+      Purpose/environment of the codebase (default: designer_test)
+      • designer_test: Early development, designer testing
+      • alpha_test: Internal alpha testing
+      • beta_test: External beta testing
+      • customer_access: Production/customer-facing
+      This determines which server URL is used from game_info.json
+
+  --deployment=<direct|localproxy|ngrok|localtunnel|portforward:RESIDENCE>
+      Deployment method (default: direct)
+      • direct: No proxy - servers accessed directly at localhost:PORT
+      • localproxy: Proxy for local testing (http://localhost:8999)
+      • ngrok: Proxy for external access via ngrok (FAST, requires account)
+      • localtunnel: Proxy for external access via localtunnel (FREE, but slow)
+      • portforward:RESIDENCE: Use port forwarding with configured residence
+        Example: --deployment=portforward:erics_cottage
+
+  --build-only=<yes|no>
+      Only build frontend, don't launch servers (default: no)
+
+  --restart=<auto|no>
+      Enable auto-restart on file changes (default: auto)
+
+  --newtab=<yes|no>
+      Launch each server in a new Windows Terminal tab (default: yes)
+
+  --help
+      Show this help message
+
+${colors.bright}EXAMPLES:${colors.reset}
+  ${colors.cyan}# Standard launch with ngrok (recommended)${colors.reset}
+  launch_servers.js --mode=dev-vite --deployment=ngrok wordguess
+
+  ${colors.cyan}# Launch with local proxy for testing${colors.reset}
+  launch_servers.js --deployment=localproxy wordguess
+
+  ${colors.cyan}# Launch in direct mode (no proxy)${colors.reset}
+  launch_servers.js wordguess
+
+  ${colors.cyan}# Launch multiple games${colors.reset}
+  launch_servers.js --deployment=ngrok wordguess anothergame
+
+  ${colors.cyan}# Beta test mode with ngrok${colors.reset}
+  launch_servers.js --purpose=beta_test --deployment=ngrok wordguess
+
+  ${colors.cyan}# Build frontends only (no servers)${colors.reset}
+  launch_servers.js --build-only=yes wordguess
+
+${colors.bright}NOTES:${colors.reset}
+  • command_line_scripts directory is on PATH - run from anywhere
+  • Script automatically cleans up stale lock files and processes
+  • Each server launches in its own Windows Terminal tab
+  • Use Ctrl+C in any tab to stop that specific server
+
+`);
+}
+
 // Parse command line arguments
 function parseArgs(args) {
     const options = {
@@ -269,6 +348,12 @@ function parseArgs(args) {
     for (let i = 0; i < args.length; i++) {
         const arg = args[i];
 
+
+        // Check for help flag first
+        if (arg === '--help' || arg === '-h') {
+            showHelp();
+            process.exit(0);
+        }
         // Parse --flag=value format
         if (arg.startsWith('--mode=')) {
             options.mode = arg.split('=')[1];

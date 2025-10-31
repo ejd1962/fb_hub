@@ -1,3 +1,4 @@
+#\!/usr/bin/env node
 /**
  * show-routes.js
  *

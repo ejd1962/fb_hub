@@ -1,3 +1,4 @@
+#\!/usr/bin/env node
 import http from 'http';
 import httpProxy from 'http-proxy';
 import net from 'net';
