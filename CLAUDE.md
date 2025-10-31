@@ -74,6 +74,7 @@ The app uses FirebaseUI for authentication with a specific setup pattern:
 - `src/index.css` - Global styles
 - `command_line_scripts/` - TransVerse command line tools (see below)
 - `setup.source_bash` - Repository setup script to add tools to PATH
+- `CLAUDE/` - Claude Code configuration files (see below)
 
 ## TransVerse Command Line Tools
 
@@ -108,3 +109,28 @@ The `command_line_scripts/` directory contains all TransVerse command line utili
 - `get-public-ip.js` - Get public IP address
 
 **Usage**: enter "source setup.source_bash" first to add these tools to your PATH, then run them directly by name.
+
+## Claude Code Configuration
+
+**IMPORTANT:** Claude Code configuration files are now stored in this repository.
+
+**Location:** `/c/_projects/p23_fb_hub/fb_hub/CLAUDE/`
+
+**Files:**
+- `CLAUDE_COMMON.md` - Common preferences across all Claude tools
+- `CLAUDE_CODE.md` - Claude Code specific preferences
+- `CLAUDE_CHAT.md` - Claude Chat specific preferences
+- `CLAUDE_API.md` - Claude API specific preferences
+- `TEMPLATES/` - Templates for MASR requests and other patterns
+
+**Reading Configuration:**
+```bash
+cat /c/_projects/p23_fb_hub/fb_hub/CLAUDE/CLAUDE_COMMON.md
+cat /c/_projects/p23_fb_hub/fb_hub/CLAUDE/CLAUDE_CODE.md
+```
+
+**Backup to Google Drive:**
+A pre-push git hook automatically copies all CLAUDE files to `/g/My Drive/CLAUDE_RULES/` whenever you push fb_hub. This ensures the config is available on mobile devices.
+
+**Note:** Always use Unix-style paths (e.g., `/c/_projects/...`). Windows-style paths (`C:\...`) should only be used when absolutely necessary for Windows-specific tools.
+
