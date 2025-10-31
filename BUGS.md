@@ -223,3 +223,148 @@ Technical explanation
 
 **Recommended Fix:** Best approach
 ```
+
+---
+
+## WordGuess Game Bugs
+
+### 🟡 HIGH - Audio Distortion and Accumulation During Rapid Gameplay
+**Component:** wordguess - game-room.tsx
+**Discovered:** 2025-10-31
+**Status:** PATCHED (kludge), root cause not fixed
+
+**Description:**
+When rapidly clicking through choices during guessing phase, audio becomes chunky, halting, and crunchy within 5-10 turns. Audio elements accumulate and bog down the client.
+
+**Symptoms:**
+- Crunchy, distorted audio when transitioning from celebrate to guessing with new theme
+- Audio halts and replays
+- Multiple audio streams playing simultaneously
+- Chrome performance warnings about slow tabs
+- Audio accumulation during rapid clicking (hmm, sad trombone, cheering sounds)
+
+**Root Cause #1: Inconsistent Attribute Application in loadPhaseMusic()**
+In `loadPhaseMusic()`, when reusing an existing audio element:
+
+```javascript
+if (backgroundMusicRef.current) {
+  backgroundMusicRef.current.src = musicPath;
+  // BUG: Attributes applied directly, bypassing applyAudioAttributes()
+  for (const [key, value] of Object.entries(attributes)) {
+    if (key !== 'file') {
+      (backgroundMusicRef.current as any)[key] = value;
+    }
+  }
+}
+```
+
+**Problems:**
+1. `gain` attribute is set directly on HTMLAudioElement (which has no `gain` property)
+2. Web Audio API GainNode is NOT updated with new gain value
+3. Over multiple phase transitions, Web Audio nodes get into inconsistent states
+4. The `else` branch (new element creation) properly calls `applyAudioAttributes()`
+
+**Root Cause #2: Audio Element Accumulation**
+Audio elements may accumulate in DOM if:
+- `backgroundMusicRef.current` becomes null due to error
+- Race condition causes multiple `loadPhaseMusic()` calls
+- Old elements never destroyed, just replaced in ref
+- Sound effects during rapid clicking create new audio players each time instead of reusing
+
+**Current Workaround (Kludge Patch)**
+Server-controlled audio cleanup via `destroyAudioPlayers` field:
+- Server sends `destroyAudioPlayers: true` in `sc_set_phase` when leaving celebrate phase
+- Client's `killAllAudio()` function destroys ALL audio elements and Web Audio nodes
+- Clears soundEffects Map
+- Forces creation of fresh audio elements with proper attribute handling
+- **Side effect:** 5-10ms latency on first sound effect after leaving celebrate
+
+**Locations:**
+- Server: `/c/_projects/p27_wordguess/wordguess/server/index.js:308,2613,2633,2644`
+- Client: `/c/_projects/p27_wordguess/wordguess/src/components/game-room.tsx:636-673,885-889`
+
+**Proper Fix (TODO)**
+1. Update the reuse path to use `applyAudioAttributes()`:
+```javascript
+if (backgroundMusicRef.current) {
+  backgroundMusicRef.current.src = musicPath;
+  backgroundMusicRef.current.load();
+  // FIX: Use applyAudioAttributes instead of direct assignment
+  applyAudioAttributes(backgroundMusicRef.current, attributes);
+  await backgroundMusicRef.current.play();
+}
+```
+
+2. Always destroy old audio element before creating new one:
+```javascript
+if (backgroundMusicRef.current) {
+  destroyAudio(backgroundMusicRef.current);
+  backgroundMusicRef.current = null;
+}
+const audio = createAudioWithGain(musicPath, attributes.gain);
+```
+
+3. Implement single audio player reuse for choice selection feedback (hmm, sad trombone, cheering):
+   - Create one shared audio player for choice feedback sounds
+   - When new sound needed, immediately abort current sound and start new one
+   - No accumulation, just one player switching between sounds
+
+**Testing Plan:**
+1. Remove server-controlled killAllAudio() mechanism
+2. Apply proper fixes above
+3. Test: celebrate → welcome (verify music plays)
+4. Test: celebrate → guessing with theme change (verify no distortion)
+5. Test: rapid clicking through 20+ choices (verify no audio accumulation)
+6. Monitor Chrome performance over multiple phase transitions
+
+---
+
+### 🟡 HIGH - Choice Arrangement Not Sufficiently Random
+**Component:** wordguess - Server choice generation
+**Discovered:** 2025-10-31
+**Status:** Open
+
+**Description:**
+When rapidly clicking the first 2 choices every turn, the correct answer appears in the first 2 positions more than 50% of the time. The random arrangement algorithm is not providing uniform distribution.
+
+**Impact:**
+- Players can exploit the bias by always choosing first 2 positions
+- Reduces difficulty and game challenge
+- Not truly random
+
+**Location:** `/c/_projects/p27_wordguess/wordguess/server/index.js` (choice generation/shuffling logic)
+
+**Root Cause:**
+Unknown - need to examine the shuffling algorithm used to arrange choices
+
+**Recommended Fix:**
+1. Locate the choice shuffling code in server
+2. Verify it uses proper Fisher-Yates shuffle or equivalent
+3. Test distribution over 1000+ samples to verify uniform randomness
+4. Consider seeding with crypto.randomBytes() for better entropy
+
+---
+
+### 🟢 MEDIUM - Sound Effects Map Memory Leak
+**Component:** wordguess - game-room.tsx
+**Discovered:** 2025-10-31
+**Status:** PATCHED (kludge)
+
+**Description:**
+`roomState.soundEffects` Map accumulates audio elements over time. Intentional caching for performance, but paused elements never destroyed.
+
+**Impact:**
+- Minor memory leak
+- Not serious, but wastes memory over long sessions
+
+**Current Workaround:**
+`killAllAudio()` clears the Map when leaving celebrate (server-controlled).
+
+**Proper Fix (TODO):**
+Implement LRU cache or periodic cleanup:
+- Keep frequently used effects
+- Destroy effects unused for >5 minutes
+- Or destroy all on room change
+
+---
+
