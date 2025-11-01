@@ -40,6 +40,14 @@ Mode-specific preferences are documented in their respective files (in this dire
    **CRITICAL:** Use `source` (not just running the script) to avoid creating a subshell that would lose the PATH changes. This adds command_line_scripts to your PATH so you can run scripts directly by name.
 
 3. **Check git-backup daemon status:**
+
+4. **Check for active TO_DO_LIST.md file:**
+   ```bash
+   if [ -f /c/_projects/p23_fb_hub/fb_hub/TO_DO_LIST.md ]; then
+     cat /c/_projects/p23_fb_hub/fb_hub/TO_DO_LIST.md
+   fi
+   ```
+   This file contains Eric's current triage list with RED/YELLOW/GREEN priorities and deadlines. If it exists, read it to understand current priorities and help keep Eric on track.
    ```bash
    cd /c/_projects/p23_fb_hub/fb_hub/command_line_scripts && node git-backup.js --status
    ```
