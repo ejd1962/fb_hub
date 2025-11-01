@@ -3,7 +3,7 @@
 ========================================================================
 
 **Created:** 2025-11-02 03:30 AM (Saturday)
-**Last Updated:** 2025-11-02 2:40 PM (Saturday) by Eric + CC
+**Last Updated:** 2025-11-02 5:00 PM (Saturday) by Eric + CC
 **Purpose:** Master triage list for all tasks between NOW and O-time (and beyond)
 **Maintained by:** Claude Code (CC) with Eric's input
 
@@ -207,17 +207,15 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
 
 ### Vehicles - Ford Escape & Jeep
 
-- [ ] **Repair Ford Escape rear window (broken hinges, 1" gap)** 🔴 MUST DO TODAY OR TOMORROW
+- [x] **Repair Ford Escape rear window (broken hinges, 1" gap)** ✅ DONE
   - **Deadline:** O-time (Sunday 3 PM) - MUST fix before driving to Ottawa
-  - **Time:** 1-2 hours
+  - **Time:** 30-45 minutes (faster than expected!)
   - **Why CRITICAL:** Rain entering car over 6 months = interior damage, mold, electronics
-  - **Plan:**
-    1. Remove pneumatic cylinders
-    2. Refit window properly
-    3. Glue with 300ml windshield adhesive (black goo)
-    4. Backup: Add 4-6 metal screws with rubber buffers (cut inner tube from lean-to C) + washers
-  - **Materials:** ✓ Adhesive, inner tube, screws/washers
-  - **Status:** **12:34 PM - Eric confirms: MUST be done today or tomorrow during daylight hours. High priority.**
+  - **Final approach:** Gorilla Duct Tape instead of black goo adhesive
+    1. ✅ Removed 2 pneumatic cylinders (carefully supported window)
+    2. ✅ Positioned window properly
+    3. ✅ Gorilla Tape around all 4 sides from outside
+  - **Result:** **3:50 PM - COMPLETED using Gorilla Duct Tape. Looks great, better than new! Waterproof, super strong. May never use black goo (found but decided tape faster/cleaner). Good for 2 trips (to Stittsville + May return). Proper repair deferred to spring 2026 if needed.**
 
 - [ ] **Jeep antifreeze - MULTI-FILL CYCLE PROCESS** 🔴 TIME-SENSITIVE SCHEDULE
   - **Vehicle:** 2016 Jeep Cherokee (sealed system, fills through overflow tank only)
@@ -267,18 +265,17 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **Why needed:** Ford sits 6 months at Garage 613, needs emergency equipment for May 2026 retrieval
   - **Status:** **3:10 PM - COMPLETED. Transferred: tire inflater, tire iron, 2 safety kits, blanket, bag of ropes, 2 ice scrapers from Jeep hatch → Ford Escape rear.**
 
-- [ ] **Transfer battery booster cables from Jeep to Ford Escape** 🔴 DO SOON
+- [x] **Transfer battery booster cables from Jeep to Ford Escape** ✅ DONE
   - **Deadline:** Before O-time (Sunday 3 PM)
   - **Time:** 2 minutes
   - **Why needed:** Ford sits 6 months, may need jump start in May 2026
-  - **Status:** **3:10 PM - Not started. Get cables from Jeep → Ford Escape rear.**
+  - **Status:** **4:55 PM - COMPLETED. Booster cables transferred from Jeep → Ford Escape rear hatch.**
 
-- [ ] **Transfer battery charger from dock to Ford Escape** 🔴 AFTER BILGE PUMP FINISHES
+- [x] **Transfer battery charger from dock to Ford Escape** ✅ DONE
   - **Deadline:** After bilge pump completes (~3:40 PM), before O-time
   - **Time:** 5 minutes
   - **Why needed:** Ford sits 6 months, useful for May 2026 retrieval
-  - **Blocker:** Currently powering bilge pump at dock (finishes ~3:40 PM)
-  - **Status:** **3:10 PM - Waiting for bilge pump to finish bailing aluminum boat.**
+  - **Status:** **4:55 PM - COMPLETED. Battery charger moved from dock → Ford Escape rear hatch (after bilge pump finished). Also added long extension cord to Ford hatch.**
 
 ---
 
@@ -316,16 +313,20 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **Items:** ~12 life jackets, ~10 wooden paddles, bailing items, ~12 foam noodles
   - **Status:** Not started
 
-- [ ] **Remove extension cord crossing road (cottage → waterfront power)**
+- [x] **Remove extension cord crossing road (cottage → waterfront power)** ✅ DONE
   - **Deadline:** O-time (Sunday 3 PM)
   - **Time:** 15 minutes
   - **Why CRITICAL:**
     - Snow plow will drag and wreck cord
     - May damage connection endpoints
     - **Municipality will see it and send fines** (Eric has "challenging history" - prohibited but does it anyway)
-  - **Storage:** Store cord somewhere safe for winter
-  - **Spring 2026:** Inspect for wear/tear, decide if reusable
-  - **Status:** Not started
+  - **Status:** **4:55 PM - COMPLETED. Extension cord removed from across road, stored in bunky. Also unplugged exterior wiring from bunky socket (no power to 2 road-side outlets anymore).**
+
+- [x] **Move old tarps from dock to campfire pit area** ✅ DONE
+  - **Deadline:** O-time (Sunday 3 PM)
+  - **Time:** 10 minutes
+  - **Why useful:** Tarps can help cover waterfront gear (though worn, not fully waterproof)
+  - **Status:** **4:55 PM - COMPLETED. Moved 3 old worn tarps from dock area up one level to campfire pit area near life jackets and paddles.**
 
 ---
 
@@ -402,19 +403,17 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
 
 ### HVAC Documentation for Kevin
 
-- [ ] **Prepare and document keys for Kevin**
+- [ ] **Prepare and document keys for Kevin** ✅ PHOTOS TAKEN, NEED TO SEND
   - **Deadline:** O-time (Sunday 3 PM)
   - **Time:** 15 minutes
   - **Tasks:**
     1. Remove extra keys from keyring (keep only 2: cottage front door + garage lock)
     2. Store removed keys inside cottage
-    3. Take photo of simplified 2-key keyring
-    4. Take close-up of each key individually
-    5. Take photo of hiding place (top metal warming grille of BBQ, front porch)
-    6. Text all photos to Kevin with labels
+    3. ✅ Take photo of BBQ key hiding place (top metal warming grille, front porch)
+    4. ✅ Take close-up of each of the 2 critical keys individually
+    5. 🔴 Text all photos to Kevin via Messenger with labels (SEE NEXT TASK)
   - **Why critical:** Kevin needs clear access while Eric away 1-2 months
-  - **Context:** Visited yesterday, mentioned hiding place but may not have registered
-  - **Status:** Not started
+  - **Status:** **4:55 PM - Photos taken. Still need to: simplify keyring + send photos to Kevin.**
 
 - [ ] **Update heat pump installation sketch (Revision 2)**
   - **Deadline:** O-time (Sunday 3 PM)
@@ -429,15 +428,39 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **Why critical:** Kevin needs accurate locations for installation while Eric away
   - **Status:** Not started
 
-- [ ] **Document removable balcony plank access for Kevin**
+- [ ] **Document removable balcony plank access for Kevin** ✅ PHOTOS TAKEN, NEED TO SEND
   - **Deadline:** Photo before O-time, text before B-time
   - **Time:** 10 minutes
   - **Context:** Kevin needs to route 220V + 110V cables from basement under balcony (tight space)
   - **Access help:**
     - Eric drilled 5cm hole through foundation wall (for hot tub wires, Kevin can use)
     - One balcony plank removable (not screwed down) - easy access
-  - **Action:** Photo removable plank + photo 5cm hole, text Kevin
-  - **Status:** Not started
+  - **Action:** ✅ Photos taken of removable plank + 5cm foundation hole. 🔴 Need to send to Kevin via Messenger (SEE NEXT TASK)
+  - **Status:** **4:55 PM - Photos taken. Need to send to Kevin.**
+
+- [ ] **Send all HVAC photos to Kevin via Facebook Messenger** 🔴 DO TONIGHT
+  - **Deadline:** Before O-time (Sunday 3 PM)
+  - **Time:** 10 minutes
+  - **Photos to send with labels:**
+    1. BBQ key hiding place (top metal warming grille, front porch)
+    2. Close-up of 2 critical keys (cottage front door + garage lock)
+    3. Removable balcony plank (for easy cable routing access)
+    4. 5cm foundation hole near panel (Kevin can route cables through)
+  - **Why needed:** Kevin needs access instructions while Eric away 1-2 months for heat pump installation
+  - **Status:** **4:55 PM - All photos taken, ready to send. Can do tonight after 6 PM.**
+
+---
+
+### Main Garage - Final Prep
+
+- [ ] **Bend garage door hasp straight with pliers (human door)** 🔴 DO BEFORE DEPARTURE
+  - **Deadline:** O-time (Sunday 3 PM)
+  - **Time:** 5-10 minutes
+  - **Location:** Main garage human-size door (not main vehicle door)
+  - **Issue:** Hasp bent downward, tough to match with metal sliding part that accepts padlock
+  - **Fix:** Use pliers to bend hasp straight for easy padlock closing
+  - **Why needed:** Must be able to lock garage securely before 6-month departure
+  - **Status:** **4:55 PM - Not started. Add to final departure checklist.**
 
 ---
 
