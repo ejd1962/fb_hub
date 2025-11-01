@@ -6,7 +6,25 @@
 **Last Updated:** 2025-11-02 10:30 AM (Saturday) by Eric + CC
 **Purpose:** Master triage list for all tasks between NOW and O-time (and beyond)
 **Maintained by:** Claude Code (CC) with Eric's input
-**Note:** Eric adds progress updates directly to Google Drive version, CC syncs to fb_hub
+
+---
+
+## 📱 How Eric Updates This File (The @@@ System)
+
+**Eric's mobile workflow:**
+- Eric can view and edit this file on his phone via Google Drive at `/My Drive/CLAUDE_RULES/TO_DO_LIST.md`
+- When Eric completes a task or makes progress, he adds update lines starting with `@@@` (3 AT symbols)
+- Example: `@@@ 10:30 AM - Found the registration! Kitchen table now organized and boxed.`
+- CC (Claude Code) periodically reads the Google Drive version, finds all `@@@` lines, and syncs the updates back to the fb_hub repository
+- CC converts `@@@` progress notes into proper task status updates with timestamps and checkmarks
+- This allows Eric to update from anywhere (phone, laptop, tablet) and CC keeps everything synced
+
+**Why this works:**
+- ✅ Eric can update on the go without needing to use git or the laptop
+- ✅ Progress is captured in real-time as tasks are completed
+- ✅ CC handles the cleanup/formatting and keeps both versions in sync
+- ✅ The `@@@` marker makes it easy for CC to find new updates with a simple grep
+- ✅ Survives power outages and laptop crashes (Google Drive is the source of truth)
 
 ---
 
