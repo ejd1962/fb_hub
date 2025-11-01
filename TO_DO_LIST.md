@@ -260,7 +260,25 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **Why critical:** Can retrieve car May 2026 even if late night/weekend
   - **Status:** **12:34 PM - Can be done day or night anytime before Garage 613 drop-off. Eric should find magnetic key enclosure (saw it in kitchen or near front door). If not found, can find another secure externally-accessible hiding spot.**
   - **Plan:** One key to Garage 613/Cheryl, second hidden on vehicle
-  - **Status:** Not started
+
+- [x] **Transfer safety equipment from Jeep to Ford Escape** ✅ DONE
+  - **Deadline:** Before O-time
+  - **Time:** 15 minutes
+  - **Why needed:** Ford sits 6 months at Garage 613, needs emergency equipment for May 2026 retrieval
+  - **Status:** **3:10 PM - COMPLETED. Transferred: tire inflater, tire iron, 2 safety kits, blanket, bag of ropes, 2 ice scrapers from Jeep hatch → Ford Escape rear.**
+
+- [ ] **Transfer battery booster cables from Jeep to Ford Escape** 🔴 DO SOON
+  - **Deadline:** Before O-time (Sunday 3 PM)
+  - **Time:** 2 minutes
+  - **Why needed:** Ford sits 6 months, may need jump start in May 2026
+  - **Status:** **3:10 PM - Not started. Get cables from Jeep → Ford Escape rear.**
+
+- [ ] **Transfer battery charger from dock to Ford Escape** 🔴 AFTER BILGE PUMP FINISHES
+  - **Deadline:** After bilge pump completes (~3:40 PM), before O-time
+  - **Time:** 5 minutes
+  - **Why needed:** Ford sits 6 months, useful for May 2026 retrieval
+  - **Blocker:** Currently powering bilge pump at dock (finishes ~3:40 PM)
+  - **Status:** **3:10 PM - Waiting for bilge pump to finish bailing aluminum boat.**
 
 ---
 
