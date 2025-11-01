@@ -290,23 +290,17 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **Why critical:** Prevents ice damage to dock anchor points and pins
   - **Status:** Not started
 
-- [ ] **Bail out aluminum fishing boat (50mm rain accumulated)** 🔴 ACTION NEEDED NOW!
+- [x] **Bail out aluminum fishing boat (50mm rain accumulated)** ✅ DONE
   - **Deadline:** O-time (Sunday 3 PM)
-  - **Time:** ~2 hours (automatic bilge pump, not manual)
+  - **Time:** ~2 hours 45 minutes (automatic bilge pump)
   - **Why critical:** Must bail before moving/inverting
-  - **Status:** **12:34 PM - PLUG IN EXTENSION CORD IMMEDIATELY!**
-    - Electric bilge pump already installed in boat, running on 12V from battery charger
-    - Battery charger powered by extension cord across road
-    - **IMMEDIATE ACTION: Plug cord back in to start pumping**
-    - Pump is slow, will take approximately 2 hours to complete bailing
-    - Only after bailing complete can boat be pulled out, inverted, and stored
+  - **Status:** **1:10 PM - Plugged in extension cord, bilge pump started. 4:55 PM - Bailing complete after ~2 hrs 45 min run time.**
 
-- [ ] **Pull aluminum boat out of water, invert, store on floating dock**
+- [x] **Pull aluminum boat out of water, invert, store on floating dock** ✅ DONE
   - **Deadline:** O-time (Sunday 3 PM)
   - **Time:** 20 minutes
   - **Why critical:** Winter storage, prevents ice damage
-  - **Depends on:** Bailing boat first
-  - **Status:** Not started
+  - **Status:** **4:55 PM - COMPLETED. Pulled boat from water, placed on smaller floating dock (dock #2), inverted. NOT yet tied down (see next task).**
 
 - [ ] **Tie down canoe, kayak, and aluminum boat on docks**
   - **Deadline:** O-time (Sunday 3 PM)
