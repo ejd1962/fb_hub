@@ -3,7 +3,7 @@
 ========================================================================
 
 **Created:** 2025-11-02 03:30 AM (Saturday)
-**Last Updated:** 2025-11-02 12:45 PM (Saturday) by Eric + CC
+**Last Updated:** 2025-11-02 2:40 PM (Saturday) by Eric + CC
 **Purpose:** Master triage list for all tasks between NOW and O-time (and beyond)
 **Maintained by:** Claude Code (CC) with Eric's input
 
@@ -219,17 +219,40 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **Materials:** ✓ Adhesive, inner tube, screws/washers
   - **Status:** **12:34 PM - Eric confirms: MUST be done today or tomorrow during daylight hours. High priority.**
 
-- [ ] **Replace Jeep radiator fluid with Prestone antifreeze** 🔴 MUST DO TODAY OR TOMORROW
-  - **Deadline:** O-time (Sunday 3 PM) - before 6-month winter storage
-  - **Time:** 30-60 minutes (depending on drain method)
+- [ ] **Jeep antifreeze - MULTI-FILL CYCLE PROCESS** 🔴 TIME-SENSITIVE SCHEDULE
+  - **Vehicle:** 2016 Jeep Cherokee (sealed system, fills through overflow tank only)
   - **Why CRITICAL:** Current fluid ~99% water, will freeze solid and crack radiator + engine block = $$$$ damage
-  - **Current state:** Topped with water after leak fix (NOT Prestone), still slowly leaks, ~50% full
-  - **Materials:** ✓ 2 gallons Prestone on hand
-  - **Vehicle:** 2016 Jeep Cherokee (VIN 1C4PJMDSXGW129224) - from KEEP_MISC_INFO.md
-  - **Options:**
-    - **Best:** Drain existing fluid (research petcock/drain method for 2016 Jeep Cherokee)
-    - **Acceptable:** Top up with Prestone (if drain too complex)
-  - **Status:** **12:34 PM - Eric confirms: MUST be done today or tomorrow during daylight hours. High priority.**
+  - **System capacity:** ~10L total, ~1.9L per fill cycle
+  - **Materials:** ✓ 3 bottles antifreeze (2 premixed 50/50, 1 pure concentrated)
+  - **Strategy:** Alternate pure/premixed to achieve ~50/50 final ratio
+
+  **FILL #1 - COMPLETED** ✅
+  - **Time:** 1:37-1:55 PM Saturday
+  - **Added:** 1.9L premixed 50/50 (non-Prestone brand)
+  - **Result:** Some heat now working (heater core getting coolant)
+
+  **FILL #2 - SATURDAY NIGHT** ⏰ NAG REMINDER!
+  - **8:00 PM:** Take Jeep for 30-minute highway drive (get engine FULLY HOT)
+  - **8:30 PM:** Park, let cool completely (3 hours)
+  - **11:30 PM:** Remove cap (rag + gloves), add Fill #2 with PURE concentrated Prestone (~1.9L)
+  - **11:45 PM:** Cap tight, done
+
+  **FILL #3 - EARLY SUNDAY MORNING** ⏰ NAG REMINDER!
+  - **3:00 AM:** Take Jeep for 30-minute highway drive (get engine FULLY HOT)
+  - **3:30 AM:** Park, let cool completely (3 hours)
+  - **6:30 AM:** Remove cap, add Fill #3 with premixed 50/50 (~1.9L)
+  - **6:45 AM:** Cap tight, done
+
+  **FILL #4 - SUNDAY LATE MORNING** ⏰ NAG REMINDER!
+  - **10:00 AM:** Take Jeep for 30-minute highway drive (get engine FULLY HOT)
+  - **10:30 AM:** Park, let cool completely (3 hours)
+  - **1:30 PM:** Remove cap, add Fill #4 with PURE concentrated Prestone (~1.9L)
+  - **1:45 PM:** Cap tight, FINAL CHECK
+  - **Test:** Heater should blow SUPER HOT air = system fully filled
+
+  **Key insight (2:25 PM):** Engine must reach FULL operating temperature each cycle for coolant to expand/circulate, then contract back into system during cooling. Short drive to hardware store (0.5km, 15 min) was insufficient - overflow tank remained full. Each cycle requires 30+ min hot running + 3 hours cool = 3.5 hours minimum per cycle.
+
+  **Status:** Fill #1 complete. Fills #2-4 scheduled overnight/Sunday. Eric expects to be up all night anyway with all RED tasks remaining.
 
 - [ ] **Hide second Ford Escape key on vehicle (under wheel well)**
   - **Deadline:** Monday morning before leaving at storage location
