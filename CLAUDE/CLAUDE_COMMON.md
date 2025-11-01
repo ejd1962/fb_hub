@@ -249,6 +249,10 @@ When discussing files in any communication (chat, code comments, commit messages
 
 ## Eric's Environment
 
+### Standard Password for Non-Financial Systems
+- **Windows login, development tools, test accounts:** 1793
+- **Financial/banking systems:** Use different passwords (not stored here)
+
 ### Operating System
 - Windows with Git Bash as primary shell
 - Windows Terminal with custom tab configurations
