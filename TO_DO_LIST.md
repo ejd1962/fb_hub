@@ -3,7 +3,7 @@
 ========================================================================
 
 **Created:** 2025-11-02 03:30 AM (Saturday)
-**Last Updated:** 2025-11-02 12:30 PM (Saturday) by Eric + CC
+**Last Updated:** 2025-11-02 12:45 PM (Saturday) by Eric + CC
 **Purpose:** Master triage list for all tasks between NOW and O-time (and beyond)
 **Maintained by:** Claude Code (CC) with Eric's input
 
@@ -156,7 +156,9 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
 
 **If these fail, Eric cannot access Furnace Server remotely for 6 months**
 
-- [ ] **Install AnyDesk and configure auto-start on boot**
+**12:34 PM UPDATE:** All Laptop A and Laptop B work postponed until after 6 PM tonight. Prioritizing outdoor tasks that require daylight.
+
+- [ ] **Install AnyDesk and configure auto-start on boot** ⏸️ POSTPONED TO TONIGHT
   - **Deadline:** O-time (Sunday 3 PM)
   - **Time:** 30 minutes
   - **Why critical:** Cannot access server remotely without this
@@ -205,7 +207,7 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
 
 ### Vehicles - Ford Escape & Jeep
 
-- [ ] **Repair Ford Escape rear window (broken hinges, 1" gap)**
+- [ ] **Repair Ford Escape rear window (broken hinges, 1" gap)** 🔴 MUST DO TODAY OR TOMORROW
   - **Deadline:** O-time (Sunday 3 PM) - MUST fix before driving to Ottawa
   - **Time:** 1-2 hours
   - **Why CRITICAL:** Rain entering car over 6 months = interior damage, mold, electronics
@@ -215,24 +217,25 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
     3. Glue with 300ml windshield adhesive (black goo)
     4. Backup: Add 4-6 metal screws with rubber buffers (cut inner tube from lean-to C) + washers
   - **Materials:** ✓ Adhesive, inner tube, screws/washers
-  - **Status:** Not started
+  - **Status:** **12:34 PM - Eric confirms: MUST be done today or tomorrow during daylight hours. High priority.**
 
-- [ ] **Replace Jeep radiator fluid with Prestone antifreeze**
+- [ ] **Replace Jeep radiator fluid with Prestone antifreeze** 🔴 MUST DO TODAY OR TOMORROW
   - **Deadline:** O-time (Sunday 3 PM) - before 6-month winter storage
   - **Time:** 30-60 minutes (depending on drain method)
   - **Why CRITICAL:** Current fluid ~99% water, will freeze solid and crack radiator + engine block = $$$$ damage
   - **Current state:** Topped with water after leak fix (NOT Prestone), still slowly leaks, ~50% full
   - **Materials:** ✓ 2 gallons Prestone on hand
+  - **Vehicle:** 2016 Jeep Cherokee (VIN 1C4PJMDSXGW129224) - from KEEP_MISC_INFO.md
   - **Options:**
-    - **Best:** Drain existing fluid (research petcock/drain method for Jeep model - NEED YEAR/MODEL INFO)
+    - **Best:** Drain existing fluid (research petcock/drain method for 2016 Jeep Cherokee)
     - **Acceptable:** Top up with Prestone (if drain too complex)
-  - **Reminder:** Get Jeep year/model info for drain research
-  - **Status:** Not started
+  - **Status:** **12:34 PM - Eric confirms: MUST be done today or tomorrow during daylight hours. High priority.**
 
 - [ ] **Hide second Ford Escape key on vehicle (under wheel well)**
   - **Deadline:** Monday morning before leaving at storage location
   - **Time:** 2 minutes
   - **Why critical:** Can retrieve car May 2026 even if late night/weekend
+  - **Status:** **12:34 PM - Can be done day or night anytime before Garage 613 drop-off. Eric should find magnetic key enclosure (saw it in kitchen or near front door). If not found, can find another secure externally-accessible hiding spot.**
   - **Plan:** One key to Garage 613/Cheryl, second hidden on vehicle
   - **Status:** Not started
 
@@ -246,11 +249,16 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **Why critical:** Prevents ice damage to dock anchor points and pins
   - **Status:** Not started
 
-- [ ] **Bail out aluminum fishing boat (50mm rain accumulated)**
+- [ ] **Bail out aluminum fishing boat (50mm rain accumulated)** 🔴 ACTION NEEDED NOW!
   - **Deadline:** O-time (Sunday 3 PM)
-  - **Time:** 15 minutes
+  - **Time:** ~2 hours (automatic bilge pump, not manual)
   - **Why critical:** Must bail before moving/inverting
-  - **Status:** Not started
+  - **Status:** **12:34 PM - PLUG IN EXTENSION CORD IMMEDIATELY!**
+    - Electric bilge pump already installed in boat, running on 12V from battery charger
+    - Battery charger powered by extension cord across road
+    - **IMMEDIATE ACTION: Plug cord back in to start pumping**
+    - Pump is slow, will take approximately 2 hours to complete bailing
+    - Only after bailing complete can boat be pulled out, inverted, and stored
 
 - [ ] **Pull aluminum boat out of water, invert, store on floating dock**
   - **Deadline:** O-time (Sunday 3 PM)
@@ -462,6 +470,26 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **Main garage:** LOCK properly
   - **Main cottage:** LOCK properly
   - **Status:** Not started
+
+---
+
+### Sunday Evening - En Route to Ottawa
+
+- [ ] **Costco pharmacy pickup (Kanata) - Extra meds for 6-month trip** 🔴 TIME-SENSITIVE
+  - **Deadline:** Sunday evening before Costco closes
+  - **Time:** 15-20 minutes (pharmacy pickup)
+  - **Drive time:** 95 minutes from Otter Lake to Costco Kanata
+  - **Why critical:** Meds already ordered and ready (text confirmation received), needed for 6-month trip
+  - **Location:** Costco Kanata - FIRST STOP after leaving Otter Lake, before going to Shelly's
+  - **ISSUE: Hours uncertainty!**
+    - Eric was told: Costco open till 6 PM on Sunday
+    - Shelly says: Costco closes at 5 PM on Sunday
+    - **ACTION NEEDED: Research and verify actual Costco Kanata Sunday closing time**
+  - **Options:**
+    - **If closes at 6 PM:** Leave Otter Lake at 3 PM (O-time as planned), arrive Costco ~4:35 PM ✅
+    - **If closes at 5 PM:** Leave Otter Lake by 2 PM (1 hour earlier), arrive Costco ~3:35 PM, OR do Monday morning pickup
+    - **Option B:** Monday morning pickup - but Monday schedule getting very busy
+  - **Status:** **12:34 PM - Meds ready and waiting. Need to research Costco Kanata Sunday pharmacy hours.**
 
 ---
 
