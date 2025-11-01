@@ -3,9 +3,10 @@
 ========================================================================
 
 **Created:** 2025-11-02 03:30 AM (Saturday)
-**Last Updated:** 2025-11-02 05:30 AM (Saturday) by CC after complete brain dump
+**Last Updated:** 2025-11-02 10:30 AM (Saturday) by Eric + CC
 **Purpose:** Master triage list for all tasks between NOW and O-time (and beyond)
 **Maintained by:** Claude Code (CC) with Eric's input
+**Note:** Eric adds progress updates directly to Google Drive version, CC syncs to fb_hub
 
 ---
 
@@ -24,8 +25,8 @@ Contains detailed maps and descriptions of:
 
 ## Timeline - Critical Deadlines
 
-- **NOW:** Saturday Nov 2, 5:30 AM
-- **O-TIME (Otter Lake Departure):** Sunday Nov 3, 3:00 PM (~33 hours from now)
+- **NOW:** Saturday Nov 2, 10:30 AM
+- **O-TIME (Otter Lake Departure):** Sunday Nov 3, 3:00 PM (~28 hours from now)
 - **S-TIME (Stittsville/Ottawa Departure):** Monday Nov 4, 11:00 AM bus to Boston
 - **B-TIME (Boston Departure/Flight):** Tuesday Nov 5, 4 PM to Portugal via EWR
 - **Trip Duration:** 6 months (returning end of April 2026)
@@ -51,38 +52,34 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
 
 #### Travel & Vehicle Logistics
 
-- [ ] **Call Cheryl (~9 AM) - Ford Escape storage decision**
+- [x] **Call Cheryl (~9 AM) - Ford Escape storage decision** ✅ DONE
   - **Deadline:** Saturday morning
   - **Time:** 10 minutes
   - **Why critical:** Must finalize 6-month vehicle storage before Monday departure
   - **Options:** Cheryl's driveway (preferred) vs Garage 613 (backup)
-  - **Probability:** 50-50 she'll agree
-  - **Status:** May have already responded via message/email (check first)
+  - **Status:** **9:20 AM - Called Cheryl, no response. Proceeding with Garage 613 plan.**
 
-- [ ] **Contact Garage 613 after Cheryl call**
+- [x] **Contact Garage 613 after Cheryl call** ✅ DONE
   - **Deadline:** Saturday morning (after Cheryl call)
   - **Time:** 10 minutes
   - **Why critical:** Confirm storage + Pontiac Torrent recycling plan
-  - **If Cheryl YES:** Still deliver Pontiac registration (for recycling, ~$300 payment goes to them as thanks)
-  - **If Cheryl NO:** Confirm Ford Escape storage at Garage 613
-  - **Status:** Blocked by Cheryl call
+  - **Status:** **10:00 AM - Texted Mohammed at Garage 613. Confirmed Ford Escape storage + will deliver Pontiac Torrent registration so he can call auto recyclers. Payment (~$300) goes to Garage 613 as thanks.**
 
-- [ ] **Search kitchen table papers for Pontiac Torrent registration**
+- [ ] **Search kitchen table papers for Pontiac Torrent registration** 🔄 IN PROGRESS
   - **Deadline:** Saturday/Sunday (before O-time)
   - **Time:** 30-60 minutes (includes organizing table into box)
   - **Why critical:** Needed to recycle Pontiac from Garage 613 junk lot
-  - **Blocker for:** Storing Ford Escape at Garage 613 (if Cheryl says no)
   - **Backup plan:** Monday morning visit Stittsville vehicle licensing office for replacement
   - **Bonus:** Clean kitchen table, box up electronic parts/tools/paperwork for May 2026 review
-  - **Status:** Eric thinks he saw it on kitchen table
+  - **Status:** **10:15 AM - Eric about to start searching kitchen table now.**
 
-- [ ] **Confirm Shelly available Monday morning pickup (~9:30 AM)**
+- [ ] **Confirm Shelly available Monday morning pickup (~11 AM)** ⏳ AWAITING REPLY
   - **Deadline:** Saturday (confirm today)
   - **Time:** 10 minutes (call/text)
-  - **Pickup:** From Garage 613 OR Cheryl's (depends on storage decision)
+  - **Pickup:** From Garage 613 (decision finalized)
   - **Destination:** Kanata Park and Ride (Shelly is nervous highway/city driver - objectively fine but won't do it)
   - **Backup:** UBER if Shelly unavailable
-  - **Status:** Not started
+  - **Status:** **10:15 AM - Sent Facebook Messenger message to Shelly requesting Monday 11 AM pickup from Garage 613 → Kanata Park and Ride. Awaiting her response.**
 
 #### Travel Bookings (HIGH PRIORITY - seats may sell out)
 
