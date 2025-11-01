@@ -3,7 +3,7 @@
 ========================================================================
 
 **Created:** 2025-11-02 03:30 AM (Saturday)
-**Last Updated:** 2025-11-02 10:30 AM (Saturday) by Eric + CC
+**Last Updated:** 2025-11-02 12:30 PM (Saturday) by Eric + CC
 **Purpose:** Master triage list for all tasks between NOW and O-time (and beyond)
 **Maintained by:** Claude Code (CC) with Eric's input
 
@@ -43,8 +43,8 @@ Contains detailed maps and descriptions of:
 
 ## Timeline - Critical Deadlines
 
-- **NOW:** Saturday Nov 2, 10:30 AM
-- **O-TIME (Otter Lake Departure):** Sunday Nov 3, 3:00 PM (~28 hours from now)
+- **NOW:** Saturday Nov 2, 12:30 PM
+- **O-TIME (Otter Lake Departure):** Sunday Nov 3, 3:00 PM (~26.5 hours from now)
 - **S-TIME (Stittsville/Ottawa Departure):** Monday Nov 4, 11:00 AM bus to Boston
 - **B-TIME (Boston Departure/Flight):** Tuesday Nov 5, 4 PM to Portugal via EWR
 - **Trip Duration:** 6 months (returning end of April 2026)
@@ -83,42 +83,41 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **Why critical:** Confirm storage + Pontiac Torrent recycling plan
   - **Status:** **10:00 AM - Texted Mohammed at Garage 613. Confirmed Ford Escape storage + will deliver Pontiac Torrent registration so he can call auto recyclers. Payment (~$300) goes to Garage 613 as thanks.**
 
-- [ ] **Search kitchen table papers for Pontiac Torrent registration** 🔄 IN PROGRESS
+- [x] **Search kitchen table papers for Pontiac Torrent registration** ✅ DONE (NOT FOUND)
   - **Deadline:** Saturday/Sunday (before O-time)
   - **Time:** 30-60 minutes (includes organizing table into box)
   - **Why critical:** Needed to recycle Pontiac from Garage 613 junk lot
-  - **Backup plan:** Monday morning visit Stittsville vehicle licensing office for replacement
-  - **Bonus:** Clean kitchen table, box up electronic parts/tools/paperwork for May 2026 review
-  - **Status:** **10:15 AM - Eric about to start searching kitchen table now.**
+  - **Status:** **12:15 PM - Searched kitchen table and top dresser drawer thoroughly. Found registration for other vehicles but NOT Pontiac Torrent. PLAN: Get replacement printout Monday morning at Stittsville Licensing office (modest fee) before driving to Garage 613.**
 
-- [ ] **Confirm Shelly available Monday morning pickup (~11 AM)** ⏳ AWAITING REPLY
+- [x] **Confirm Shelly available Monday morning pickup (~11 AM)** ✅ CONFIRMED
   - **Deadline:** Saturday (confirm today)
   - **Time:** 10 minutes (call/text)
   - **Pickup:** From Garage 613 (decision finalized)
-  - **Destination:** Kanata Park and Ride (Shelly is nervous highway/city driver - objectively fine but won't do it)
-  - **Backup:** UBER if Shelly unavailable
-  - **Status:** **10:15 AM - Sent Facebook Messenger message to Shelly requesting Monday 11 AM pickup from Garage 613 → Kanata Park and Ride. Awaiting her response.**
+  - **Destination:** Kanata Park and Ride
+  - **Status:** **12:20 PM - Shelly texted back confirming she can shuttle Eric from Garage 613 → Kanata Park and Ride on Monday morning. ISSUE CLOSED.**
 
 #### Travel Bookings (HIGH PRIORITY - seats may sell out)
 
-- [ ] **Research and book Ottawa → Montreal bus (Monday ~12 noon)**
+**12:24 PM UPDATE:** Postponing all travel bookings until TONIGHT after 6 PM. Prioritizing outdoor/dock work while daylight remains (dark at ~6 PM).
+
+- [ ] **Research and book Ottawa → Montreal bus (Monday ~12 noon)** ⏸️ POSTPONED TO TONIGHT
   - **Deadline:** Book Saturday (Monday travel may sell out)
   - **Time:** 30 minutes research + booking
   - **Departure:** Monday Nov 4, ~12:00 noon from Ottawa bus terminal (near Ottawa University)
   - **Arrival:** Montreal terminal ~2:30 PM (2.5 hour trip)
   - **City bus:** Kanata Park and Ride → Ottawa terminal (by 11 AM, research route/timing)
   - **Action:** Find exact terminal address, verify schedules, book tickets
-  - **Status:** Not started
+  - **Status:** **Postponed until after 6 PM tonight (prioritizing daylight outdoor tasks)**
 
-- [ ] **Research and book Montreal → Boston bus (Monday ~4 PM)**
+- [ ] **Research and book Montreal → Boston bus (Monday ~4 PM)** ⏸️ POSTPONED TO TONIGHT
   - **Deadline:** Book Saturday (Monday travel may sell out)
   - **Time:** 30 minutes research + booking
   - **Departure:** Monday Nov 4, ~4:00 PM from Montreal terminal (same terminal as arrival)
   - **Arrival:** Boston ~11:00 PM (exhausted from 13+ hour bus journey)
   - **Action:** Verify latest safe departure time, book tickets
-  - **Status:** Not started
+  - **Status:** **Postponed until after 6 PM tonight (prioritizing daylight outdoor tasks)**
 
-- [ ] **Book cheap accommodation in Boston for Monday night**
+- [ ] **Book cheap accommodation in Boston for Monday night** ⏸️ POSTPONED TO TONIGHT
   - **Deadline:** Book Saturday (prices rise, availability drops)
   - **Time:** 30-60 minutes research + booking
   - **Need:** Cheap, safe, convenient to Logan Airport for Tuesday morning transport
@@ -130,25 +129,24 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
     - YMCA if available
     - Last resort: Budget AirBNB/Booking.com
   - **Priority:** Cheap + safe > fancy
-  - **Status:** Not started
+  - **Status:** **Postponed until after 6 PM tonight (prioritizing daylight outdoor tasks)**
 
-- [ ] **Verify Logan Airport transport from accommodation**
+- [ ] **Verify Logan Airport transport from accommodation** ⏸️ POSTPONED TO TONIGHT
   - **Deadline:** While booking accommodation
   - **Time:** 10 minutes
   - **Need:** Easy Tuesday morning access to Logan for 4 PM flight (plenty of time, but verify)
-  - **Status:** Not started
+  - **Status:** **Postponed until after 6 PM tonight (prioritizing daylight outdoor tasks)**
 
 #### Critical Equipment Testing
 
-- [ ] **Test heater/blower block thermostat**
+- [ ] **Test heater/blower block thermostat** 🔄 IN PROGRESS
   - **Deadline:** Saturday (BEFORE building water pump enclosure)
   - **Time:** 30-60 minutes (test + wait for results)
   - **Why CRITICAL:** Cannot rely on untested equipment for 6-month freeze protection of $600 water pump
   - **Goal:** Confirm thermostat activates heater when temp drops below ~8°C (safety margin above 4°C ice)
-  - **Test environments:** Outside (3°C today) or inside fridge (4°C)
   - **Thermostat:** Dial marked "low to high" (no temp numbers)
   - **If FAILS:** Must use backup plan (disconnect pump, store at Shelly's or Wolfy's)
-  - **Status:** Not started
+  - **Status:** **12:24 PM - TEST IN PROGRESS. Phase 1 complete (~10:24 AM): Tested indoors at 20°C ambient, marked dial calibration point #1. Heater confirmed working. Phase 2 starting now: Heater has been cooling outside on front porch for ~2 hours. Will retest at outdoor ambient temp (using front balcony thermometer to confirm) to establish calibration point #2. Two points = sufficient calibration.**
 
 ---
 
