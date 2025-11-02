@@ -232,28 +232,49 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **Added:** 1.9L premixed 50/50 (non-Prestone brand)
   - **Result:** Some heat now working (heater core getting coolant)
 
-  **FILL #2 - SATURDAY NIGHT** ⏰ NAG REMINDER!
-  - **8:00 PM:** Take Jeep for 30-minute highway drive (get engine FULLY HOT)
-  - **8:30 PM:** Park, let cool completely (3 hours)
-  - **11:30 PM:** Remove cap (rag + gloves), add Fill #2 with PURE concentrated Prestone (~1.9L)
-  - **11:45 PM:** Cap tight, done
+  **MAJOR DISCOVERY - AIR LOCK PROBLEM** 🔴 IN PROGRESS
 
-  **FILL #3 - EARLY SUNDAY MORNING** ⏰ NAG REMINDER!
-  - **3:00 AM:** Take Jeep for 30-minute highway drive (get engine FULLY HOT)
-  - **3:30 AM:** Park, let cool completely (3 hours)
-  - **6:30 AM:** Remove cap, add Fill #3 with premixed 50/50 (~1.9L)
-  - **6:45 AM:** Cap tight, done
+  **8:10-8:40 PM - Highway drive to Shawville (gas fill-up):**
+  - Drove 110 km/h for 30+ minutes, engine running hard
+  - Added $50 gas (now 7/8 full tank)
+  - **Result:** Heater blew STONE COLD air entire drive
+  - **Temp gauge:** 3/8 mark (37.5%) - below normal operating temp
+  - **Radiator:** Stone cold to touch (thermostat not opening)
+  - **Overflow tank:** Still ~90% full (~3cm down from brim), no coolant drawn into system
+  - **Diagnosis:** AIR LOCK preventing coolant circulation
 
-  **FILL #4 - SUNDAY LATE MORNING** ⏰ NAG REMINDER!
-  - **10:00 AM:** Take Jeep for 30-minute highway drive (get engine FULLY HOT)
-  - **10:30 AM:** Park, let cool completely (3 hours)
-  - **1:30 PM:** Remove cap, add Fill #4 with PURE concentrated Prestone (~1.9L)
-  - **1:45 PM:** Cap tight, FINAL CHECK
-  - **Test:** Heater should blow SUPER HOT air = system fully filled
+  **9:22 PM - First burp attempt (after highway drive):**
+  - Cracked overflow cap with rag/gloves
+  - **Result:** Very slight pressure, no boiling, no fluid movement
+  - **Conclusion:** Engine not hot enough yet
 
-  **Key insight (2:25 PM):** Engine must reach FULL operating temperature each cycle for coolant to expand/circulate, then contract back into system during cooling. Short drive to hardware store (0.5km, 15 min) was insufficient - overflow tank remained full. Each cycle requires 30+ min hot running + 3 hours cool = 3.5 hours minimum per cycle.
+  **9:35 PM - Started idle test (NEW APPROACH):**
+  - Hood CLOSED to trap heat (vs highway with 110 km/h cold air blast)
+  - Goal: Reach full operating temp (50% gauge mark) to build pressure for air lock burp
 
-  **Status:** Fill #1 complete. Fills #2-4 scheduled overnight/Sunday. Eric expects to be up all night anyway with all RED tasks remaining.
+  **10:07 PM - First idle check (32 minutes):**
+  - **Temp gauge:** 45% (up from 37.5% - progress!)
+  - **Radiator:** Still stone cold
+  - Cracked cap: Little pressure, boiled ~5 seconds, then stopped
+  - Overflow tank level unchanged
+  - **Conclusion:** Getting warmer but thermostat not fully open yet
+
+  **10:24 PM - Continuing idle test:**
+  - Total idle time: ~50 minutes
+  - Engine feels warmer, gauge at 45%
+  - Hood closed, continuing to heat
+  - **Next check: 10:40 PM** (target 50% gauge = thermostat fully open)
+
+  **Plan:** Once gauge hits 50%+, crack cap to burp air lock. System should drink 4-6L coolant like Eric's summer overheating experience. Alternate pure/premixed to achieve 50/50 ratio.
+
+  **Key insights:**
+  - **Highway driving counterproductive:** 110 km/h = massive cold air cooling, prevents engine reaching operating temp
+  - **Idling with hood closed works better:** Less cooling, heat builds up
+  - **Air lock must be broken:** No amount of driving will fill system until air is purged
+  - **Thermostat stuck closed:** Won't open until ~90°C (50% gauge mark)
+  - **Similar to summer overheating:** Once burped, system should drink coolant rapidly
+
+  **Status:** 10:24 PM - Idling test in progress, approaching thermostat opening temperature. Standing by for 10:40 PM check.
 
 - [ ] **Place Ford Escape key under driver's floor mat before leaving at Cheryl's** 🔴 MONDAY
   - **Deadline:** Monday morning before leaving Ford at Cheryl's house
@@ -428,17 +449,21 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
 
 ### HVAC Documentation for Kevin
 
-- [ ] **Prepare and document keys for Kevin** ✅ PHOTOS TAKEN, NEED TO SEND
+- [ ] **Prepare and document keys for Kevin** ✅ KEYRING SPLIT, PHOTOS TAKEN, NEED TO SEND
   - **Deadline:** O-time (Sunday 3 PM)
   - **Time:** 15 minutes
   - **Tasks:**
-    1. Remove extra keys from keyring (keep only 2: cottage front door + garage lock)
-    2. Store removed keys inside cottage
+    1. ✅ Remove extra keys from keyring (keep only 2: cottage front door + garage padlock)
+    2. ✅ Store removed keys inside cottage (2nd keyring on knick knack cupboard top near entry door)
     3. ✅ Take photo of BBQ key hiding place (top metal warming grille, front porch)
     4. ✅ Take close-up of each of the 2 critical keys individually
     5. 🔴 Text all photos to Kevin via Messenger with labels (SEE NEXT TASK)
+    6. ⏰ **REMINDER: Place BBQ keyring on top BBQ shelf at O-time before departure**
+  - **Kevin's keyring contents:** Flashlight + ring + metal keyring fob + 2 keys (cottage front door + garage padlock)
+  - **2nd keyring (stored):** Postbox keys + bunky door key (likely front inside door from before renovations)
+  - **Storage location:** Knick knack cupboard top near cottage entry (where Eric normally keeps keys)
   - **Why critical:** Kevin needs clear access while Eric away 1-2 months
-  - **Status:** **4:55 PM - Photos taken. Still need to: simplify keyring + send photos to Kevin.**
+  - **Status:** **10:24 PM - Keys split and organized. Still need to: send photos to Kevin + place keyring on BBQ at O-time.**
 
 - [ ] **Update heat pump installation sketch (Revision 2)**
   - **Deadline:** O-time (Sunday 3 PM)
