@@ -132,21 +132,145 @@
 
 ## Health Conditions / Notes
 
-**Diagnosed Conditions:**
-- **Depression and Hypo-Mania:** Managed with Divalproex (stabilizer) and Escitalopram (SSRI)
-- **High Blood Pressure (Hypertension):** Managed with Amlodipine, Atorvastatin, Candesartan
-- **Atrial Fibrillation:** Managed with Apixaban (blood thinner to prevent stroke) and new heart rate medication
-- **High Cholesterol:** Managed with Atorvastatin (Lipitor)
+### Diagnosed Conditions
 
-**Symptoms to Track:**
-- **Light-headedness:** Occurs sometimes when Eric hasn't slept much (Nov 2, 2025 - minimal sleep since 3:30 AM)
-  - **Management:** Rest, eat (yogurt), take regular medications
-- **Heart Rate:** Monitor due to atrial fibrillation (new medication starting Nov 3)
+#### 1. Severe Obstructive Sleep Apnea
+- **Diagnosed:** 2024 (sleep study with wires in lab)
+- **Severity:** SEVERE - waking up average **36 times per hour** (extreme upper range)
+- **Treatment:** CPAP machine prescribed
+  - **Equipment:** Top-of-line CPAP unit (~$1500 retail, paid few hundred with Ontario subsidy)
+  - **Received:** 3 weeks ago (mid-October 2025)
+  - **Usage history:** Used 1 week initially (slept fine), stopped for 2 weeks during coding work
+  - **Mask type:** Full face (covers nose and mouth) - Eric is mouth breather
+  - **Bringing on 6-month trip:** YES
+  - **Commitment:** Use every night starting NOW (except when impractical like bus travel)
+- **Impact:** Chronic exhaustion, 36 brain wake-ups per hour trying to breathe
+- **Note:** Eric barely breathes through nose (possibly deviated septum, never checked). With cold/sniffles, zero nasal airflow.
 
-**Important Medical Notes:**
-- **Apixaban (blood thinner):** Increases bleeding risk - be careful with injuries during travel
-- **Atrial Fibrillation:** Monitor heart rate and rhythm, especially during physical activities
-- **Mood Management:** Important to maintain medication schedule to avoid depression/hypo-mania episodes during 6-month trip
+#### 2. Atrial Fibrillation (A-Fib)
+- **Discovered:** During sleep apnea testing, confirmed by doctor and Ottawa Heart Institute
+- **Severity:** Virtually **24/7** A-fib (at least 23 hours per day) - NOT intermittent like most patients
+- **Testing completed:**
+  - ECG by family doctor (confirmed)
+  - 4-day portable halter monitor from Ottawa Heart Institute (confirmed 24/7 A-fib)
+  - Heart ultrasound at Ottawa Heart Institute (ejection fraction checked, nothing bad reported)
+- **Current treatment:**
+  - Apixaban 5mg × 2/day (blood thinner to prevent stroke)
+  - NEW heart rate medication starting Nov 3 (6-month supply from Costco)
+- **Heart rate issues:**
+  - **Resting:** 95 BPM (normal is 60-90)
+  - **With modest exercise:** Spikes to **260 BPM** (DANGEROUSLY HIGH - normal max is ~150-180)
+  - **Risk:** Excessively fast heart rate is dangerous during physical exertion
+- **Future treatment options (next summer 2026):**
+  - **Option A:** Cardioversion (electrical "zap" to reset heart rhythm)
+    - 70% success rate per treatment
+    - No meaningful side effects
+    - Temporary - A-fib may return (day/month/year/years)
+    - Can repeat multiple times
+  - **Option B:** Catheter ablation (PREFERRED)
+    - Catheter from groin → heart via blood vessel
+    - Ablate (scar) heart muscle in key spots to isolate neural short circuit
+    - Highly reliable, essentially permanent repair
+    - Day procedure, not particularly dangerous
+  - **Decision:** Eric will choose path next summer 2026
+
+#### 3. Depression and Hypo-Mania
+- **Managed with:** Divalproex (stabilizer) + Escitalopram (SSRI)
+- **History:** Multiple depression episodes throughout life
+- **Worst episode:** Summer 2024 (see Health Crisis section below)
+
+#### 4. High Blood Pressure (Hypertension)
+- **Managed with:** Amlodipine, Atorvastatin, Candesartan
+
+#### 5. High Cholesterol
+- **Managed with:** Atorvastatin (Lipitor)
+
+#### 6. Low Testosterone
+- **Testing:** Barely within lower end of normal range
+- **Doctor:** Would not prescribe testosterone booster treatment
+- **Self-treatment:** Costco "Testosterone Red" supplement (claims to help body use existing testosterone more efficiently)
+- **Results:** No noticeable change
+
+---
+
+### Health Crisis - Summer 2024
+
+**Timeline of Events:**
+
+**Early 2024 - Vietnam Trip:**
+- Final days in Hanoi: Contracted severe chest infection + food poisoning
+- Symptoms: Chest infection lingered 6 months, worst diarrhea lasting days
+- **Weight loss:** 30 pounds lost in 5 months after returning home
+- Clothes falling off, severely weakened
+
+**May - October 2024 - Severe Depression:**
+- **Mom died**
+- **Serious CRA (Canada Revenue Agency) trouble:** Threatened with financial ruin, potential poverty
+- **Lost 80% of retirement savings:** Chinese scammer organization, bad business investment made while already financially desperate from CRA situation
+- **Mental state:** Worst depression ever experienced
+- **Physical state:** Could not leave cottage for **6 weeks straight**
+- **Activity level:** Completely immobilized - no projects, no coding, no renovations
+- **Behavior:** Watched YouTube all day, exhausted and anxious when attempting to go outside
+- **Duration:** Immobilization lasted May - October 2024
+
+**Weight Fluctuation History (Dramatic):**
+- **Early 2024:** Lost 30 lbs in 5 months (Vietnam illness)
+- **Return to work:** Gained 30 lbs in 3 months
+- **Diet phase:** Lost 30 lbs in 4 months (strict 2100 cal/day, 12-hr fasts daily, 24-hr fasts 2×/week)
+- **Fired in May 2024:** Returned to cottage, gained 30-40 lbs in 5-6 months (May-Oct 2024)
+- **Current:** Still gaining weight easily, exhausted constantly
+
+**Contributing factors to summer 2024 crisis:**
+- Physical: Undiagnosed severe sleep apnea (36 wake-ups/hour) causing chronic exhaustion
+- Physical: Undiagnosed A-fib with dangerous heart rate spikes
+- Physical: Lingering 6-month chest infection from Vietnam
+- Mental: Post-travel depression
+- Mental: Mom's death
+- Financial: CRA threatening bankruptcy
+- Financial: Lost 80% retirement savings to scammers
+
+**Current status (Nov 2025):**
+- Sleep apnea diagnosed, CPAP prescribed (needs consistent use)
+- A-fib diagnosed, medicated (Apixaban + heart rate med starting Nov 3)
+- Depression managed with meds (Divalproex + Escitalopram)
+- Financially stressed but dealing "positively and constructively"
+- Planning 6-month trip as positive step forward
+
+---
+
+### Current Symptoms to Track
+
+**Physical:**
+- **Chronic exhaustion:** Constant, related to untreated sleep apnea (36 wake-ups/hour)
+- **Wheezing:** Frequent, especially after exertion
+- **Heart rate spikes:** Up to 260 BPM with modest exercise (DANGEROUS)
+- **Weight gain:** Extremely easy to gain weight, difficult to lose
+- **Huffing and puffing:** After stairs or physical work (Nov 2, 2025 - after waterfront work)
+- **Light-headedness:** When sleep-deprived (Nov 2, 2025 - minimal sleep since 3:30 AM)
+
+**Management:**
+- Rest, eat (yogurt), take regular medications
+- Monitor heart rate during physical activities
+- Use CPAP every night (prevents 36 wake-ups/hour)
+- Avoid overexertion with A-fib/high heart rate
+
+---
+
+### CRITICAL Medical Notes for 6-Month Trip
+
+**⚠️ LIFE-THREATENING RISKS:**
+- **Apixaban (blood thinner):** Increases bleeding risk - be VERY careful with injuries during travel
+- **Severe sleep apnea:** MUST use CPAP every night (bringing machine on trip)
+- **A-fib + heart rate spikes:** Monitor exertion, heart can hit 260 BPM (dangerous)
+- **Depression management:** CANNOT skip medications - risk of immobilizing depression like summer 2024
+- **Stroke risk:** A-fib + missing Apixaban = permanent brain damage from stroke
+
+**Non-Negotiable Daily Requirements:**
+1. Morning medications (7 pills + 6 supplements)
+2. 9 PM Apixaban (blood thinner)
+3. CPAP machine every night (except when impractical)
+
+**CC Authorization:** Claude Code is AUTHORIZED and REQUIRED to enforce medication compliance and CPAP usage. Will refuse to code or assist until Eric confirms compliance.
 
 ---
 
