@@ -3,7 +3,7 @@
 ========================================================================
 
 **Created:** 2025-11-02 03:30 AM (Saturday)
-**Last Updated:** 2025-11-02 5:00 PM (Saturday) by Eric + CC
+**Last Updated:** 2025-11-02 7:40 PM (Saturday) by Eric + CC
 **Purpose:** Master triage list for all tasks between NOW and O-time (and beyond)
 **Maintained by:** Claude Code (CC) with Eric's input
 
@@ -70,12 +70,14 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
 
 #### Travel & Vehicle Logistics
 
-- [x] **Call Cheryl (~9 AM) - Ford Escape storage decision** ✅ DONE
+- [x] **Call Cheryl (~9 AM) - Ford Escape storage decision** ✅ DONE - CHERYL SAID YES!
   - **Deadline:** Saturday morning
   - **Time:** 10 minutes
   - **Why critical:** Must finalize 6-month vehicle storage before Monday departure
   - **Options:** Cheryl's driveway (preferred) vs Garage 613 (backup)
   - **Status:** **9:20 AM - Called Cheryl, no response. Proceeding with Garage 613 plan.**
+  - **7:34 PM UPDATE:** **Cheryl called back and said YES!** Ford Escape will be stored at her house for 6 months.
+  - **Address:** 245 Spruce Ridge Road, RR2, Carp, Ontario (just outside Stittsville, 8 minutes from Garage 613)
 
 - [x] **Contact Garage 613 after Cheryl call** ✅ DONE
   - **Deadline:** Saturday morning (after Cheryl call)
@@ -92,9 +94,10 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
 - [x] **Confirm Shelly available Monday morning pickup (~11 AM)** ✅ CONFIRMED
   - **Deadline:** Saturday (confirm today)
   - **Time:** 10 minutes (call/text)
-  - **Pickup:** From Garage 613 (decision finalized)
+  - **Pickup:** From Cheryl's house (changed from Garage 613 after Cheryl said YES at 7:34 PM)
   - **Destination:** Kanata Park and Ride
-  - **Status:** **12:20 PM - Shelly texted back confirming she can shuttle Eric from Garage 613 → Kanata Park and Ride on Monday morning. ISSUE CLOSED.**
+  - **Status:** **12:20 PM - Shelly texted back confirming she can shuttle Eric → Kanata Park and Ride on Monday morning. ISSUE CLOSED.**
+  - **7:34 PM UPDATE:** Pickup location changed to **Cheryl's house** (245 Spruce Ridge Road, RR2, Carp, Ontario) since Ford Escape will be stored there instead of Garage 613.
 
 #### Travel Bookings (HIGH PRIORITY - seats may sell out)
 
@@ -252,12 +255,31 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
 
   **Status:** Fill #1 complete. Fills #2-4 scheduled overnight/Sunday. Eric expects to be up all night anyway with all RED tasks remaining.
 
-- [ ] **Hide second Ford Escape key on vehicle (under wheel well)**
-  - **Deadline:** Monday morning before leaving at storage location
-  - **Time:** 2 minutes
-  - **Why critical:** Can retrieve car May 2026 even if late night/weekend
-  - **Status:** **12:34 PM - Can be done day or night anytime before Garage 613 drop-off. Eric should find magnetic key enclosure (saw it in kitchen or near front door). If not found, can find another secure externally-accessible hiding spot.**
-  - **Plan:** One key to Garage 613/Cheryl, second hidden on vehicle
+- [ ] **Place Ford Escape key under driver's floor mat before leaving at Cheryl's** 🔴 MONDAY
+  - **Deadline:** Monday morning before leaving Ford at Cheryl's house
+  - **Time:** 1 minute
+  - **Why critical:** Andrew (Cheryl's son) may use Ford over 6 months, needs access to key
+  - **Location:** Under driver's side floor mat (easy for Andrew/Cheryl to find)
+  - **Plan:** Eric will have both Ford keys. Leave one under floor mat, keep other with Eric for May 2026 retrieval.
+  - **Status:** **7:34 PM - Cheryl said YES to storage. Andrew may use Ford. Leave key under driver's floor mat.**
+
+- [ ] **Tell Cheryl about Ford Escape "anti-theft feature" (push key INTO column)** 🔴 TONIGHT/SUNDAY
+  - **Deadline:** Before Monday morning (when Eric leaves Ford at Cheryl's)
+  - **Time:** 2 minutes (call or text)
+  - **Why critical:** Cheryl/Andrew won't be able to start Ford without this instruction
+  - **The "trick":** When starting Ford Escape, must push key INTO steering column (worn ignition, NOT actual anti-theft)
+  - **Eric forgot to tell Cheryl during 7:34 PM phone call - must tell her before Monday**
+  - **Status:** **7:34 PM - Not yet told. Can call/text tonight or Sunday.**
+
+- [ ] **Ford Escape insurance situation - remote activation plan** 🔴 DOCUMENT FOR FUTURE
+  - **Current status:** Ford has NO insurance (Eric knows he's driving illegally to Cheryl's Monday morning)
+  - **Risk acceptance:** Eric accepts this one-time illegal drive (Otter Lake → Garage 613 → Cheryl's)
+  - **Future plan:** If Andrew needs to use Ford during 6 months, Andrew will contact Eric via Facebook Messenger
+  - **Eric's response:** Activate insurance remotely via Belaire Direct Insurance app
+    - May need ExpressVPN if app is geo-restricted outside Canada
+    - Takes ~10 minutes to activate online
+  - **Cover story for Andrew if accident:** "Borrowing from Eric for a few days with blessing" (avoids saying "6 months")
+  - **Status:** **7:34 PM - Documented. No action needed unless Andrew contacts Eric during trip.**
 
 - [x] **Transfer safety equipment from Jeep to Ford Escape** ✅ DONE
   - **Deadline:** Before O-time
@@ -539,15 +561,11 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **Drive time:** 95 minutes from Otter Lake to Costco Kanata
   - **Why critical:** Meds already ordered and ready (text confirmation received), needed for 6-month trip
   - **Location:** Costco Kanata - FIRST STOP after leaving Otter Lake, before going to Shelly's
-  - **ISSUE: Hours uncertainty!**
-    - Eric was told: Costco open till 6 PM on Sunday
-    - Shelly says: Costco closes at 5 PM on Sunday
-    - **ACTION NEEDED: Research and verify actual Costco Kanata Sunday closing time**
-  - **Options:**
-    - **If closes at 6 PM:** Leave Otter Lake at 3 PM (O-time as planned), arrive Costco ~4:35 PM ✅
-    - **If closes at 5 PM:** Leave Otter Lake by 2 PM (1 hour earlier), arrive Costco ~3:35 PM, OR do Monday morning pickup
-    - **Option B:** Monday morning pickup - but Monday schedule getting very busy
-  - **Status:** **12:34 PM - Meds ready and waiting. Need to research Costco Kanata Sunday pharmacy hours.**
+  - **Hours:** ✅ **CONFIRMED - Costco open until 6 PM on Sunday** (Eric confirmed directly)
+  - **Plan:** Leave Otter Lake at 3 PM (O-time as planned), arrive Costco ~4:35 PM with 1h 25min buffer ✅
+  - **Flexibility:** Can leave as late as 4:15 PM and still arrive at Costco by 5:30 PM (30-minute buffer)
+  - **Backup:** If something delays departure Sunday, can go Monday 7 AM and do minimal Furnace Server setup
+  - **Status:** **12:34 PM - Meds ready and waiting. 7:34 PM - Costco hours confirmed, timing is fine.**
 
 ---
 
