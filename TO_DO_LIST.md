@@ -930,6 +930,24 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **Topics:** Colligative properties, eutectic points, solution chemistry
   - **Status:** **Eric was fascinated during Jeep antifreeze emergency - wants to understand the science**
 
+- [ ] **Migrate TO_DO_LIST.md and DONE_OR_ABANDONED_LIST.md to new personal project**
+  - **Deadline:** Future - when time permits (no rush)
+  - **Time:** 1-2 hours (create new pNN_xxxx project structure + migrate files + update git hooks)
+  - **Goal:** Separate personal organization/task management from TransVerse project (fb_hub)
+  - **Why useful:**
+    - TO_DO and DONE lists are universal personal tools (not project-specific)
+    - Makes them available across all projects and contexts
+    - Cleaner separation of concerns
+  - **Migration steps:**
+    1. Create new project directory (e.g., `pNN_personal_tasks/`)
+    2. Initialize git repo
+    3. Move TO_DO_LIST.md and DONE_OR_ABANDONED_LIST.md to new project
+    4. Update git-backup.js to track new project
+    5. Update pre-push hook (or create new hook) to sync to Google Drive
+    6. Add to git-backup.js projects list
+  - **Note:** For now, keeping both files in fb_hub is fine - migration can wait until settled
+  - **Status:** Not started - future improvement
+
 ---
 
 ### Laptop B (Furnace Server) - TGP Deployment (Remote via AnyDesk)

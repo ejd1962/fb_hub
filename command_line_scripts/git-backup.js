@@ -14,6 +14,7 @@ const __dirname = path.dirname(__filename);
 const CONFIG_FILE = path.join(os.homedir(), 'git-backup.json');
 const LOCK_FILE = CONFIG_FILE + '.lock';
 const DEFAULT_INTERVAL = 600;
+const DEFAULT_PUSH_INTERVAL = 7200; // 2 hours
 
 // Path to git.exe
 const GIT_EXE = 'C:\\Program Files\\Git\\bin\\git.exe';
@@ -23,11 +24,12 @@ function showHelp() {
     console.log(`
 git-backup.js 
 
-Arguments: 
+Arguments:
 
-   --interval=NNN                or --i=NNN   : NNN is seconds. Default is 600 seconds. 
-   --projects=proj1,proj2,proj3  or --p=xxx   : a list of projects to use (prior list is discarded) 
-   --projects_add=proj4,proj5    or --pa=xxx  : a list of projects to add to the list. 
+   --commit_interval=NNN         or --ci=NNN  : NNN is seconds. Default is 600 seconds (auto-commit interval).
+   --push_interval=NNN           or --pi=NNN  : NNN is seconds. Default is 7200 seconds (auto-push interval).
+   --projects=proj1,proj2,proj3  or --p=xxx   : a list of projects to use (prior list is discarded)
+   --projects_add=proj4,proj5    or --pa=xxx  : a list of projects to add to the list.
    --projects_remove=proj2,proj3 or --pr=xxx  : a list of projects to remove from the list.
    --kill                                     : Kill the daemon if running
    --restart                                  : Restart the daemon (kill and start new one)
@@ -36,10 +38,11 @@ Arguments:
    
 The operation of git-backup.js is:
 
-    It looks for a file in users root directory called "git-backup.json".  If 
+    It looks for a file in users root directory called "git-backup.json".  If
     it does not already exist then create it.  The fields in the json file are "projects",
-    "interval", "last_saved_time", "daemon_pid".  The default interval is 600.  All other 
-    fields default to be blank. 
+    "commit_interval", "push_interval", "last_commit_time", "last_push_time", "daemon_pid".
+    The default commit_interval is 600 seconds (10 min). The default push_interval is 7200
+    seconds (2 hours). All other fields default to be blank. 
     
     It locks the json file by touching a file with json filename, suffixed by .lock  
 	(Note this is not really atomic, so there is a small chance of a race condition.)
@@ -50,37 +53,42 @@ The operation of git-backup.js is:
     If the daemon_pid value in the json file is blank, then it launches a new daemon, waits 
     for it to come alive, and reads its PID and saves it in the daemon_pid field.
     
-    All arguments are processed 
-        The --projectsXXX arguments are processed in order to replace, or add to,   
-        or remove from the json projects list. 
-        The --interval argument updates the interval value in json. 
-    
-    After all arguments are processed, a git commit is done of all projects. 
-    
-    The current time is put into the "last_time_saved" field.
+    All arguments are processed
+        The --projectsXXX arguments are processed in order to replace, or add to,
+        or remove from the json projects list.
+        The --commit_interval argument updates the commit_interval value in json.
+        The --push_interval argument updates the push_interval value in json.
+
+    After all arguments are processed, a git commit is done of all projects.
+
+    The current time is put into the "last_commit_time" field.
     
     Then save the json data back to the json file. 
 	
     Then the lock file is removed. 
 
 	
-The daemon operates autonomously as follows: 
-    
-    It spends most of its time sleeping.  
-    
+The daemon operates autonomously as follows:
+
+    It spends most of its time sleeping.
+
     When it wakes up, it waits for the lock file to be not present, then
-    it reads the json file into an interval variable.  (This read is is not really done
-    as an atomic operation, so there is a chance of a race condition.) 	
-    
-    It subtracts the last_saved_time from the current time to determine elapsed time.   
-    
-    If the elapsed exceeds the "interval", then do a git commit of all the projects.  
-    
-    Then update the "last_time_saved" with the current time. 
-    
-    Then save the json variable to the json file. 
-    
-    Then sleep for "interval" seconds PLUS 5.
+    it reads the json file. (This read is not really done as an atomic operation,
+    so there is a chance of a race condition.)
+
+    It checks TWO separate timers:
+
+    1. COMMIT TIMER: Subtracts last_commit_time from current time.
+       If elapsed exceeds "commit_interval", then do a git commit of all projects.
+       Then update "last_commit_time" with the current time.
+
+    2. PUSH TIMER: Subtracts last_push_time from current time.
+       If elapsed exceeds "push_interval", then do a git push of all projects.
+       Then update "last_push_time" with the current time.
+
+    Then save the json variable to the json file.
+
+    Then sleep for the SMALLER of (commit_interval, push_interval) seconds PLUS 5.
 
 Project paths can be specified in either Windows format (C:\\path\\to\\project) or 
 GitBash format (/c/path/to/project). Both formats are supported and normalized internally.
@@ -313,20 +321,44 @@ function loadConfig() {
     if (!fs.existsSync(CONFIG_FILE)) {
         return {
             projects: [],
-            interval: DEFAULT_INTERVAL,
-            last_saved_time: '',
+            commit_interval: DEFAULT_INTERVAL,
+            push_interval: DEFAULT_PUSH_INTERVAL,
+            last_commit_time: '',
+            last_push_time: '',
             daemon_pid: '',
             last_commits: {}
         };
     }
     const data = fs.readFileSync(CONFIG_FILE, 'utf8');
     const config = JSON.parse(data);
-    
-    // Ensure last_commits field exists
+
+    // Migrate old field names to new field names (backward compatibility)
+    if (config.interval !== undefined && config.commit_interval === undefined) {
+        config.commit_interval = config.interval;
+        delete config.interval;
+    }
+    if (config.last_saved_time !== undefined && config.last_commit_time === undefined) {
+        config.last_commit_time = config.last_saved_time;
+        delete config.last_saved_time;
+    }
+
+    // Set defaults for new fields
+    if (!config.commit_interval) {
+        config.commit_interval = DEFAULT_INTERVAL;
+    }
+    if (!config.push_interval) {
+        config.push_interval = DEFAULT_PUSH_INTERVAL;
+    }
+    if (!config.last_commit_time) {
+        config.last_commit_time = '';
+    }
+    if (!config.last_push_time) {
+        config.last_push_time = '';
+    }
     if (!config.last_commits) {
         config.last_commits = {};
     }
-    
+
     return config;
 }
 
