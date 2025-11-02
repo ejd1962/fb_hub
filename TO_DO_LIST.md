@@ -690,6 +690,17 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **Note:** A34 has room for SD card slot, but using smaller card might work better - test remotely
   - **Status:** Not started
 
+- [ ] **Find watch box and select one watch for trip** 🟡 NICE TO HAVE
+  - **Deadline:** Before S-time (Monday 11 AM) ideally, or pack later in trip
+  - **Time:** 15-30 minutes (find box + select watch)
+  - **Box description:** ~15cm x 15cm x 7cm, contains ~10 watches
+  - **Watch condition:** Most need fresh battery or new leather band
+  - **Decision:** Select ONE watch, pack it even if needs battery/band
+  - **Battery/band replacement:** Can be done later during trip (watchmaker in Portugal/Vietnam)
+  - **Note:** Eric has been meaning to get one sorted for months, took box to/from Ottawa multiple times
+  - **Priority:** YELLOW - Nice to have but not critical. If time is tight, can skip and use phone for time.
+  - **Status:** Not started
+
 ---
 
 ### Government / Administrative ✅ UP TO DATE!
