@@ -376,6 +376,38 @@ cd /c/_projects/p23_fb_hub/fb_hub/command_line_scripts && node git-backup.js --r
 - Default interval: 600 seconds (10 minutes)
 - This ensures Eric never loses more than 10 minutes of work across all projects
 
+### Proactive Time Checking
+**CRITICAL RULE: Always know the current time without asking Eric**
+
+- **Use the `date` command to check current time** - Do this proactively, never ask Eric for the time
+- **No permission needed** - Time checks are non-destructive and always allowed
+- **Check time at conversation turns** when time-sensitive tasks are involved
+- **Timestamp Eric's inputs** when relevant for tracking elapsed time
+- **Use for reminders and scheduling** - Calculate time until deadlines, set up time-based alerts
+
+#### When to Check Time:
+- Start of time-sensitive conversations
+- Before/after tasks with duration estimates
+- When tracking multi-step processes with time constraints
+- For calculating countdowns to deadlines
+- When Eric mentions a time in the future (set mental reminders)
+
+#### Example Usage:
+```bash
+# Check current time
+date
+# Output: Sat, Nov  1, 2025  9:54:49 PM
+```
+
+#### Benefits:
+- Removes cognitive load from Eric (no need to tell you the time)
+- Enables accurate time tracking and countdown reminders
+- Improves coordination on time-sensitive tasks
+- Makes collaboration more autonomous and efficient
+
+**Protocol established 2025-11-01 during Jeep antifreeze emergency**
+
+
 
 
 
