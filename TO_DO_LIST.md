@@ -263,13 +263,16 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **Plan:** Eric will have both Ford keys. Leave one under floor mat, keep other with Eric for May 2026 retrieval.
   - **Status:** **7:34 PM - Cheryl said YES to storage. Andrew may use Ford. Leave key under driver's floor mat.**
 
-- [ ] **Tell Cheryl about Ford Escape "anti-theft feature" (push key INTO column)** 🔴 TONIGHT/SUNDAY
+- [x] **Tell Cheryl about Ford Escape "anti-theft feature" (push key INTO column)** ✅ DONE
   - **Deadline:** Before Monday morning (when Eric leaves Ford at Cheryl's)
   - **Time:** 2 minutes (call or text)
   - **Why critical:** Cheryl/Andrew won't be able to start Ford without this instruction
   - **The "trick":** When starting Ford Escape, must push key INTO steering column (worn ignition, NOT actual anti-theft)
   - **Eric forgot to tell Cheryl during 7:34 PM phone call - must tell her before Monday**
-  - **Status:** **7:34 PM - Not yet told. Can call/text tonight or Sunday.**
+  - **Status:** **COMPLETED:**
+    - **~8:30 PM** - Left voicemail for Cheryl during drive to Shawville explaining starting procedure
+    - **~9:25 PM** - Phone call with Andrew, reviewed ALL facts: insurance situation, storage at Cheryl's, key location under driver's floor mat, anti-theft starting trick
+    - **Andrew is fully up to speed**
 
 - [ ] **Ford Escape insurance situation - remote activation plan** 🔴 DOCUMENT FOR FUTURE
   - **Current status:** Ford has NO insurance (Eric knows he's driving illegally to Cheryl's Monday morning)
