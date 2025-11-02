@@ -463,7 +463,7 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **2nd keyring (stored):** Postbox keys + bunky door key (likely front inside door from before renovations)
   - **Storage location:** Knick knack cupboard top near cottage entry (where Eric normally keeps keys)
   - **Why critical:** Kevin needs clear access while Eric away 1-2 months
-  - **Status:** **10:24 PM - Keys split and organized. Still need to: send photos to Kevin + place keyring on BBQ at O-time.**
+  - **Status:** **10:39 PM - Keys split and organized. ✅ Photos sent to Kevin. Remaining: Place keyring on BBQ at O-time.**
 
 - [ ] **Update heat pump installation sketch (Revision 2)**
   - **Deadline:** O-time (Sunday 3 PM)
@@ -478,26 +478,26 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **Why critical:** Kevin needs accurate locations for installation while Eric away
   - **Status:** Not started
 
-- [ ] **Document removable balcony plank access for Kevin** ✅ PHOTOS TAKEN, NEED TO SEND
+- [x] **Document removable balcony plank access for Kevin** ✅ DONE
   - **Deadline:** Photo before O-time, text before B-time
   - **Time:** 10 minutes
   - **Context:** Kevin needs to route 220V + 110V cables from basement under balcony (tight space)
   - **Access help:**
     - Eric drilled 5cm hole through foundation wall (for hot tub wires, Kevin can use)
     - One balcony plank removable (not screwed down) - easy access
-  - **Action:** ✅ Photos taken of removable plank + 5cm foundation hole. 🔴 Need to send to Kevin via Messenger (SEE NEXT TASK)
-  - **Status:** **4:55 PM - Photos taken. Need to send to Kevin.**
+  - **Action:** ✅ Photos taken of removable plank + 5cm foundation hole. ✅ Sent to Kevin via Messenger
+  - **Status:** **10:39 PM - Photos taken and sent to Kevin. Task complete.**
 
-- [ ] **Send all HVAC photos to Kevin via Facebook Messenger** 🔴 DO TONIGHT
+- [x] **Send all HVAC photos to Kevin via Facebook Messenger** ✅ DONE
   - **Deadline:** Before O-time (Sunday 3 PM)
   - **Time:** 10 minutes
-  - **Photos to send with labels:**
+  - **Photos sent with labels:**
     1. BBQ key hiding place (top metal warming grille, front porch)
     2. Close-up of 2 critical keys (cottage front door + garage lock)
     3. Removable balcony plank (for easy cable routing access)
     4. 5cm foundation hole near panel (Kevin can route cables through)
   - **Why needed:** Kevin needs access instructions while Eric away 1-2 months for heat pump installation
-  - **Status:** **4:55 PM - All photos taken, ready to send. Can do tonight after 6 PM.**
+  - **Status:** **10:39 PM - ALL PHOTOS AND INSTRUCTIONS SENT TO KEVIN VIA MESSENGER. Kevin fully briefed on access.**
 
 ---
 
