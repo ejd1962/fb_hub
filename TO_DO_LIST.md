@@ -692,21 +692,21 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
 
 ---
 
-### Government / Administrative 🔴 OVERDUE!
+### Government / Administrative ✅ UP TO DATE!
 
-- [ ] **File overdue EI (Employment Insurance) report** ⚠️ OVERDUE - FILE TODAY!
-  - **Due date:** October 18, 2025
-  - **Days overdue:** ~15 days (as of Nov 2)
+- [ ] **File next EI (Employment Insurance) report**
+  - **Next filing date:** Saturday, November 15, 2025
   - **Time:** 5 minutes
   - **Frequency:** Every 2 weeks
   - **Filing window:** Should file promptly, must file within 3 weeks of due date
-  - **Remaining grace period:** ~6 days (3 weeks from Oct 18 = Nov 8)
-  - **Why urgent:** In Eric's interest to file promptly, approaching end of grace period
   - **URL:** https://www.canada.ca/en/services/benefits/ei/employment-insurance-reporting.html
-  - **Status:** NOT STARTED - OVERDUE
+  - **Login credentials (stored for convenience):**
+    - **SIN:** 472619154
+    - **EI PIN:** 4108
+  - **Status:** NOT YET DUE (13 days away)
   - **⏰ CC NAGGING RULE:** Nag Eric ONCE PER DAY when EI report is overdue
-  - **Next report due:** ~November 1, 2025 (2 weeks after Oct 18) - ALSO LIKELY OVERDUE!
-  - **After that:** Reports due every 2 weeks going forward
+  - **Last filed:** November 2, 2025 at 4:00 AM - filed 2 reports, now caught up!
+  - **After Nov 15:** Next report due ~November 29, 2025
 
 ---
 
