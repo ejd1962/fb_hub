@@ -43,31 +43,35 @@ Contains detailed maps and descriptions of:
 
 ## Timeline - Critical Deadlines
 
-**Current Status:** Sunday Nov 2, 2025 at 4:31 AM
+**Current Status:** Sunday Nov 2, 2025 at 9:00 AM
 
-### TWO POSSIBLE O-TIMES (Decision at 9 AM today):
+### ✅ DECISION MADE: SCENARIO B - Leave Monday 12 Noon
 
-**SCENARIO A - Sons Available (Leave Today):**
-- **Decision Point:** 9:00 AM Sunday - Call James to confirm
-- **O-TIME:** Sunday Nov 2, **6:30 PM sharp** (leave Otter Lake for good)
-- **Time available at cottage:** ~14 hours from 4:31 AM
-- **Drive time:** 80 minutes Otter Lake → Stittsville
-- **Sons visit:** 8:00 PM Sunday (Andrew & James at Cheryl's or nearby pub after their mom's dinner)
-- **Sunday night:** Sleep at Shelly's
-- **Monday schedule:** Costco pharmacy, licensing office, install Furnace Server at Shelly's, optional shopping (Canadian gifts, watch battery/band)
-- **Monday 4:30 PM:** Garage 613 (drop Pontiac registration) → Cheryl's (park Ford, key under mat)
-- **Monday 5:00 PM:** UBER from Cheryl's → Ottawa VIA Rail Station (~$30-40)
+**Eric's decision:** Informed sons and Shelly - leaving Monday. No attempt to see sons tonight (no time).
 
-**SCENARIO B - Sons NOT Available (Leave Monday):**
-- **O-TIME:** Monday Nov 3, **12:00 NOON sharp** (hard stop, no variability)
-- **Time available at cottage:** ~31.5 hours from 4:31 AM Sunday
-- **Drive time:** 80 min → Shelly's OR 90 min → Costco (direct)
-- **Monday 1:00 PM:** Arrive Stittsville
-- **Monday 1:00-4:30 PM:** Licensing office + install Furnace Server at Shelly's + goodbye
-- **Monday 4:30 PM:** Garage 613 (drop Pontiac registration) → Cheryl's (park Ford, key under mat)
-- **Monday 5:00 PM:** UBER from Cheryl's → Ottawa VIA Rail Station
+**Contact info sent to all associates (9 AM Sunday):**
+- **PRIMARY:** Facebook Messenger (www.facebook.com/ericdormer1962)
+- **SECONDARY:** WhatsApp +66 93 752 8306
+- **EMAIL:** EricDormer1962@gmail.com
+- **PHONE:** ~~1-613-301-1770~~ ❌ OUT OF SERVICE during 6-month trip (POTS disabled)
 
-**Both scenarios converge on Monday evening:**
+---
+
+### O-TIME: Monday Nov 3, 12:00 NOON (Leave Otter Lake)
+
+**Time available:** ~27 hours (Sunday 9 AM → Monday 12 noon)
+
+**Monday Stittsville sequence:**
+1. **12:00 NOON:** Leave Otter Lake
+2. **~1:00 PM:** Costco Kanata (pick up meds)
+3. **~1:30 PM:** Stittsville Licensing Office (Pontiac Torrent registration replacement)
+4. **~2:00-4:00 PM:** Shelly's house (install Furnace Server / Laptop B + goodbye)
+5. **~4:15 PM:** Garage 613 (drop Torrent registration, Mohammed keeps recycling payment ~$300)
+6. **~5:00 PM:** Cheryl's house (park Ford Escape, key under driver's floor mat)
+7. **~5:00 PM:** Call UBER → VIA Rail Station (200 Tremblay Rd) - arrive by 7:00 PM
+8. **Optional if time:** Shopping for Canadian gifts (Jenny's family), watch parts/new watch
+
+**Monday evening travel:**
 - **Monday 7:30 PM:** Orléans Express bus Ottawa → Montreal
 - **Monday 11:00 PM:** Greyhound bus Montreal → Boston (overnight, sleep on bus)
 - **Tuesday 8:48 AM:** Arrive Boston South Station
@@ -93,6 +97,147 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
 ---
 
 ## 🔴 RED PRIORITY - CRITICAL PATH TASKS
+
+### SUNDAY DAY - Outdoor Tasks (Use Daylight 9 AM - 6 PM)
+
+#### Waterfront Winterization (2 hours)
+
+- [ ] **Tie down boats on docks**
+  - **Boats:** Canoe, kayak, aluminum boat
+  - **Time:** 15 minutes
+  - **Why:** Prevent blowing/sliding off docks over winter
+
+- [ ] **Pull dock anchor pins, tie docks to shore**
+  - **Time:** 30 minutes
+  - **Why:** Prevents ice damage to dock anchor points and pins
+
+- [ ] **Move tent from behind bunky → lean-to**
+  - **Time:** 10 minutes
+  - **Why:** Canvas tent shouldn't be exposed to winter weather on porch
+
+- [ ] **Move glass table from near bunky → storage location**
+  - **Time:** 10 minutes
+
+- [ ] **Move marine plywood (from tree + big trailer) → proper storage**
+  - **Time:** 15 minutes
+
+#### Main Garage Area Cleanup (3-4 hours) - BIGGIE!
+
+**Front of garage cleanup:**
+
+- [ ] **Load scrap paint cans on little trailer (dump run ready)**
+  - **Time:** 20 minutes
+  - **Note:** ~20 rusty paint cans
+
+- [ ] **Move 4 stacked tires to side of garage + cover**
+  - **Time:** 10 minutes
+
+- [ ] **Move pressure washer inside garage or covered area**
+  - **Time:** 5 minutes
+  - **Why:** Keep out of snow
+
+- [ ] **Drain 3 wheelbarrows, invert and stack behind lean-to**
+  - **Time:** 15 minutes
+  - **Why:** Prevent water collection, winter storage
+
+- [ ] **Move riding mower + push mower (under repair) → Lean-to B**
+  - **Time:** 15 minutes
+  - **Why:** Eric explicitly wants this done - winter weather will damage half-repaired mowers
+
+**Main garage interior (BIGGIE):**
+
+- [ ] **Major garage declutter - move items to lean-tos**
+  - **Time:** 2-3 hours
+  - **Goal:** Free up space for Jeep to fit inside garage
+  - **Challenge:** Garage is very cluttered
+  - **Why CRITICAL:** Jeep must be protected inside garage for winter
+
+#### Laundry (Parallel Background Task)
+
+- [x] **Load #1** - Started 9:00 AM ✅
+  - Move to dryer: 9:45 AM
+  - Fold/put away: 10:45 AM
+
+- [ ] **Load #2**
+  - Start: When convenient
+  - Finish: By 6:00 PM
+
+---
+
+### SUNDAY NIGHT - Indoor Critical Tasks (After Dark)
+
+**These MUST be done tonight - too critical to leave for Monday morning!**
+
+- [ ] **FIX LAPTOP B SENSE WIRE** 🔴 CRITICAL!
+  - **Time:** 1 hour
+  - **Why CRITICAL:** Laptop B = Furnace Server at Shelly's. If not fixed, won't charge = DEAD = NO remote access for 6 months!
+  - **Steps:**
+    1. Get 47k resistor from Lean-to A parts boxes
+    2. Identify sense wire (likely yellowish/green) via continuity test to LED
+    3. Connect sense wire through 47k resistor to +20V line
+    4. Test - laptop should recognize charger, start charging, stop "plug in" warnings
+  - **Status:** Not started - do after sunset
+
+- [ ] **Build water pump protection enclosure** 🔴 CRITICAL!
+  - **Time:** 3-4 hours
+  - **Why CRITICAL:** Pump always freezes/cracks if water left = $600 replacement
+  - **Plan:**
+    - Build 2x4 corner frame in basement
+    - Enclose with white poly plastic
+    - Enclose water pump + water heater tank (small space = efficient)
+    - Install heater/blower block with thermostat (already tested ✅ Saturday)
+    - Set to ~10°C
+  - **Materials:** ✓ 2x4 lumber, ✓ white poly, ✓ heater/blower with thermostat
+  - **Status:** Not started - do tonight (in case takes longer than expected)
+
+- [ ] **Pack electronics for 6-month trip**
+  - **Time:** 2-3 hours (deciding what to bring is complicated)
+  - **Confirmed items:**
+    - Laptop A (travel laptop) - **NOTE: Battery replacement can wait till Boston or Europe!**
+    - Foldable keyboard
+    - Mouse
+    - Travel monitor
+    - Various USB3 hubs
+  - **To decide:**
+    - Which tablet? (charge first)
+    - Which 2 backup phones? (charge first)
+    - Solar/battery backup for phone
+    - How many charging adapters? Which voltages?
+    - Cables: USB3, USB-micro, USB-C, others?
+  - **Clothes:** Also needs packing (6 months, multiple climates)
+  - **Status:** Not started
+
+---
+
+### MONDAY MORNING - Final Cottage Tasks (8:30 AM - 12 Noon)
+
+- [ ] **Water winterization (2 hours: 8:30-10:30 AM)**
+  - **Shut off water** in main cottage
+  - **Blow out pipes** (~1.5 hours)
+  - **Pour cottage antifreeze** in drains, toilet reservoir, S-traps (~10 min)
+  - **Why CRITICAL:** Sub-zero temps + water = cracked pipes/tanks = thousands in damage
+  - **AFTER THIS:** Cannot use sinks or toilets anymore
+  - **Status:** Not started
+
+- [ ] **Park Jeep inside main garage (10:30 AM)**
+  - **Time:** 10 minutes
+  - **Prerequisite:** Sunday garage cleanup must be complete!
+  - **Why:** Jeep needs protection over winter
+  - **Status:** Garage not ready yet
+
+- [ ] **Dump run - FINAL before departure (10:45-11:45 AM)**
+  - **Time:** 60 minutes total (drive + unload + return)
+  - **Items:** Little trailer with paint cans + final garbage from cottage + garage cleanup debris
+  - **Dump:** 3 miles north, open Friday-Monday
+  - **Why timing:** Last chance before 6-month freeze
+  - **Status:** Not started
+
+- [ ] **Final cottage walkthrough + secure all doors (11:45 AM)**
+  - **Time:** 15 minutes
+  - **Check:** All doors secured, nothing left running, keys placed
+  - **Status:** Not started
+
+---
 
 ### COMPLETED - Saturday Tasks (ALL DONE ✅)
 
