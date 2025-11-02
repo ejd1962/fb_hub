@@ -61,6 +61,98 @@ Mode-specific preferences are documented in their respective files (in this dire
 
 ---
 
+## Task Management with TO_DO_LIST.md and DONE_OR_ABANDONED_LIST.md
+
+**Eric's core task management system established November 2025.**
+
+### The Two-List System
+
+Eric uses TWO connected markdown files for task tracking:
+
+1. **TO_DO_LIST.md** - Active tasks (RED/YELLOW/GREEN priorities)
+2. **DONE_OR_ABANDONED_LIST.md** - Completed and abandoned tasks (historical record)
+
+**Both files:**
+- Located in `/c/_projects/p23_fb_hub/fb_hub/`
+- Backed up to Google Drive via git pre-push hook
+- Available on Eric's phone at `/My Drive/CLAUDE_RULES/`
+
+### TO_DO_LIST.md - Active Tasks
+
+**Purpose:** Master triage list for current tasks
+
+**Triage categories:**
+- **🔴 RED:** MUST do before deadline (critical, can't defer)
+- **🟡 YELLOW:** Should do if time permits (important but not blocking)
+- **🟢 GREEN:** Can do remotely or defer (post-deadline OK)
+
+**Features:**
+- Mobile updates via `@@@` marker system (Eric adds progress notes starting with `@@@`)
+- CC syncs `@@@` updates from Google Drive and converts to proper status
+- Detailed task context (time estimates, dependencies, why critical)
+- Linked to OTTER_LAKE_COTTAGE_COMPOUND_INFO.md for property context
+
+**At session start:**
+- Always check if TO_DO_LIST.md exists
+- If exists, read it to understand current priorities
+- Help Eric stay focused on RED tasks, avoid GREEN distractions
+
+### DONE_OR_ABANDONED_LIST.md - Historical Record
+
+**Purpose:** Track completed/abandoned tasks from TO_DO_LIST.md
+
+**Benefits:**
+- **Morale boost:** Eric gets satisfaction from seeing victories pile up
+- **Historical record:** Documents what was accomplished and when
+- **Learning tool:** Captures lessons learned, time estimates vs actuals, decisions made
+
+**Process for moving tasks from TO_DO → DONE:**
+
+1. When a task is completed or abandoned, COPY the full task entry from TO_DO_LIST.md
+2. ADD to the BOTTOM of DONE_OR_ABANDONED_LIST.md under appropriate date heading
+3. ADD completion details:
+   - **For completed tasks:** `**Completed:** Date/time + outcome summary`
+   - **For abandoned tasks:** `**Abandoned:** Date/time + reason + future plan (if any)`
+4. Include any notable details:
+   - Actual time taken vs estimate
+   - Unexpected challenges overcome
+   - Key decisions made
+   - Impact of completion
+5. REMOVE or mark as `[x]` in TO_DO_LIST.md (Eric's preference may vary)
+
+**Example entry in DONE list:**
+```markdown
+- [x] **Jeep antifreeze - AIR LOCK BATTLE**
+  - **Completed:** November 2, 11:51 PM
+  - **Battle duration:** 3h 41min (much longer than estimated 30 min!)
+  - **Outcome:**
+    - 4000 RPM burst broke severe air lock
+    - Added 4.9L coolant (70.4% concentration)
+    - Freeze protection: -55°C (crushed -37°C goal)
+  - **Key lesson:** 4000 RPM > 2500 RPM for breaking air locks
+  - **Impact:** Engine protected for winter, Non-Static Duo victory!
+```
+
+**Formatting in DONE list:**
+- Group by date (## Saturday, November 1, 2025)
+- Group by category within date (### ✅ Travel & Vehicle Logistics)
+- Most recent entries at BOTTOM of file (chronological order)
+- Keep original task checkboxes `[x]` for consistency
+
+**When to migrate tasks:**
+- Immediately after completion (keep TO_DO list clean)
+- During triage reviews (batch move completed tasks)
+- When Eric explicitly requests migration
+
+**Both lists backed up together:**
+- Git pre-push hook syncs both to Google Drive
+- Eric can view progress history on phone
+- Survives laptop crashes/power outages
+
+**This system is now part of Eric's permanent toolbox - use it across all future projects.**
+
+---
+
 
 
 ## ═══════════════════════════════════════════════════════════════════════

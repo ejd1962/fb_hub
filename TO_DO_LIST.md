@@ -664,6 +664,34 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
 
 ---
 
+### Final Packing & Electronics 🔴 QUICK WINS
+
+- [ ] **Charge tablet**
+  - **Deadline:** Before O-time (Sunday 3 PM)
+  - **Time:** 2-3 hours charging (can do while working on other tasks)
+  - **Why needed:** Travel device for 6-month trip
+  - **Status:** Not started
+
+- [ ] **Charge 2 backup phones**
+  - **Deadline:** Before O-time (Sunday 3 PM)
+  - **Time:** 2-3 hours charging (can do while working on other tasks)
+  - **Why needed:** Backup devices for 6-month trip
+  - **Status:** Not started
+
+- [ ] **Find and pack micro-SD memory cards (1TB + 512GB)**
+  - **Deadline:** Before O-time (Sunday 3 PM)
+  - **Time:** 10-15 minutes (locate + pack in safe spot)
+  - **Cards to find:**
+    - 1TB micro-SD card (currently NOT in Samsung A34 phone)
+    - 512GB micro-SD card (currently NOT in Samsung A34 phone)
+  - **Current issue:** Both cards have mounting issues in A34 (phone keeps unmounting them - likely phone issue, not card issue)
+  - **Decision:** Pack cards physically, defer phone troubleshooting to remote/May 2026
+  - **Use case:** Video library storage, even if not immediately usable in phone
+  - **Note:** A34 has room for SD card slot, but using smaller card might work better - test remotely
+  - **Status:** Not started
+
+---
+
 ### Flexible Deadline RED Tasks (Can do remotely before deadline)
 
 - [ ] **Suspend/cancel Jeep car insurance until May 1, 2026**
