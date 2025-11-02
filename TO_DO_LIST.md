@@ -220,61 +220,61 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
     3. ✅ Gorilla Tape around all 4 sides from outside
   - **Result:** **3:50 PM - COMPLETED using Gorilla Duct Tape. Looks great, better than new! Waterproof, super strong. May never use black goo (found but decided tape faster/cleaner). Good for 2 trips (to Stittsville + May return). Proper repair deferred to spring 2026 if needed.**
 
-- [ ] **Jeep antifreeze - MULTI-FILL CYCLE PROCESS** 🔴 TIME-SENSITIVE SCHEDULE
+- [x] **Jeep antifreeze - AIR LOCK BATTLE** ✅ VICTORY AT 11:51 PM!
   - **Vehicle:** 2016 Jeep Cherokee (sealed system, fills through overflow tank only)
   - **Why CRITICAL:** Current fluid ~99% water, will freeze solid and crack radiator + engine block = $$$$ damage
-  - **System capacity:** ~10L total, ~1.9L per fill cycle
+  - **System capacity:** ~10L total
   - **Materials:** ✓ 3 bottles antifreeze (2 premixed 50/50, 1 pure concentrated)
-  - **Strategy:** Alternate pure/premixed to achieve ~50/50 final ratio
+  - **Battle duration:** 8:10 PM - 11:51 PM (3h 41min of troubleshooting)
 
-  **FILL #1 - COMPLETED** ✅
-  - **Time:** 1:37-1:55 PM Saturday
-  - **Added:** 1.9L premixed 50/50 (non-Prestone brand)
-  - **Result:** Some heat now working (heater core getting coolant)
+  **THE BATTLE TIMELINE:**
 
-  **MAJOR DISCOVERY - AIR LOCK PROBLEM** 🔴 IN PROGRESS
+  **Fill #1** (1:37 PM): 1.9L premixed 50/50 → Some heat, but air lock remained
 
-  **8:10-8:40 PM - Highway drive to Shawville (gas fill-up):**
-  - Drove 110 km/h for 30+ minutes, engine running hard
-  - Added $50 gas (now 7/8 full tank)
-  - **Result:** Heater blew STONE COLD air entire drive
-  - **Temp gauge:** 3/8 mark (37.5%) - below normal operating temp
-  - **Radiator:** Stone cold to touch (thermostat not opening)
-  - **Overflow tank:** Still ~90% full (~3cm down from brim), no coolant drawn into system
-  - **Diagnosis:** AIR LOCK preventing coolant circulation
+  **Failed Attempt #1 - Highway driving** (8:10-8:40 PM):
+  - 110 km/h for 30+ min → Cold air blast prevented heating
+  - Result: Stone cold heater, 37.5% temp gauge, radiator ice cold
+  - Diagnosis: SEVERE AIR LOCK
 
-  **9:22 PM - First burp attempt (after highway drive):**
-  - Cracked overflow cap with rag/gloves
-  - **Result:** Very slight pressure, no boiling, no fluid movement
-  - **Conclusion:** Engine not hot enough yet
+  **Failed Attempt #2 - Idle test** (9:35-10:50 PM):
+  - 75 min at 800 RPM idle, hood closed
+  - Slowly climbed 37.5% → 47% (plateau at 2°C ambient)
+  - Not enough heat generation to break air lock
 
-  **9:35 PM - Started idle test (NEW APPROACH):**
-  - Hood CLOSED to trap heat (vs highway with 110 km/h cold air blast)
-  - Goal: Reach full operating temp (50% gauge mark) to build pressure for air lock burp
+  **Failed Attempt #3 - 2500 RPM sustained** (10:56-11:03 PM):
+  - Brick on gas pedal, steady 2500 RPM
+  - Still 47% gauge, still stone cold air
+  - Air lock holding strong
 
-  **10:07 PM - First idle check (32 minutes):**
-  - **Temp gauge:** 45% (up from 37.5% - progress!)
-  - **Radiator:** Still stone cold
-  - Cracked cap: Little pressure, boiled ~5 seconds, then stopped
-  - Overflow tank level unchanged
-  - **Conclusion:** Getting warmer but thermostat not fully open yet
+  **BREAKTHROUGH - 4000 RPM BURST** (11:03-11:51 PM):
+  - Increased RPM to 4000 for 1 minute → **AIR LOCK BROKE!**
+  - Shut down, cracked cap → **MASSIVE BUBBLING/BOILING**
+  - Overflow tank emptied in 2 minutes
+  - **Fill #2:** Added 2.0L PURE concentrated antifreeze
+  - Ran at idle, shut down, cracked cap → More bubbling
+  - **Fill #3:** Added 1.0L premixed 50/50
+  - **TOTAL ADDED: 4.9L (1.9L + 2.0L + 1.0L)**
 
-  **10:24 PM - Continuing idle test:**
-  - Total idle time: ~50 minutes
-  - Engine feels warmer, gauge at 45%
-  - Hood closed, continuing to heat
-  - **Next check: 10:40 PM** (target 50% gauge = thermostat fully open)
+  **THE RIBBET MOMENT:**
+  - Heater still blowing cold → panic!
+  - Noticed temp set to 28°C (not MAX)
+  - Changed to MAX → **IMMEDIATELY BLOWING HOT AIR!**
+  - Lesson: MAX bypasses A/C logic, gives instant heat
 
-  **Plan:** Once gauge hits 50%+, crack cap to burp air lock. System should drink 4-6L coolant like Eric's summer overheating experience. Alternate pure/premixed to achieve 50/50 ratio.
+  **FINAL PROTECTION ACHIEVED:**
+  - Pure antifreeze added: 3.45L out of 4.9L total = **70.4% concentration**
+  - **Freeze protection: -55°C** (goal was -37°C for 50/50 mix)
+  - **CRUSHED THE GOAL** - engine block safe all winter
+  - Spring 2026: Use hydrometer to measure and adjust to optimal 50/50
 
-  **Key insights:**
-  - **Highway driving counterproductive:** 110 km/h = massive cold air cooling, prevents engine reaching operating temp
-  - **Idling with hood closed works better:** Less cooling, heat builds up
-  - **Air lock must be broken:** No amount of driving will fill system until air is purged
-  - **Thermostat stuck closed:** Won't open until ~90°C (50% gauge mark)
-  - **Similar to summer overheating:** Once burped, system should drink coolant rapidly
+  **Key lessons learned:**
+  - Highway driving counterproductive (cold air blast)
+  - Idle insufficient (2°C ambient = heat loss)
+  - 2500 RPM not enough (heat plateau)
+  - **4000 RPM burst = magic number to break severe air lock**
+  - MAX heater setting = instant hot air (bypasses A/C logic)
 
-  **Status:** 10:24 PM - Idling test in progress, approaching thermostat opening temperature. Standing by for 10:40 PM check.
+  **Status:** ✅ **11:51 PM - COMPLETE VICTORY! Non-Static Duo defeats the Automotive Lord of the Locks!**
 
 - [ ] **Place Ford Escape key under driver's floor mat before leaving at Cheryl's** 🔴 MONDAY
   - **Deadline:** Monday morning before leaving Ford at Cheryl's house
