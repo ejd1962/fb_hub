@@ -1068,6 +1068,13 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **Cost:** Free (ad-supported)
   - **Status:** Optional, only if actually needed
 
+- [ ] **Buy new analog dial thermometer for cottage (May 2026)**
+  - **Deadline:** Spring 2026 when returning to cottage
+  - **Time:** 5 minutes (quick purchase)
+  - **Why needed:** Old analog thermometer unreliable (discarded Nov 2025) - digital thermometer accurate but hard to read in dim light
+  - **What to get:** Large easy-to-read analog dial thermometer for cottage use
+  - **Status:** Not urgent - buy when back in May 2026
+
 ---
 
 ### Workflow Improvements / CC Collaboration
