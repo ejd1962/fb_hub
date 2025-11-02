@@ -233,7 +233,8 @@ function getLastCommitInfo(projectPath) {
 // Parse command line arguments - maintaining order and detecting unrecognized args
 function parseArgs() {
     const args = {
-        interval: null,
+        commit_interval: null,
+        push_interval: null,
         projectOperations: [], // Ordered list of operations
         help: false,
         kill: false,
@@ -251,8 +252,10 @@ function parseArgs() {
             args.restart = true;
         } else if (arg === '--status') {
             args.status = true;
-        } else if (arg.startsWith('--interval=') || arg.startsWith('--i=')) {
-            args.interval = parseInt(arg.split('=')[1]);
+        } else if (arg.startsWith('--commit_interval=') || arg.startsWith('--ci=')) {
+            args.commit_interval = parseInt(arg.split('=')[1]);
+        } else if (arg.startsWith('--push_interval=') || arg.startsWith('--pi=')) {
+            args.push_interval = parseInt(arg.split('=')[1]);
         } else if (arg.startsWith('--projects=') || arg.startsWith('--p=')) {
             const projects = arg.split('=')[1].split(',')
                 .map(p => normalizePath(p.trim()))
@@ -438,6 +441,48 @@ function gitCommitProjects(projects, config) {
     console.log(`\nCommit summary: ${success} successful, ${failed} failed`);
 }
 
+// Git push operations - using git.exe directly with windowsHide
+function gitPushProjects(projects) {
+    const timestamp = new Date().toISOString();
+    let success = 0;
+    let failed = 0;
+
+    projects.forEach(proj => {
+        try {
+            // Use Windows path for file system checks
+            const winPath = toWindowsPath(proj);
+
+            if (!fs.existsSync(winPath)) {
+                console.error(`[ERROR] Project path does not exist: ${proj}`);
+                failed++;
+                return;
+            }
+
+            // Check if it's a git repo
+            const gitDir = path.join(winPath, '.git');
+            if (!fs.existsSync(gitDir)) {
+                console.error(`[ERROR] Not a git repository: ${proj}`);
+                failed++;
+                return;
+            }
+
+            // Push to remote using git.exe directly
+            execSync(`"${GIT_EXE}" -C "${winPath}" push`, {
+                encoding: 'utf8',
+                windowsHide: true
+            });
+
+            console.log(`[PUSHED] ${proj} at ${timestamp}`);
+            success++;
+        } catch (error) {
+            console.error(`[ERROR] Failed to push ${proj}:`, error.message);
+            failed++;
+        }
+    });
+
+    console.log(`\nPush summary: ${success} successful, ${failed} failed`);
+}
+
 // Check if daemon is running
 function isDaemonRunning(pid) {
     if (!pid) return false;
@@ -480,7 +525,7 @@ function spawnDaemon() {
 // Daemon mode
 function runDaemon() {
     console.log(`[DAEMON] Started with PID ${process.pid}`);
-    
+
     const daemonLoop = () => {
         try {
             // Wait for lock to be released
@@ -490,29 +535,58 @@ function runDaemon() {
 
             // Atomic read of config
             const config = loadConfig();
-            const interval = config.interval || DEFAULT_INTERVAL;
-            const lastSaved = config.last_saved_time ? new Date(config.last_saved_time) : new Date(0);
+            const commitInterval = config.commit_interval || DEFAULT_INTERVAL;
+            const pushInterval = config.push_interval || DEFAULT_PUSH_INTERVAL;
+            const lastCommit = config.last_commit_time ? new Date(config.last_commit_time) : new Date(0);
+            const lastPush = config.last_push_time ? new Date(config.last_push_time) : new Date(0);
             const now = new Date();
-            const elapsed = (now - lastSaved) / 1000; // seconds
+            const commitElapsed = (now - lastCommit) / 1000; // seconds
+            const pushElapsed = (now - lastPush) / 1000; // seconds
 
-            console.log(`[DAEMON] Check at ${now.toISOString()} - Elapsed: ${Math.floor(elapsed)}s / Interval: ${interval}s`);
+            console.log(`[DAEMON] Check at ${now.toISOString()}`);
+            console.log(`  Commit: ${Math.floor(commitElapsed)}s elapsed / ${commitInterval}s interval`);
+            console.log(`  Push: ${Math.floor(pushElapsed)}s elapsed / ${pushInterval}s interval`);
 
-            if (elapsed >= interval) {
-                console.log(`[DAEMON] Interval exceeded, committing projects...`);
-                
+            let configChanged = false;
+
+            // Check commit timer
+            if (commitElapsed >= commitInterval) {
+                console.log(`[DAEMON] Commit interval exceeded, committing projects...`);
+
                 if (config.projects && config.projects.length > 0) {
                     gitCommitProjects(config.projects, config);
-                    
-                    // Update last_saved_time
-                    config.last_saved_time = now.toISOString();
-                    saveConfig(config);
+
+                    // Update last_commit_time
+                    config.last_commit_time = now.toISOString();
+                    configChanged = true;
                 } else {
                     console.log(`[DAEMON] No projects configured`);
                 }
             }
 
-            // Sleep for interval + 5 seconds
-            setTimeout(daemonLoop, (interval + 5) * 1000);
+            // Check push timer
+            if (pushElapsed >= pushInterval) {
+                console.log(`[DAEMON] Push interval exceeded, pushing projects...`);
+
+                if (config.projects && config.projects.length > 0) {
+                    gitPushProjects(config.projects);
+
+                    // Update last_push_time
+                    config.last_push_time = now.toISOString();
+                    configChanged = true;
+                } else {
+                    console.log(`[DAEMON] No projects configured`);
+                }
+            }
+
+            // Save config if anything changed
+            if (configChanged) {
+                saveConfig(config);
+            }
+
+            // Sleep for the smaller of the two intervals + 5 seconds
+            const sleepInterval = Math.min(commitInterval, pushInterval) + 5;
+            setTimeout(daemonLoop, sleepInterval * 1000);
 
         } catch (error) {
             console.error(`[DAEMON ERROR]`, error);
@@ -539,10 +613,15 @@ function showStatus() {
     // Configuration
     console.log('CONFIGURATION:');
     console.log(`  Config File: ${CONFIG_FILE}`);
-    console.log(`  Interval: ${config.interval} seconds`);
-    console.log(`  Last Save Time: ${config.last_saved_time || 'Never'}`);
-    if (config.last_saved_time) {
-        console.log(formatTimeDifference(config.last_saved_time));
+    console.log(`  Commit Interval: ${config.commit_interval} seconds`);
+    console.log(`  Push Interval: ${config.push_interval} seconds`);
+    console.log(`  Last Commit Time: ${config.last_commit_time || 'Never'}`);
+    if (config.last_commit_time) {
+        console.log(formatTimeDifference(config.last_commit_time));
+    }
+    console.log(`  Last Push Time: ${config.last_push_time || 'Never'}`);
+    if (config.last_push_time) {
+        console.log(formatTimeDifference(config.last_push_time));
     }
     console.log(`  Number of Projects: ${config.projects.length}`);
     console.log('');
@@ -738,7 +817,8 @@ function main() {
             }
             console.log('[MANAGER] Starting new daemon...');
             config.daemon_pid = spawnDaemon();
-            config.last_saved_time = new Date().toISOString();
+            config.last_commit_time = new Date().toISOString();
+            config.last_push_time = new Date().toISOString();
             saveConfig(config);
             console.log(`[MANAGER] Daemon started with PID ${config.daemon_pid}`);
             console.log(`[MANAGER] Configuration saved to ${CONFIG_FILE}`);
@@ -752,7 +832,7 @@ function main() {
         // Validate all arguments before making any changes
         let validationErrors = [];
         let validatedProjects = config.projects;
-        let intervalChanged = false;
+        let intervalsChanged = false;
 
         // Check daemon status first (don't start yet if there might be errors)
         const daemonRunning = isDaemonRunning(config.daemon_pid);
@@ -763,7 +843,7 @@ function main() {
         // Validate project operations if any
         if (args.projectOperations.length > 0) {
             const result = processProjectOperations(args.projectOperations, config.projects);
-            
+
             if (result.hasErrors) {
                 validationErrors.push(...result.errorDetails);
             } else {
@@ -771,10 +851,16 @@ function main() {
             }
         }
 
-        // Check if interval changed
-        if (args.interval !== null && args.interval !== config.interval) {
-            intervalChanged = true;
-            console.log(`\n[MANAGER] Interval will change from ${config.interval} to ${args.interval} seconds`);
+        // Check if commit interval changed
+        if (args.commit_interval !== null && args.commit_interval !== config.commit_interval) {
+            intervalsChanged = true;
+            console.log(`\n[MANAGER] Commit interval will change from ${config.commit_interval} to ${args.commit_interval} seconds`);
+        }
+
+        // Check if push interval changed
+        if (args.push_interval !== null && args.push_interval !== config.push_interval) {
+            intervalsChanged = true;
+            console.log(`\n[MANAGER] Push interval will change from ${config.push_interval} to ${args.push_interval} seconds`);
         }
 
         // If there are any validation errors, abort everything
@@ -797,10 +883,16 @@ function main() {
                 console.log(`[MANAGER] Projects list updated to ${config.projects.length} project(s)`);
             }
 
-            // Apply interval change
-            if (args.interval !== null) {
-                config.interval = args.interval;
-                console.log(`[MANAGER] Interval set to: ${config.interval} seconds`);
+            // Apply commit interval change
+            if (args.commit_interval !== null) {
+                config.commit_interval = args.commit_interval;
+                console.log(`[MANAGER] Commit interval set to: ${config.commit_interval} seconds`);
+            }
+
+            // Apply push interval change
+            if (args.push_interval !== null) {
+                config.push_interval = args.push_interval;
+                console.log(`[MANAGER] Push interval set to: ${config.push_interval} seconds`);
             }
 
             // Handle daemon management
@@ -808,8 +900,8 @@ function main() {
                 console.log('[MANAGER] Starting new daemon...');
                 config.daemon_pid = spawnDaemon();
                 console.log(`[MANAGER] Daemon started with PID ${config.daemon_pid}`);
-            } else if (intervalChanged) {
-                console.log(`[MANAGER] Interval changed - Restarting daemon (old PID ${config.daemon_pid})...`);
+            } else if (intervalsChanged) {
+                console.log(`[MANAGER] Intervals changed - Restarting daemon (old PID ${config.daemon_pid})...`);
                 killDaemon(config.daemon_pid);
                 config.daemon_pid = spawnDaemon();
                 console.log(`[MANAGER] Daemon restarted with new PID ${config.daemon_pid}`);
@@ -825,8 +917,8 @@ function main() {
                 console.log('\n[MANAGER] No projects configured, skipping commit');
             }
 
-            // Update last_saved_time
-            config.last_saved_time = new Date().toISOString();
+            // Update last_commit_time
+            config.last_commit_time = new Date().toISOString();
 
             // Save config
             saveConfig(config);
