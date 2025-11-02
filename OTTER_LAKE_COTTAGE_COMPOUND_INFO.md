@@ -284,12 +284,63 @@ Eric owns a 30-foot-wide strip of land that runs 250 feet from the road down to 
 - Philippines (5 weeks)
 - Return to Canada end of April 2026
 
-**Key Contacts While Away:**
-- **Shelly (Ottawa):** Hosting Furnace Server (Laptop B) in basement furnace room
-- **Kevin (HVAC guy):** Installing heat pump at cottage ($500 deposit, has hidden key access)
-- **Cheryl (ex-wife):** Possibly storing Ford Escape on driveway (50-50 chance)
-- **Garage 613 (Mohammed):** Backup Ford Escape storage, handling Pontiac Torrent recycling
+---
+
+## FAMILY AND FRIENDS
+
+**NOTE:** This section will be migrated to separate FAMILY_AND_FRIENDS.md file in future (with Google Drive sync).
+
+### Ex-Wife (Mother of Eric's Sons)
+
+**Cheryl**
+- **Location:** 245 Spruce Ridge Road, RR2, Carp, Ontario (just outside Stittsville)
+- **Distance:** 8 minutes from Garage 613
+- **Role during trip:** Storing Ford Escape for 6 months (confirmed YES Nov 1, 2025)
+- **Sons' relationship:** Mother of Andrew, James, and William
+- **Sunday Nov 2, 2025:** Hosting Sunday dinner for Andrew and James
+
+### Eric's Three Sons
+
+**Andrew** (Oldest)
+- **Occupation:** Works at Statistics Canada in Ottawa (government department)
+- **Education:** Masters in Statistics and Economics
+- **Location:** Ottawa area
+- **Access to Ford:** May use Ford Escape during Eric's 6-month trip (insurance activated remotely by Eric if needed)
+- **Knows:** Ford storage location, key under floor mat, anti-theft starting trick
+
+**James** (Youngest)
+- **Education:** 4th and final year undergraduate in Health Science, Queens University, Kingston Ontario
+- **Location:** Kingston (about 2 hours south of Ottawa)
+- **Nov 2, 2025:** Visiting mom (Cheryl) for Sunday dinner, returns to Kingston tonight
+
+**William** (Middle)
+- **Education:** Completing Masters in Artificial Intelligence, University of Toronto
+- **Previous:** 4-year Computer Engineering degree from Queens University
+- **Current:** 2 more months of workterm in Toronto
+- **Location:** Toronto
+
+### Friends
+
+**Shelly**
+- **Location:** Stittsville/Ottawa area
+- **Relationship:** Friend, on-again off-again boyfriend named Michael
+- **Role during trip:** Hosting Furnace Server (Laptop B) in basement furnace room for 6 months
+- **Nov 2, 2025:** Has date with Michael Sunday afternoon
+
+### Service Providers
+
+**Kevin (HVAC Contractor)**
+- **Role:** Installing heat pump at cottage over next 1-2 months while Eric travels
+- **Payment:** $500 deposit already paid
+- **Access:** Has hidden key on BBQ (top metal warming grille, front porch)
+- **Keys provided:** Cottage front door + garage padlock
+- **Instructions:** Photos sent via Messenger (key locations, removable balcony plank, 5cm foundation hole for cables)
+
+**Mohammed at Garage 613**
+- **Location:** Stittsville (8 minutes from Cheryl's house)
+- **Role:** Handling Pontiac Torrent recycling (receives registration + payment ~$300)
+- **Backup role:** Was backup Ford Escape storage option (not needed - Cheryl said yes)
 
 ---
 
-**This document provides context for TO_DO_LIST.md tasks. Refer to this when Eric mentions specific structures, lean-tos, vehicles, or areas of the property.**
+**This document provides context for TO_DO_LIST.md tasks. Refer to this when Eric mentions specific structures, lean-tos, vehicles, areas of the property, or family/friends.**

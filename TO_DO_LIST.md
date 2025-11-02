@@ -976,6 +976,22 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **Note:** For now, keeping both files in fb_hub is fine - migration can wait until settled
   - **Status:** Not started - future improvement
 
+- [ ] **Create FAMILY_AND_FRIENDS.md file (migrate from cottage compound file)**
+  - **Deadline:** Future - when time permits (no rush)
+  - **Time:** 30 minutes (create file + migrate section + update git hooks)
+  - **Goal:** Separate family/friends context from cottage property context
+  - **Why useful:**
+    - Family information is universal (not property-specific)
+    - Makes it available across all projects and contexts
+    - Cleaner separation of concerns
+  - **Migration steps:**
+    1. Create FAMILY_AND_FRIENDS.md in fb_hub root (or future personal project)
+    2. Copy "FAMILY AND FRIENDS" section from OTTER_LAKE_COTTAGE_COMPOUND_INFO.md
+    3. Update pre-push hook to sync FAMILY_AND_FRIENDS.md to Google Drive
+    4. Remove section from cottage compound file (add reference link instead)
+  - **Current status:** Family info temporarily in OTTER_LAKE_COTTAGE_COMPOUND_INFO.md
+  - **Status:** Not started - future improvement
+
 ---
 
 ### Laptop B (Furnace Server) - TGP Deployment (Remote via AnyDesk)
