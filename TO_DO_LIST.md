@@ -816,6 +816,41 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
 
 ---
 
+### Workflow Improvements / CC Collaboration
+
+- [ ] **Develop bash command categorizer for autonomous CC operation**
+  - **Deadline:** Once settled in Europe (remote, post-trip priority)
+  - **Time:** 2-4 hours development + iterative refinement
+  - **Goal:** Reduce permission friction by categorizing bash commands automatically
+  - **Categories to implement:**
+    - **ND (Non-Destructive):** Read-only operations (cat, ls, grep, git status, etc.) - no permission needed
+    - **IDO (Intended Destructive Operation):** Cleanup tasks like removing backup files, temp files - no permission needed
+    - **Other categories:** TBD as patterns emerge
+  - **Implementation approach:**
+    - Create categorizer script using regex patterns
+    - All proposed bash commands run through categorizer first
+    - Each category has permission rule (some = "just do it")
+    - Gives CC more autonomy, reduces interruptions for trivial decisions
+  - **Examples of IDOs:**
+    - `rm *.backup` - removing backup files
+    - `rm /tmp/temp_*.txt` - cleaning temp files
+    - `rm CLAUDE_CODE.md.backup` - cleanup after successful edit
+  - **Status:** **10:07 PM Saturday - Eric identified this pain point during time protocol discussion. Will develop once settled in Europe.**
+  - **Benefits:**
+    - CC can operate more autonomously
+    - Fewer permission requests for safe operations
+    - Eric's attention only needed for truly ambiguous cases
+    - Systematic approach (not ad-hoc rules)
+
+- [ ] **Study antifreeze colligative properties (freezing point depression)**
+  - **Deadline:** Anytime during trip when curious
+  - **Time:** 1-2 hours reading
+  - **Why interesting:** Pure ethylene glycol freezes at -13°C, 50/50 mix at -37°C (counterintuitive!)
+  - **Topics:** Colligative properties, eutectic points, solution chemistry
+  - **Status:** **Eric was fascinated during Jeep antifreeze emergency - wants to understand the science**
+
+---
+
 ### Laptop B (Furnace Server) - TGP Deployment (Remote via AnyDesk)
 
 **All of these can be done remotely via AnyDesk once RED tasks are complete**
