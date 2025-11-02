@@ -2,8 +2,8 @@
 # Eric's Pre-Departure Triage and Task Tracking
 ========================================================================
 
-**Created:** 2025-11-02 03:30 AM (Saturday)
-**Last Updated:** 2025-11-02 7:40 PM (Saturday) by Eric + CC
+**Created:** 2025-11-02 03:30 AM (Sunday early morning)
+**Last Updated:** 2025-11-02 04:40 AM (Sunday) by Eric + CC
 **Purpose:** Master triage list for all tasks between NOW and O-time (and beyond)
 **Maintained by:** Claude Code (CC) with Eric's input
 
@@ -43,11 +43,39 @@ Contains detailed maps and descriptions of:
 
 ## Timeline - Critical Deadlines
 
-- **NOW:** Saturday Nov 2, 12:30 PM
-- **O-TIME (Otter Lake Departure):** Sunday Nov 3, 3:00 PM (~26.5 hours from now)
-- **S-TIME (Stittsville/Ottawa Departure):** Monday Nov 4, 11:00 AM bus to Boston
-- **B-TIME (Boston Departure/Flight):** Tuesday Nov 5, 4 PM to Portugal via EWR
-- **Trip Duration:** 6 months (returning end of April 2026)
+**Current Status:** Sunday Nov 2, 2025 at 4:31 AM
+
+### TWO POSSIBLE O-TIMES (Decision at 9 AM today):
+
+**SCENARIO A - Sons Available (Leave Today):**
+- **Decision Point:** 9:00 AM Sunday - Call James to confirm
+- **O-TIME:** Sunday Nov 2, **6:30 PM sharp** (leave Otter Lake for good)
+- **Time available at cottage:** ~14 hours from 4:31 AM
+- **Drive time:** 80 minutes Otter Lake → Stittsville
+- **Sons visit:** 8:00 PM Sunday (Andrew & James at Cheryl's or nearby pub after their mom's dinner)
+- **Sunday night:** Sleep at Shelly's
+- **Monday schedule:** Costco pharmacy, licensing office, install Furnace Server at Shelly's, optional shopping (Canadian gifts, watch battery/band)
+- **Monday 4:30 PM:** Garage 613 (drop Pontiac registration) → Cheryl's (park Ford, key under mat)
+- **Monday 5:00 PM:** UBER from Cheryl's → Ottawa VIA Rail Station (~$30-40)
+
+**SCENARIO B - Sons NOT Available (Leave Monday):**
+- **O-TIME:** Monday Nov 3, **12:00 NOON sharp** (hard stop, no variability)
+- **Time available at cottage:** ~31.5 hours from 4:31 AM Sunday
+- **Drive time:** 80 min → Shelly's OR 90 min → Costco (direct)
+- **Monday 1:00 PM:** Arrive Stittsville
+- **Monday 1:00-4:30 PM:** Licensing office + install Furnace Server at Shelly's + goodbye
+- **Monday 4:30 PM:** Garage 613 (drop Pontiac registration) → Cheryl's (park Ford, key under mat)
+- **Monday 5:00 PM:** UBER from Cheryl's → Ottawa VIA Rail Station
+
+**Both scenarios converge on Monday evening:**
+- **Monday 7:30 PM:** Orléans Express bus Ottawa → Montreal
+- **Monday 11:00 PM:** Greyhound bus Montreal → Boston (overnight, sleep on bus)
+- **Tuesday 8:48 AM:** Arrive Boston South Station
+- **Tuesday 4:00 PM:** Flight Boston → Portugal (via Newark EWR)
+
+**Philosophy:** Whatever doesn't get done by O-time doesn't get done. That's life.
+
+**Trip Duration:** 6 months (returning end of April 2026)
 
 ---
 
@@ -66,7 +94,7 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
 
 ## 🔴 RED PRIORITY - CRITICAL PATH TASKS
 
-### IMMEDIATE - Saturday Morning (TODAY)
+### COMPLETED - Saturday Tasks (ALL DONE ✅)
 
 #### Travel & Vehicle Logistics
 
