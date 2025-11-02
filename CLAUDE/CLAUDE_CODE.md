@@ -151,6 +151,31 @@ Eric uses TWO connected markdown files for task tracking:
 
 **This system is now part of Eric's permanent toolbox - use it across all future projects.**
 
+### Recurring Tasks & Nagging Rules
+
+**Eric has recurring administrative tasks that require proactive reminders.**
+
+**EI (Employment Insurance) Reports:**
+- **Frequency:** Every 2 weeks
+- **Filing deadline:** Within 3 weeks of due date (hard deadline)
+- **Best practice:** File promptly (in Eric's interest)
+- **URL:** https://www.canada.ca/en/services/benefits/ei/employment-insurance-reporting.html
+- **Time:** 5 minutes
+
+**CC Nagging Rule for EI Reports:**
+- **Check at session start:** Look for overdue EI report tasks in TO_DO_LIST.md
+- **If overdue:** Nag Eric ONCE PER DAY until filed
+- **Nagging format:** "⚠️ REMINDER: EI report overdue by X days - takes 5 min to file"
+- **Don't nag multiple times per session** - once at start is enough
+- **After filing:** Calculate next due date (2 weeks later) and add reminder
+
+**Future recurring tasks may include:**
+- Other government reporting
+- Bill payments
+- Subscription renewals
+
+**Add new recurring tasks to TO_DO_LIST.md with nagging rules clearly documented.**
+
 ---
 
 

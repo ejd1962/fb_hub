@@ -692,6 +692,24 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
 
 ---
 
+### Government / Administrative 🔴 OVERDUE!
+
+- [ ] **File overdue EI (Employment Insurance) report** ⚠️ OVERDUE - FILE TODAY!
+  - **Due date:** October 18, 2025
+  - **Days overdue:** ~15 days (as of Nov 2)
+  - **Time:** 5 minutes
+  - **Frequency:** Every 2 weeks
+  - **Filing window:** Should file promptly, must file within 3 weeks of due date
+  - **Remaining grace period:** ~6 days (3 weeks from Oct 18 = Nov 8)
+  - **Why urgent:** In Eric's interest to file promptly, approaching end of grace period
+  - **URL:** https://www.canada.ca/en/services/benefits/ei/employment-insurance-reporting.html
+  - **Status:** NOT STARTED - OVERDUE
+  - **⏰ CC NAGGING RULE:** Nag Eric ONCE PER DAY when EI report is overdue
+  - **Next report due:** ~November 1, 2025 (2 weeks after Oct 18) - ALSO LIKELY OVERDUE!
+  - **After that:** Reports due every 2 weeks going forward
+
+---
+
 ### Flexible Deadline RED Tasks (Can do remotely before deadline)
 
 - [ ] **Suspend/cancel Jeep car insurance until May 1, 2026**
