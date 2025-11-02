@@ -5,7 +5,7 @@
 **Created:** 2025-11-02
 **Purpose:** Personal health information, medications, preferences
 **Maintained by:** Claude Code (CC) with Eric's input
-**Synced to:** Google Drive at `/My Drive/CLAUDE_RULES/PERSONAL_INFO.md`
+**Synced to:** Google Drive at `/My Drive/CLAUDE_GEN_MD/PERSONAL_INFO.md`
 
 **PRIVACY NOTE:** This file contains personal health information. Stored in private repo + personal Google Drive only.
 

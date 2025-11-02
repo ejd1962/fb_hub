@@ -5,7 +5,7 @@
 **Created:** 2025-11-02
 **Purpose:** Central reference for family members, friends, and key contacts
 **Maintained by:** Claude Code (CC) with Eric's input
-**Synced to:** Google Drive at `/My Drive/CLAUDE_RULES/FAMILY_AND_FRIENDS.md`
+**Synced to:** Google Drive at `/My Drive/CLAUDE_GEN_MD/FAMILY_AND_FRIENDS.md`
 
 ---
 

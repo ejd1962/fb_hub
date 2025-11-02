@@ -74,7 +74,8 @@ The app uses FirebaseUI for authentication with a specific setup pattern:
 - `src/index.css` - Global styles
 - `command_line_scripts/` - TransVerse command line tools (see below)
 - `setup.source_bash` - Repository setup script to add tools to PATH
-- `CLAUDE/` - Claude Code configuration files (see below)
+- `CLAUDE_TOOLS_MD/` - Claude Code configuration files (see below)
+- `CLAUDE_GEN_MD/` - Context files (cottage, family, personal info)
 
 ## TransVerse Command Line Tools
 
@@ -114,7 +115,7 @@ The `command_line_scripts/` directory contains all TransVerse command line utili
 
 **IMPORTANT:** Claude Code configuration files are now stored in this repository.
 
-**Location:** `/c/_projects/p23_fb_hub/fb_hub/CLAUDE/`
+**Location:** `/c/_projects/p23_fb_hub/fb_hub/CLAUDE_TOOLS_MD/`
 
 **Files:**
 - `CLAUDE_COMMON.md` - Common preferences across all Claude tools
@@ -125,12 +126,23 @@ The `command_line_scripts/` directory contains all TransVerse command line utili
 
 **Reading Configuration:**
 ```bash
-cat /c/_projects/p23_fb_hub/fb_hub/CLAUDE/CLAUDE_COMMON.md
-cat /c/_projects/p23_fb_hub/fb_hub/CLAUDE/CLAUDE_CODE.md
+cat /c/_projects/p23_fb_hub/fb_hub/CLAUDE_TOOLS_MD/CLAUDE_COMMON.md
+cat /c/_projects/p23_fb_hub/fb_hub/CLAUDE_TOOLS_MD/CLAUDE_CODE.md
 ```
 
+**Context Files Location:** `/c/_projects/p23_fb_hub/fb_hub/CLAUDE_GEN_MD/`
+- `TO_DO_LIST.md` - Current tasks and priorities
+- `DONE_OR_ABANDONED_LIST.md` - Completed/abandoned tasks
+- `OTTER_LAKE_COTTAGE_COMPOUND_INFO.md` - Property layout and context
+- `FAMILY_AND_FRIENDS.md` - Family members and contacts
+- `PERSONAL_INFO.md` - Personal health and medication info
+
 **Backup to Google Drive:**
-A pre-push git hook automatically copies all CLAUDE files to `/g/My Drive/CLAUDE_RULES/` whenever you push fb_hub. This ensures the config is available on mobile devices.
+A pre-push git hook automatically syncs:
+- `CLAUDE_TOOLS_MD/` → `/g/My Drive/CLAUDE_TOOLS_MD/`
+- `CLAUDE_GEN_MD/` (includes all context files + TODO/DONE lists) → `/g/My Drive/CLAUDE_GEN_MD/`
+
+This ensures all configuration and context files are available across devices.
 
 **Note:** Always use Unix-style paths (e.g., `/c/_projects/...`). Windows-style paths (`C:\...`) should only be used when absolutely necessary for Windows-specific tools.
 
