@@ -99,46 +99,45 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **Status:** **12:20 PM - Shelly texted back confirming she can shuttle Eric → Kanata Park and Ride on Monday morning. ISSUE CLOSED.**
   - **7:34 PM UPDATE:** Pickup location changed to **Cheryl's house** (245 Spruce Ridge Road, RR2, Carp, Ontario) since Ford Escape will be stored there instead of Garage 613.
 
-#### Travel Bookings (HIGH PRIORITY - seats may sell out)
+#### Travel Bookings ✅ COMPLETE!
 
-**12:24 PM UPDATE:** Postponing all travel bookings until TONIGHT after 6 PM. Prioritizing outdoor/dock work while daylight remains (dark at ~6 PM).
+**12:31 AM UPDATE:** All travel bookings completed! Overnight bus strategy saves hotel cost.
 
-- [ ] **Research and book Ottawa → Montreal bus (Monday ~12 noon)** ⏸️ POSTPONED TO TONIGHT
-  - **Deadline:** Book Saturday (Monday travel may sell out)
-  - **Time:** 30 minutes research + booking
-  - **Departure:** Monday Nov 4, ~12:00 noon from Ottawa bus terminal (near Ottawa University)
-  - **Arrival:** Montreal terminal ~2:30 PM (2.5 hour trip)
-  - **City bus:** Kanata Park and Ride → Ottawa terminal (by 11 AM, research route/timing)
-  - **Action:** Find exact terminal address, verify schedules, book tickets
-  - **Status:** **Postponed until after 6 PM tonight (prioritizing daylight outdoor tasks)**
+- [x] **Ottawa → Montreal bus** ✅ BOOKED
+  - **Company:** Orléans Express
+  - **Date:** Monday, November 3, 2025
+  - **Departure:** 7:30 PM from Ottawa VIA Rail Station (200 Tremblay Rd)
+  - **Arrival:** ~9:50 PM at Montreal Centre-ville (Gare d'Autocars de Montréal, 1717 Berri St)
+  - **Duration:** ~2h 20min
+  - **Luggage:** 1 carry-on + 2 checked bags
+  - **Getting to VIA Rail:** UBER from Cheryl's house in Stittsville (~$30-40, reward for Jeep battle!)
+  - **Status:** **BOOKED 12:31 AM Sunday**
 
-- [ ] **Research and book Montreal → Boston bus (Monday ~4 PM)** ⏸️ POSTPONED TO TONIGHT
-  - **Deadline:** Book Saturday (Monday travel may sell out)
-  - **Time:** 30 minutes research + booking
-  - **Departure:** Monday Nov 4, ~4:00 PM from Montreal terminal (same terminal as arrival)
-  - **Arrival:** Boston ~11:00 PM (exhausted from 13+ hour bus journey)
-  - **Action:** Verify latest safe departure time, book tickets
-  - **Status:** **Postponed until after 6 PM tonight (prioritizing daylight outdoor tasks)**
+- [x] **Montreal → Boston bus (OVERNIGHT)** ✅ BOOKED
+  - **Company:** Greyhound
+  - **Date:** Monday, November 3, 2025 (departs) → Tuesday, November 4, 2025 (arrives)
+  - **Departure:** 11:00 PM from Montreal Gare d'Autocars (same station as arrival)
+  - **Arrival:** ~8:48 AM at Boston South Station
+  - **Duration:** ~9h 48min (SLEEP ON BUS - save hotel cost!)
+  - **Buffer in Montreal:** 1h 10min between buses (7:30 PM + 2h 20min = 9:50 PM → 11:00 PM departure)
+  - **Luggage:** Same 1 carry-on + 2 checked bags
+  - **Booking notes:** Wanderu payment failed 4x, booked direct on greyhound.com successfully
+  - **Status:** **BOOKED 12:31 AM Sunday**
 
-- [ ] **Book cheap accommodation in Boston for Monday night** ⏸️ POSTPONED TO TONIGHT
-  - **Deadline:** Book Saturday (prices rise, availability drops)
-  - **Time:** 30-60 minutes research + booking
-  - **Need:** Cheap, safe, convenient to Logan Airport for Tuesday morning transport
-  - **Arrival:** 11 PM Monday, exhausted
-  - **Checkout:** Tuesday morning, get to Logan for 4 PM flight BOS→EWR→Porto
-  - **Options to research:**
-    - Budget hotels near Logan
-    - Hostels (HI Boston?)
-    - YMCA if available
-    - Last resort: Budget AirBNB/Booking.com
-  - **Priority:** Cheap + safe > fancy
-  - **Status:** **Postponed until after 6 PM tonight (prioritizing daylight outdoor tasks)**
+- [x] **Boston accommodation** ✅ NOT NEEDED!
+  - **Reason:** Sleeping on overnight bus Montreal → Boston
+  - **Cost savings:** ~$100-150 USD
+  - **Arrival:** Tuesday 8:48 AM at South Station with full day before 4 PM flight
+  - **Status:** **RESOLVED - no booking needed**
 
-- [ ] **Verify Logan Airport transport from accommodation** ⏸️ POSTPONED TO TONIGHT
-  - **Deadline:** While booking accommodation
-  - **Time:** 10 minutes
-  - **Need:** Easy Tuesday morning access to Logan for 4 PM flight (plenty of time, but verify)
-  - **Status:** **Postponed until after 6 PM tonight (prioritizing daylight outdoor tasks)**
+- [ ] **Boston South Station → Logan Airport (Tuesday morning)**
+  - **Options available:**
+    - **Silver Line bus** (free with transit, ~20 min to Logan)
+    - **Uber/Lyft** (~$25-35, 15 min direct)
+    - **Taxi** (~$30-40)
+  - **Time available:** 8:48 AM arrival → 4:00 PM flight = 7+ hours buffer
+  - **Decision:** Can figure out Tuesday morning (not urgent)
+  - **Status:** Deferred to Tuesday - plenty of time
 
 #### Critical Equipment Testing
 
