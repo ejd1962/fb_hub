@@ -898,6 +898,17 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **Time:** 15 minutes to arrange + pickup
   - **Status:** Scrap vehicle, battery salvaged for Ford Escape
 
+- [ ] **Repair Jeep exhaust system (loud muffler/header joint issue)**
+  - **Deadline:** May 2026 when Eric returns
+  - **Time:** 1-2 hours at muffler shop
+  - **Symptoms:**
+    - Progressively louder engine noise (related to engine RPMs, not wheel rotation)
+    - Coming from under vehicle, approximately under driver's seat area
+    - Very loud when accelerating (waking neighbors), quieter when not working hard
+  - **Diagnosis:** Likely header joint failure where header (from engine exhaust ports) connects to piping system (catalytic converter → muffler → resonator → tailpipe)
+  - **Action:** Arrange exhaust repair at muffler shop in May 2026
+  - **Status:** **9:35 PM Saturday - Eric reports issue getting worse over past few days of highway driving**
+
 - [ ] **Continue Bunky renovation project**
   - **Deadline:** Ongoing multi-year project
   - **Goal:** Complete renovation, move into Bunky, convert cottage to AirBNB
