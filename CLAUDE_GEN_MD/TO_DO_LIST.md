@@ -1247,6 +1247,37 @@ Tasks that can be completed from anywhere with internet access (Portugal, Vietna
   - **Goal:** Complete renovation, move into Bunky, convert cottage to AirBNB
   - **Status:** Half-done with ~4 additions over years
 
+- [ ] **Laptop B (Furnace Server) - Install 3 screws under rubber foot strip**
+  - **Deadline:** May 2026 when returning from trip
+  - **Time:** 10-15 minutes (find correct screws + install)
+  - **Location:** Rubber "foot strip" on foot nearest the hinge (bottom of laptop)
+  - **Issue:** Only center screw installed (out of 3 holes), didn't grab tight
+  - **Status:** Nov 2025 - Lost 2 screws, remaining screw doesn't hold. Laptop sits in Furnace room at Shelly's (not traveling), so loose foot is OK for now.
+  - **What to find:** 3 screws that properly thread into those holes and grip tight
+  - **Note:** Laptop can't be portable until this is fixed (foot strip not secured)
+
+- [ ] **Laptop B (Furnace Server) - Add strain relief to power brick wire dongle**
+  - **Deadline:** May 2026 when returning from trip
+  - **Time:** 15-20 minutes (apply hot melt glue or other strain relief)
+  - **Location:** Wire dongle that exits laptop case to connect to power brick cord
+  - **Issue:** No strain relief inside case - wire could pull/break with movement
+  - **Status:** Nov 2025 - Sitting stationary in Furnace room at Shelly's, so no strain on wire. Fine for 6-month deployment.
+  - **Fix:** Blob of hot melt glue inside case around wire exit point, OR proper strain relief clamp
+  - **Note:** Laptop can't be portable until this is fixed (wire could disconnect/break)
+
+- [ ] **Laptop B (Furnace Server) - Test lower resistor values for sense wire brightness**
+  - **Deadline:** May 2026 when returning from trip
+  - **Time:** 30-45 minutes (test 2.2K, 1K, or direct connection)
+  - **Current status:** 5K resistor on GREENISH/YELLOW wire = moderately dim screen (readable but not full brightness)
+  - **Goal:** Find resistor value that triggers full brightness (Windows detects AC power)
+  - **Test sequence:**
+    1. Try 2.2K on GREENISH/YELLOW wire
+    2. If still dim, try 1K
+    3. If still dim, try direct connection (0Ω - no resistor)
+    4. Test other wires (WHITE, TAN) with winning resistor value
+  - **Result:** Fully functional portable laptop with battery + bright screen
+  - **Status:** Nov 2025 - Screen moderately dim but AnyDesk remote access works perfectly. Fine for Furnace Server role.
+
 ---
 
 ## Time Budget Analysis
