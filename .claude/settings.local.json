@@ -15,7 +15,8 @@
       "Read(//c/_projects//**)",
       "Read(//c/_projects/**)",
       "Read(//c/Users/ericd/.claude/**)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(node git-backup.js:*)"
     ],
     "deny": [],
     "ask": []
